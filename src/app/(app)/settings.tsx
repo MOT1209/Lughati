@@ -7,9 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Button, Card, Screen, Text } from '@/components/ui';
 import { useTheme } from '@/hooks/useTheme';
-import { getDeviceLanguageCode } from '@/i18n';
-import { isRtlLocale, resolveLocale } from '@/i18n/resolveLocale';
-import { applyLayoutDirection, reloadApp } from '@/services/direction';
+import { applyLanguagePreference } from '@/services/appLanguage';
+import { reloadApp } from '@/services/direction';
 import { useAuthStore } from '@/store/authStore';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import type { LanguagePreference, ThemePreference } from '@/types';
@@ -29,10 +28,19 @@ export default function Settings() {
   const [dailyReminder, setDailyReminder] = useState(false); // UI only: no permission is requested
   const [signingOut, setSigningOut] = useState(false);
 
-  const onLanguageChange = (value: LanguagePreference) => {
+  const [restartFailed, setRestartFailed] = useState(false);
+
+  // The persisted preference also drives the root layout; applying here updates the texts
+  // immediately and tells us whether the direction needs a restart.
+  const onLanguageChange = async (value: LanguagePreference) => {
     setLanguagePreference(value);
-    const locale = resolveLocale(value, getDeviceLanguageCode());
-    setRestartNeeded(applyLayoutDirection(isRtlLocale(locale)) === 'restart-required');
+    const { direction } = await applyLanguagePreference(value);
+    setRestartNeeded(direction === 'restart-required');
+    setRestartFailed(false);
+  };
+
+  const onRestart = async () => {
+    setRestartFailed(!(await reloadApp()));
   };
 
   const onSignOut = async () => {
@@ -77,7 +85,12 @@ export default function Settings() {
             <Text variant="small" color="textSecondary">
               {t('settings.restartMessage')}
             </Text>
-            <Button title={t('settings.restartNow')} icon="refresh-outline" onPress={reloadApp} />
+            <Button title={t('settings.restartNow')} icon="refresh-outline" onPress={onRestart} />
+            {restartFailed ? (
+              <Text variant="small" color="error">
+                {t('settings.restartFailed')}
+              </Text>
+            ) : null}
           </View>
         ) : null}
       </Card>
@@ -90,7 +103,7 @@ export default function Settings() {
             value={dailyReminder}
             onValueChange={setDailyReminder}
             accessibilityLabel={t('settings.notificationsDaily')}
-            trackColor={{ true: colors.primary, false: colors.border }}
+            trackColor={{ true: colors.primary, false: colors.borderStrong }}
           />
         </View>
         <Text variant="caption" color="textSecondary">
