@@ -7,6 +7,10 @@ const rank = (id: string) => levels.findIndex((level) => level.id === id);
 const targets = languages.filter((l) => l.roles.includes('target')).map((l) => l.code);
 
 describe('mock progress consistency', () => {
+  it.each(targets)('%s: the learner starts at the first level', (code) => {
+    expect(getMockProgress('u1', code)!.levelId).toBe('A1');
+  });
+
   it.each(targets)('%s: level, completed lessons and current lesson agree', (code) => {
     const progress = getMockProgress('u1', code)!;
     const byId = new Map(lessons.map((lesson) => [lesson.id, lesson]));
@@ -44,9 +48,6 @@ describe('mock progress consistency', () => {
     expect(progress.levelProgress).toBeCloseTo(expected, 2);
   });
 
-  it('keeps at least one learner without a current lesson to exercise the null case', () => {
-    expect(targets.some((code) => getMockProgress('u1', code)!.currentLessonId === null)).toBe(true);
-  });
 });
 
 describe('streak', () => {

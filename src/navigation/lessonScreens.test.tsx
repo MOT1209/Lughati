@@ -25,9 +25,11 @@ beforeEach(async () => {
 describe('Learn screen', () => {
   it('lists the lessons of the current language with their status', async () => {
     renderRouter({ learn: LearnScreen }, { initialUrl: '/learn' });
-    expect(await screen.findByRole('button', { name: 'Greetings and introductions, Completed' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'At the café, Current lesson' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Numbers 1–20, Completed' })).toBeTruthy();
+    expect(await screen.findAllByRole('button')).toHaveLength(10);
+    expect(screen.getByRole('button', { name: 'Greetings and politeness, Completed' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Introducing yourself, Completed' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Numbers, Current lesson' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Getting around, Not started' })).toBeTruthy();
   });
 
   it('shows an empty state for a language without lessons', async () => {
@@ -40,7 +42,7 @@ describe('Learn screen', () => {
 describe('Lesson screen', () => {
   it('shows the lesson words, then runs the quiz, saves progress and shows a summary', async () => {
     renderRouter(routes, { initialUrl: '/lesson/de-a1-3' });
-    expect(await screen.findByText(isolateLtr('Wasser'))).toBeTruthy();
+    expect(await screen.findByText(isolateLtr('eins'))).toBeTruthy();
 
     const words = vocabulary.filter((w) => w.lessonId === 'de-a1-3');
     const byId = new Map(words.map((w) => [w.id, w]));
@@ -57,7 +59,7 @@ describe('Lesson screen', () => {
     }
 
     expect(await screen.findByText('Well done! Lesson complete')).toBeTruthy();
-    expect(screen.getByText('You got 10 of 10 right')).toBeTruthy();
+    expect(screen.getByText('You got 12 of 12 right')).toBeTruthy();
     const progress = await getRepositories().progress.get('', 'de');
     expect(progress?.completedLessonIds).toContain('de-a1-3');
     expect(useLearningStore.getState().progressVersion).toBe(1);
@@ -87,7 +89,7 @@ describe('Lesson screen', () => {
       const text = exercise.type === 'multiple-choice' ? word.translations.ar : isolateLtr(word.term);
       fireEvent.press(await screen.findByRole('button', { name: `Option: ${text}` }));
       await act(async () => {
-        fireEvent.press(screen.getByRole('button', { name: index === 9 ? 'Finish' : 'Next' }));
+        fireEvent.press(screen.getByRole('button', { name: index === 11 ? 'Finish' : 'Next' }));
       });
     }
 

@@ -1,45 +1,97 @@
 import type { LanguageCode, Vocabulary } from '@/types';
 
-// [term, Arabic meaning] per lesson. The three lessons mirror mocks/lessons.ts by order.
-type Pair = [term: string, ar: string];
-type Curriculum = Record<Exclude<LanguageCode, 'ar'>, [Pair[], Pair[], Pair[]]>;
+type TargetCode = Exclude<LanguageCode, 'ar'>;
 
-const curriculum: Curriculum = {
+// Meanings in the learner's source language (Arabic), one list per lesson, six items each.
+// Every target language below lists its terms in exactly the same order, so index i of a lesson
+// in any language means the same thing as index i here. vocabulary.test checks the shape.
+const arabic: string[][] = [
+  ['مرحباً', 'مع السلامة', 'شكراً', 'من فضلك', 'أهلاً بك', 'آسف'],
+  ['اسمي…', 'ما اسمك؟', 'تشرفت بمعرفتك', 'كيف حالك؟', 'أنا بخير', 'من أين أنت؟'],
+  ['واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'عشرة'],
+  ['أحمر', 'أزرق', 'أخضر', 'أصفر', 'أسود', 'أبيض'],
+  ['أم', 'أب', 'أخ', 'أخت', 'صديق', 'عائلة'],
+  ['خبز', 'تفاح', 'بيضة', 'أرز', 'سمك', 'لحم'],
+  ['ماء', 'قهوة', 'شاي', 'حليب', 'الحساب', 'القائمة'],
+  ['اليوم', 'غداً', 'أمس', 'الآن', 'الصباح', 'الليل'],
+  ['بيت', 'مدرسة', 'متجر', 'شارع', 'مدينة', 'مستشفى'],
+  ['يسار', 'يمين', 'مباشرة', 'قريب', 'بعيد', 'تذكرة'],
+];
+
+const terms: Record<TargetCode, string[][]> = {
   de: [
-    [['Hallo', 'مرحباً'], ['Tschüss', 'مع السلامة'], ['Danke', 'شكراً'], ['Bitte', 'من فضلك'], ['Willkommen', 'أهلاً بك']],
-    [['eins', 'واحد'], ['zwei', 'اثنان'], ['drei', 'ثلاثة'], ['zehn', 'عشرة'], ['zwanzig', 'عشرون']],
-    [['Wasser', 'ماء'], ['Kaffee', 'قهوة'], ['Tee', 'شاي'], ['Milch', 'حليب'], ['die Rechnung', 'الحساب']],
+    ['Hallo', 'Tschüss', 'Danke', 'Bitte', 'Willkommen', 'Entschuldigung'],
+    ['Ich heiße…', 'Wie heißt du?', 'Freut mich', "Wie geht's?", 'Mir geht es gut', 'Woher kommst du?'],
+    ['eins', 'zwei', 'drei', 'vier', 'fünf', 'zehn'],
+    ['rot', 'blau', 'grün', 'gelb', 'schwarz', 'weiß'],
+    ['die Mutter', 'der Vater', 'der Bruder', 'die Schwester', 'der Freund', 'die Familie'],
+    ['das Brot', 'der Apfel', 'das Ei', 'der Reis', 'der Fisch', 'das Fleisch'],
+    ['das Wasser', 'der Kaffee', 'der Tee', 'die Milch', 'die Rechnung', 'die Speisekarte'],
+    ['heute', 'morgen', 'gestern', 'jetzt', 'der Morgen', 'die Nacht'],
+    ['das Haus', 'die Schule', 'das Geschäft', 'die Straße', 'die Stadt', 'das Krankenhaus'],
+    ['links', 'rechts', 'geradeaus', 'nah', 'weit', 'die Fahrkarte'],
   ],
   en: [
-    [['Hello', 'مرحباً'], ['Goodbye', 'مع السلامة'], ['Thank you', 'شكراً'], ['Please', 'من فضلك'], ['Welcome', 'أهلاً بك']],
-    [['one', 'واحد'], ['two', 'اثنان'], ['three', 'ثلاثة'], ['ten', 'عشرة'], ['twenty', 'عشرون']],
-    [['Water', 'ماء'], ['Coffee', 'قهوة'], ['Tea', 'شاي'], ['Milk', 'حليب'], ['The bill', 'الحساب']],
+    ['Hello', 'Goodbye', 'Thank you', 'Please', 'Welcome', 'Sorry'],
+    ['My name is…', 'What is your name?', 'Nice to meet you', 'How are you?', 'I am fine', 'Where are you from?'],
+    ['one', 'two', 'three', 'four', 'five', 'ten'],
+    ['red', 'blue', 'green', 'yellow', 'black', 'white'],
+    ['mother', 'father', 'brother', 'sister', 'friend', 'family'],
+    ['bread', 'apple', 'egg', 'rice', 'fish', 'meat'],
+    ['water', 'coffee', 'tea', 'milk', 'the bill', 'the menu'],
+    ['today', 'tomorrow', 'yesterday', 'now', 'morning', 'night'],
+    ['house', 'school', 'shop', 'street', 'city', 'hospital'],
+    ['left', 'right', 'straight ahead', 'near', 'far', 'ticket'],
   ],
   es: [
-    [['Hola', 'مرحباً'], ['Adiós', 'مع السلامة'], ['Gracias', 'شكراً'], ['Por favor', 'من فضلك'], ['Bienvenido', 'أهلاً بك']],
-    [['uno', 'واحد'], ['dos', 'اثنان'], ['tres', 'ثلاثة'], ['diez', 'عشرة'], ['veinte', 'عشرون']],
-    [['Agua', 'ماء'], ['Café', 'قهوة'], ['Té', 'شاي'], ['Leche', 'حليب'], ['La cuenta', 'الحساب']],
+    ['Hola', 'Adiós', 'Gracias', 'Por favor', 'Bienvenido', 'Lo siento'],
+    ['Me llamo…', '¿Cómo te llamas?', 'Mucho gusto', '¿Cómo estás?', 'Estoy bien', '¿De dónde eres?'],
+    ['uno', 'dos', 'tres', 'cuatro', 'cinco', 'diez'],
+    ['rojo', 'azul', 'verde', 'amarillo', 'negro', 'blanco'],
+    ['la madre', 'el padre', 'el hermano', 'la hermana', 'el amigo', 'la familia'],
+    ['el pan', 'la manzana', 'el huevo', 'el arroz', 'el pescado', 'la carne'],
+    ['el agua', 'el café', 'el té', 'la leche', 'la cuenta', 'el menú'],
+    ['hoy', 'mañana', 'ayer', 'ahora', 'la mañana', 'la noche'],
+    ['la casa', 'la escuela', 'la tienda', 'la calle', 'la ciudad', 'el hospital'],
+    ['izquierda', 'derecha', 'todo recto', 'cerca', 'lejos', 'el billete'],
   ],
   fr: [
-    [['Bonjour', 'مرحباً'], ['Au revoir', 'مع السلامة'], ['Merci', 'شكراً'], ["S'il vous plaît", 'من فضلك'], ['Bienvenue', 'أهلاً بك']],
-    [['un', 'واحد'], ['deux', 'اثنان'], ['trois', 'ثلاثة'], ['dix', 'عشرة'], ['vingt', 'عشرون']],
-    [['Eau', 'ماء'], ['Café', 'قهوة'], ['Thé', 'شاي'], ['Lait', 'حليب'], ["L'addition", 'الحساب']],
+    ['Bonjour', 'Au revoir', 'Merci', "S'il vous plaît", 'Bienvenue', 'Désolé'],
+    ["Je m'appelle…", "Comment tu t'appelles ?", 'Enchanté', 'Comment ça va ?', 'Ça va bien', "D'où viens-tu ?"],
+    ['un', 'deux', 'trois', 'quatre', 'cinq', 'dix'],
+    ['rouge', 'bleu', 'vert', 'jaune', 'noir', 'blanc'],
+    ['la mère', 'le père', 'le frère', 'la sœur', "l'ami", 'la famille'],
+    ['le pain', 'la pomme', "l'œuf", 'le riz', 'le poisson', 'la viande'],
+    ["l'eau", 'le café', 'le thé', 'le lait', "l'addition", 'le menu'],
+    ["aujourd'hui", 'demain', 'hier', 'maintenant', 'le matin', 'la nuit'],
+    ['la maison', "l'école", 'le magasin', 'la rue', 'la ville', "l'hôpital"],
+    ['à gauche', 'à droite', 'tout droit', 'près', 'loin', 'le billet'],
   ],
   tr: [
-    [['Merhaba', 'مرحباً'], ['Güle güle', 'مع السلامة'], ['Teşekkürler', 'شكراً'], ['Lütfen', 'من فضلك'], ['Hoş geldiniz', 'أهلاً بك']],
-    [['bir', 'واحد'], ['iki', 'اثنان'], ['üç', 'ثلاثة'], ['on', 'عشرة'], ['yirmi', 'عشرون']],
-    [['Su', 'ماء'], ['Kahve', 'قهوة'], ['Çay', 'شاي'], ['Süt', 'حليب'], ['Hesap', 'الحساب']],
+    ['Merhaba', 'Güle güle', 'Teşekkürler', 'Lütfen', 'Hoş geldiniz', 'Özür dilerim'],
+    ['Benim adım…', 'Adın ne?', 'Memnun oldum', 'Nasılsın?', 'İyiyim', 'Nerelisin?'],
+    ['bir', 'iki', 'üç', 'dört', 'beş', 'on'],
+    ['kırmızı', 'mavi', 'yeşil', 'sarı', 'siyah', 'beyaz'],
+    ['anne', 'baba', 'erkek kardeş', 'kız kardeş', 'arkadaş', 'aile'],
+    ['ekmek', 'elma', 'yumurta', 'pirinç', 'balık', 'et'],
+    ['su', 'kahve', 'çay', 'süt', 'hesap', 'menü'],
+    ['bugün', 'yarın', 'dün', 'şimdi', 'sabah', 'gece'],
+    ['ev', 'okul', 'dükkân', 'sokak', 'şehir', 'hastane'],
+    ['sol', 'sağ', 'düz', 'yakın', 'uzak', 'bilet'],
   ],
 };
 
-export const vocabulary: Vocabulary[] = (Object.keys(curriculum) as (keyof Curriculum)[]).flatMap((code) =>
-  curriculum[code].flatMap((pairs, lessonIndex) =>
-    pairs.map(([term, ar], wordIndex) => ({
+export const vocabulary: Vocabulary[] = (Object.keys(terms) as TargetCode[]).flatMap((code) =>
+  terms[code].flatMap((lessonTerms, lessonIndex) =>
+    lessonTerms.map((term, wordIndex) => ({
       id: `${code}-a1-${lessonIndex + 1}-w${wordIndex + 1}`,
       lessonId: `${code}-a1-${lessonIndex + 1}`,
       targetLanguage: code,
       term,
-      translations: { ar },
+      translations: { ar: arabic[lessonIndex]![wordIndex]! },
     })),
   ),
 );
+
+/** Exposed so tests can check every language lists the same shape as the Arabic meanings. */
+export const arabicMeanings = arabic;

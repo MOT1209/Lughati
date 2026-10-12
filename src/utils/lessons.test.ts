@@ -1,7 +1,7 @@
 import { languages } from '@/mocks/languages';
 import { lessons } from '@/mocks/lessons';
 import { levels } from '@/mocks/levels';
-import { vocabulary } from '@/mocks/vocabulary';
+import { arabicMeanings, vocabulary } from '@/mocks/vocabulary';
 import type { Progress } from '@/types';
 
 import { buildExercises, OPTIONS_PER_EXERCISE } from './exercises';
@@ -20,6 +20,16 @@ describe('vocabulary data', () => {
     for (const word of words) {
       expect(word.translations.ar?.trim()).toBeTruthy();
       expect(word.targetLanguage).toBe(lessons.find((l) => l.id === id)!.targetLanguage);
+    }
+  });
+
+  it('every language has the same shape: 10 lessons of 6 items matching the Arabic meanings', () => {
+    expect(arabicMeanings).toHaveLength(10);
+    for (const code of targets) {
+      for (const [index, meanings] of arabicMeanings.entries()) {
+        const words = wordsOf(`${code}-a1-${index + 1}`);
+        expect(words.map((w) => w.translations.ar)).toEqual(meanings);
+      }
     }
   });
 
@@ -98,24 +108,24 @@ describe('applyLessonCompletion', () => {
     wordsLearned: 10,
     minutesLearned: 20,
   };
-  const perfect = { correct: 10, total: 10 };
+  const perfect = { correct: 12, total: 12 };
   const complete = (progress: Progress, id: string, result = perfect) =>
-    applyLessonCompletion(progress, german.find((l) => l.id === id)!, german, levels, result, 5);
+    applyLessonCompletion(progress, german.find((l) => l.id === id)!, german, levels, result, 6);
 
   it('marks the lesson done, moves to the next one and updates counters', () => {
     const after = complete(base, 'de-a1-1');
     expect(after.completedLessonIds).toEqual(['de-a1-1']);
     expect(after.currentLessonId).toBe('de-a1-2');
     expect(after.levelId).toBe('A1');
-    expect(after.levelProgress).toBeCloseTo(0.33, 2);
-    expect(after.totalXp).toBe(100 + 10 * XP_PER_CORRECT_ANSWER + XP_LESSON_BONUS);
-    expect(after.wordsLearned).toBe(15);
+    expect(after.levelProgress).toBeCloseTo(0.1, 2);
+    expect(after.totalXp).toBe(100 + 12 * XP_PER_CORRECT_ANSWER + XP_LESSON_BONUS);
+    expect(after.wordsLearned).toBe(16);
     expect(after.minutesLearned).toBe(20 + german[0]!.estimatedMinutes);
   });
 
   it('raises the level and clears the current lesson when the last lesson of a level is done', () => {
-    const almost = { ...base, completedLessonIds: ['de-a1-1', 'de-a1-2'], currentLessonId: 'de-a1-3' };
-    const after = complete(almost, 'de-a1-3');
+    const almost = { ...base, completedLessonIds: german.slice(0, 9).map((l) => l.id), currentLessonId: 'de-a1-10' };
+    const after = complete(almost, 'de-a1-10');
     expect(after.levelId).toBe('A2');
     expect(after.currentLessonId).toBeNull(); // no A2 lessons exist yet
     expect(after.levelProgress).toBe(0);

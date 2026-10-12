@@ -21,7 +21,7 @@ describe('LessonQuiz', () => {
   it('shows the target word first and the meaning options (multiple-choice)', () => {
     render(<LessonQuiz exercises={exercises} words={words} onFinish={() => {}} />);
     expect(screen.getByText(isolateLtr('Hallo'))).toBeTruthy();
-    expect(screen.getByText('Question 1 of 10')).toBeTruthy();
+    expect(screen.getByText('Question 1 of 12')).toBeTruthy();
     expect(screen.getAllByRole('button')).toHaveLength(4);
   });
 
@@ -54,6 +54,6 @@ describe('LessonQuiz', () => {
       fireEvent.press(screen.getByRole('button', { name: index === exercises.length - 1 ? 'Finish' : 'Next' }));
     });
     expect(onFinish).toHaveBeenCalledTimes(1);
-    expect(onFinish).toHaveBeenCalledWith({ correct: 3, total: 10 });
+    expect(onFinish).toHaveBeenCalledWith({ correct: 3, total: 12 });
   });
 });

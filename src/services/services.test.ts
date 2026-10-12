@@ -76,7 +76,7 @@ describe('mock repositories', () => {
 
   it('returns lessons in order for a target language and none for Arabic', async () => {
     const german = await repos.lessons.getByLanguage('de');
-    expect(german.map((l) => l.order)).toEqual([1, 2, 3]);
+    expect(german.map((l) => l.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     expect(await repos.lessons.getByLanguage('ar')).toEqual([]);
   });
 
