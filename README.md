@@ -25,7 +25,7 @@ npx expo start      # افتح Expo Go على Android وامسح QR
 - `theme/` ألوان Light/Dark وtokens وطباعة (Cairo).
 - `i18n/` ترجمة `ar`/`en` وتحديد اللغة والاتجاه.
 - `services/` `auth` (واجهة + Mock)، `ai` (واجهة + Mock + سجل)، `repositories` (واجهات + Mock)، `direction`.
-- `store/` Zustand: التفضيلات (محفوظة)، الجلسة، اللغة المختارة.
+- `store/` Zustand: التفضيلات (محفوظة)، الجلسة، اللغة المختارة. السلسلة (Streak) على مستوى المستخدم عبر `repositories.streaks`، والنقاط/المستوى لكل لغة.
 - `mocks/` بيانات وهمية بالعربية، و`types/` نموذج البيانات، و`utils/`، و`hooks/`.
 
 استبدال Mock بالحقيقي لاحقاً: `registerAuthService(...)` و`registerRepositories(...)` و`registerAIProvider(...)` دون لمس الشاشات.
