@@ -6,6 +6,7 @@ import { registerAuthService, MockAuthService } from '@/services/auth';
 import { useAuthStore } from './authStore';
 import { useLearningStore } from './learningStore';
 import { usePreferencesStore } from './preferencesStore';
+import { createMemoryStorage } from '@/services/storage';
 
 const credentials = { method: 'password' as const, email: 'sara@example.com', password: 'password1' };
 
@@ -44,7 +45,7 @@ describe('preferences store', () => {
 
 describe('auth store', () => {
   beforeEach(() => {
-    registerAuthService(new MockAuthService(0));
+    registerAuthService(new MockAuthService(0, createMemoryStorage()));
     useAuthStore.setState({ session: null, initialized: false });
   });
 
@@ -67,7 +68,7 @@ describe('auth store', () => {
   });
 
   it('restores a session that already exists when the app starts', async () => {
-    const service = new MockAuthService(0);
+    const service = new MockAuthService(0, createMemoryStorage());
     registerAuthService(service);
     await service.signIn(credentials);
 

@@ -12,7 +12,7 @@ describe('MockAuthService', () => {
   const credentials = { method: 'password' as const, email: 'Sara@Example.com', password: 'password1' };
 
   it('signs in, exposes the session and notifies listeners', async () => {
-    const auth = new MockAuthService(0);
+    const auth = new MockAuthService(0, createMemoryStorage());
     const seen: (Session | null)[] = [];
     auth.onAuthStateChange((s) => seen.push(s));
 
@@ -24,7 +24,7 @@ describe('MockAuthService', () => {
   });
 
   it('signOut clears the session and notifies with null', async () => {
-    const auth = new MockAuthService(0);
+    const auth = new MockAuthService(0, createMemoryStorage());
     const seen: (Session | null)[] = [];
     await auth.signIn(credentials);
     auth.onAuthStateChange((s) => seen.push(s));
@@ -36,7 +36,7 @@ describe('MockAuthService', () => {
   });
 
   it('stops notifying after unsubscribe', async () => {
-    const auth = new MockAuthService(0);
+    const auth = new MockAuthService(0, createMemoryStorage());
     const listener = jest.fn();
     const unsubscribe = auth.onAuthStateChange(listener);
     unsubscribe();
@@ -45,7 +45,7 @@ describe('MockAuthService', () => {
   });
 
   it('signUp keeps the chosen name', async () => {
-    const auth = new MockAuthService(0);
+    const auth = new MockAuthService(0, createMemoryStorage());
     const session = await auth.signUp({ method: 'password', name: 'سارة', email: 'sara@example.com', password: 'password1' });
     expect(session.user.name).toBe('سارة');
   });
@@ -54,13 +54,13 @@ describe('MockAuthService', () => {
     ['fail@example.com', 'invalid_credentials'],
     ['offline@example.com', 'network'],
   ])('scripted failure %s rejects with %s and creates no session', async (email, code) => {
-    const auth = new MockAuthService(0);
+    const auth = new MockAuthService(0, createMemoryStorage());
     await expect(auth.signIn({ method: 'password', email, password: 'password1' })).rejects.toMatchObject({ code });
     expect(await auth.getSession()).toBeNull();
   });
 
   it('signUp rejects an email that is already taken', async () => {
-    const auth = new MockAuthService(0);
+    const auth = new MockAuthService(0, createMemoryStorage());
     const attempt = auth.signUp({ method: 'password', name: 'X', email: 'taken@example.com', password: 'password1' });
     await expect(attempt).rejects.toBeInstanceOf(AuthError);
     await expect(attempt).rejects.toMatchObject({ code: 'email_in_use' });
@@ -197,6 +197,7 @@ describe('progress persistence', () => {
     let fail = true;
     const flaky = {
       getItem: storage.getItem,
+      removeItem: storage.removeItem,
       setItem: async (k: string, v: string) => {
         if (fail) throw new Error('disk full');
         return storage.setItem(k, v);
@@ -252,5 +253,43 @@ describe('AI provider registry', () => {
 
   it('throws for an unknown provider', () => {
     expect(() => getAIProvider('nope')).toThrow(/not registered/);
+  });
+});
+
+describe('MockAuthService session persistence', () => {
+  const credentials = { method: 'password' as const, email: 'sara@example.com', password: 'password1' };
+
+  it('restores the saved session in a new instance (app restart)', async () => {
+    const storage = createMemoryStorage();
+    await new MockAuthService(0, storage).signIn(credentials);
+
+    const restored = await new MockAuthService(0, storage).getSession();
+    expect(restored?.user.email).toBe('sara@example.com');
+  });
+
+  it('forgets the session after sign out', async () => {
+    const storage = createMemoryStorage();
+    const auth = new MockAuthService(0, storage);
+    await auth.signIn(credentials);
+    await auth.signOut();
+
+    await expect(new MockAuthService(0, storage).getSession()).resolves.toBeNull();
+  });
+
+  it.each(['not json', '{"user":1}', 'null'])('treats corrupt stored data (%s) as signed out', async (raw) => {
+    const storage = createMemoryStorage();
+    await storage.setItem('lughati.session.v1', raw);
+    await expect(new MockAuthService(0, storage).getSession()).resolves.toBeNull();
+  });
+
+  it('survives a storage that throws', async () => {
+    const fail = async () => {
+      throw new Error('disk');
+    };
+    const broken = { getItem: fail, setItem: fail, removeItem: fail };
+    const auth = new MockAuthService(0, broken);
+    await expect(auth.getSession()).resolves.toBeNull();
+    await expect(auth.signIn(credentials)).resolves.toMatchObject({ user: { email: 'sara@example.com' } });
+    await expect(auth.getSession()).resolves.not.toBeNull();
   });
 });

@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs } from 'expo-router/js-tabs';
 import { useTranslation } from 'react-i18next';
 
 import { Icon, type IconName } from '@/components/ui';
