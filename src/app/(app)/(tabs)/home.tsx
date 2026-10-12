@@ -93,7 +93,7 @@ export default function Home() {
             {t('home.lessonMeta', { level: lesson.levelId, minutes: lesson.estimatedMinutes })}
           </Text>
           <ProgressBar value={progress.levelProgress} accessibilityLabel={t('home.overallProgress')} />
-          <Button title={t('home.continueLearning')} icon="play-outline" iconDirectional onPress={() => router.push('/learn')} />
+          <Button title={t('home.continueLearning')} icon="play-outline" iconDirectional onPress={() => router.push(ROUTES.lesson(lesson.id))} />
         </Card>
       ) : (
         // currentLessonId === null means "no current lesson", not an error.
@@ -118,7 +118,7 @@ export default function Home() {
       <View style={{ gap: spacing.sm }}>
         <Text variant="subheading">{t('home.quickActions')}</Text>
         {quickActions.map((action) => (
-          <Button key={action.label} title={t(action.label)} icon={action.icon} variant="secondary" onPress={() => router.push('/learn')} />
+          <Button key={action.label} title={t(action.label)} icon={action.icon} variant="secondary" onPress={() => router.push(ROUTES.learn)} />
         ))}
         <Button title={t('home.qaLanguages')} icon="language-outline" variant="secondary" onPress={() => router.push(ROUTES.languageSelection)} />
       </View>
