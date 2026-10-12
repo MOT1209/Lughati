@@ -4,6 +4,7 @@ export const APP_NAME = 'Lughati';
 
 export const STORAGE_KEYS = {
   preferences: 'lughati.preferences.v1',
+  learningProgress: 'lughati.learning-progress.v1',
 } as const;
 
 export const MIN_TOUCH_TARGET = 48;
