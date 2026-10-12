@@ -4,6 +4,7 @@ export const APP_NAME = 'Lughati';
 
 export const STORAGE_KEYS = {
   preferences: 'lughati.preferences.v1',
+  session: 'lughati.session.v1',
   learningProgress: 'lughati.learning-progress.v1',
 } as const;
 

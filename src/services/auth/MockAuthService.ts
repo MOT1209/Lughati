@@ -1,4 +1,7 @@
+import { STORAGE_KEYS } from '@/constants/app';
 import { createMockUser } from '@/mocks/users';
+
+import { deviceStorage, type KeyValueStorage } from '../storage';
 
 import {
   AuthError,
@@ -9,18 +12,29 @@ import {
   type SignUpRequest,
 } from './types';
 
+function isSession(value: unknown): value is Session {
+  if (typeof value !== 'object' || value === null) return false;
+  const { user, issuedAt } = value as Partial<Session>;
+  return typeof issuedAt === 'string' && typeof user?.id === 'string' && typeof user.email === 'string';
+}
+
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 /**
- * In-memory stand-in for a real backend. No network, session lost on app restart.
+ * Stand-in for a real backend. No network. The session (user + timestamp, never a password)
+ * is persisted so an app restart restores it, like a real token-based session would.
  * Test hooks for the error states: emails starting with "fail@" (invalid credentials),
  * "taken@" (email in use, sign-up) and "offline@" (network error).
  */
 export class MockAuthService implements AuthService {
   private session: Session | null = null;
+  private loaded = false;
   private listeners = new Set<AuthListener>();
 
-  constructor(private readonly latencyMs = 600) {}
+  constructor(
+    private readonly latencyMs = 600,
+    private readonly storage: KeyValueStorage = deviceStorage,
+  ) {}
 
   async signIn(request: SignInRequest): Promise<Session> {
     await wait(this.latencyMs);
@@ -43,6 +57,10 @@ export class MockAuthService implements AuthService {
   }
 
   async getSession(): Promise<Session | null> {
+    if (!this.loaded) {
+      this.session = await this.readStored();
+      this.loaded = true;
+    }
     return this.session;
   }
 
@@ -67,6 +85,22 @@ export class MockAuthService implements AuthService {
 
   private setSession(session: Session | null): void {
     this.session = session;
+    this.loaded = true;
+    // Persisting is best effort: a storage failure must not break sign-in or sign-out.
+    const write = session
+      ? this.storage.setItem(STORAGE_KEYS.session, JSON.stringify(session))
+      : this.storage.removeItem(STORAGE_KEYS.session);
+    write.catch(() => undefined);
     this.listeners.forEach((listener) => listener(session));
+  }
+
+  private async readStored(): Promise<Session | null> {
+    try {
+      const raw = await this.storage.getItem(STORAGE_KEYS.session);
+      const parsed: unknown = raw ? JSON.parse(raw) : null;
+      return isSession(parsed) ? parsed : null;
+    } catch {
+      return null; // unreadable or corrupt: behave as signed out
+    }
   }
 }
