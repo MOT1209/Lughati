@@ -20,6 +20,7 @@ export default function AppLayout() {
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="language-selection" options={{ title: t('languageSelection.title') }} />
+      <Stack.Screen name="lesson/[id]" options={{ title: t('lesson.title') }} />
       <Stack.Screen name="settings" options={{ title: t('settings.title') }} />
     </Stack>
   );

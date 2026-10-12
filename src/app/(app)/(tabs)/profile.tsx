@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { ProgressBar } from '@/components/ProgressBar';
+import { LanguageBadge } from '@/components/LanguageBadge';
 import { StatTile } from '@/components/StatTile';
 import { Button, Card, ErrorState, Icon, LoadingState, Screen, Text } from '@/components/ui';
 import { useCurrentLearning } from '@/hooks/useCurrentLearning';
@@ -33,7 +34,7 @@ export default function Profile() {
     );
   }
 
-  const { language, level, progress } = learning.data;
+  const { language, level, progress, streak } = learning.data;
 
   return (
     <Screen edges={['top']}>
@@ -52,9 +53,10 @@ export default function Profile() {
       <Card style={{ gap: spacing.md }}>
         <View style={styles.between}>
           <Text color="textSecondary">{t('profile.language')}</Text>
-          <Text variant="bodyStrong">
-            {language ? `${language.flag} ${localize(language.name, locale)}` : ''}
-          </Text>
+          <View style={[styles.row, { gap: spacing.sm }]}>
+            {language ? <LanguageBadge code={language.code} /> : null}
+            <Text variant="bodyStrong">{language ? localize(language.name, locale) : ''}</Text>
+          </View>
         </View>
         <View style={styles.between}>
           <Text color="textSecondary">{t('profile.level')}</Text>
@@ -71,7 +73,7 @@ export default function Profile() {
         <StatTile icon="flash-outline" value={String(progress?.totalXp ?? 0)} label={t('profile.statXp')} />
         <StatTile icon="text-outline" value={String(progress?.wordsLearned ?? 0)} label={t('profile.statWords')} />
         <StatTile icon="time-outline" value={String(progress?.minutesLearned ?? 0)} label={t('profile.statMinutes')} />
-        <StatTile icon="flame-outline" value={String(progress?.streakDays ?? 0)} label={t('profile.statStreak')} />
+        <StatTile icon="flame-outline" value={String(streak.days)} label={t('profile.statStreak')} />
       </View>
 
       <Button title={t('profile.openSettings')} icon="settings-outline" variant="secondary" onPress={() => router.push(ROUTES.settings)} />

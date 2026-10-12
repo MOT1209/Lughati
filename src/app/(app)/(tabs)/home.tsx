@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { LanguageBadge } from '@/components/LanguageBadge';
 import { ProgressBar } from '@/components/ProgressBar';
 import { Button, Card, ErrorState, Icon, LoadingState, Screen, Text, type IconName } from '@/components/ui';
 import { useCurrentLearning } from '@/hooks/useCurrentLearning';
@@ -38,7 +39,7 @@ export default function Home() {
     );
   }
 
-  const { language, level, progress, plan, lesson } = learning.data;
+  const { language, level, progress, plan, lesson, streak } = learning.data;
   const goalRatio = plan.dailyGoalMinutes > 0 ? plan.minutesToday / plan.dailyGoalMinutes : 0;
   const goalReached = plan.minutesToday >= plan.dailyGoalMinutes;
 
@@ -53,7 +54,7 @@ export default function Home() {
           {t('home.currentLanguage')}
         </Text>
         <View style={[styles.row, { gap: spacing.md }]}>
-          <Text style={styles.flag}>{language?.flag}</Text>
+          {language ? <LanguageBadge code={language.code} /> : null}
           <View style={styles.flex}>
             <Text variant="heading">{language ? localize(language.name, locale) : ''}</Text>
             {language && language.nativeName !== localize(language.name, locale) ? (
@@ -92,9 +93,17 @@ export default function Home() {
             {t('home.lessonMeta', { level: lesson.levelId, minutes: lesson.estimatedMinutes })}
           </Text>
           <ProgressBar value={progress.levelProgress} accessibilityLabel={t('home.overallProgress')} />
-          <Button title={t('home.continueLearning')} icon="play-outline" onPress={() => router.push('/learn')} />
+          <Button title={t('home.continueLearning')} icon="play-outline" iconDirectional onPress={() => router.push(ROUTES.lesson(lesson.id))} />
         </Card>
-      ) : null}
+      ) : (
+        // currentLessonId === null means "no current lesson", not an error.
+        <Card style={{ gap: spacing.sm }}>
+          <Text variant="subheading">{t('home.noCurrentLesson')}</Text>
+          <Text variant="small" color="textSecondary">
+            {t('home.noCurrentLessonBody')}
+          </Text>
+        </Card>
+      )}
 
       <Card style={[styles.row, { gap: spacing.md }]}>
         <Icon name="flame" size={32} color="accent" />
@@ -102,14 +111,14 @@ export default function Home() {
           <Text variant="small" color="textSecondary">
             {t('home.streak')}
           </Text>
-          <Text variant="heading">{t('home.streakDays', { count: progress?.streakDays ?? 0 })}</Text>
+          <Text variant="heading">{t('home.streakDays', { count: streak.days })}</Text>
         </View>
       </Card>
 
       <View style={{ gap: spacing.sm }}>
         <Text variant="subheading">{t('home.quickActions')}</Text>
         {quickActions.map((action) => (
-          <Button key={action.label} title={t(action.label)} icon={action.icon} variant="secondary" onPress={() => router.push('/learn')} />
+          <Button key={action.label} title={t(action.label)} icon={action.icon} variant="secondary" onPress={() => router.push(ROUTES.learn)} />
         ))}
         <Button title={t('home.qaLanguages')} icon="language-outline" variant="secondary" onPress={() => router.push(ROUTES.languageSelection)} />
       </View>
@@ -120,5 +129,4 @@ export default function Home() {
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
   flex: { flex: 1 },
-  flag: { fontSize: 36, lineHeight: 52 },
 });

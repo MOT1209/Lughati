@@ -1,4 +1,5 @@
-import { DevSettings, I18nManager, Platform } from 'react-native';
+import { reloadAppAsync } from 'expo';
+import { I18nManager, Platform } from 'react-native';
 
 export type DirectionAction = 'none' | 'restart-required';
 
@@ -21,6 +22,16 @@ export function applyLayoutDirection(desiredIsRtl: boolean): DirectionAction {
   return action;
 }
 
-export function reloadApp(): void {
-  DevSettings.reload();
+/**
+ * Reloads the JS bundle so the native direction flag set above takes effect. `reloadAppAsync`
+ * (from `expo`) works in release and debug builds; `DevSettings.reload` is a no-op when
+ * `__DEV__` is false, so it must not be used here. Resolves false if the reload was refused.
+ */
+export async function reloadApp(): Promise<boolean> {
+  try {
+    await reloadAppAsync('Layout direction changed');
+    return true;
+  } catch {
+    return false;
+  }
 }

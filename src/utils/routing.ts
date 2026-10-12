@@ -6,6 +6,8 @@ export const ROUTES = {
   home: '/home',
   languageSelection: '/language-selection',
   settings: '/settings',
+  learn: '/learn',
+  lesson: (id: string) => `/lesson/${id}` as const,
 } as const;
 
 export type InitialRoute = typeof ROUTES.onboarding | typeof ROUTES.login | typeof ROUTES.home;

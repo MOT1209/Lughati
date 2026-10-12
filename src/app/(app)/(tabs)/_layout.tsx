@@ -33,9 +33,7 @@ export default function TabsLayout() {
           options={{
             title: t(tab.titleKey),
             tabBarAccessibilityLabel: t(tab.titleKey),
-            tabBarIcon: ({ color }) => (
-              <Icon name={tab.icon} size={24} color={color === colors.primary ? 'primary' : 'textSecondary'} />
-            ),
+            tabBarIcon: ({ focused }) => <Icon name={tab.icon} size={24} color={focused ? 'primary' : 'textSecondary'} />,
           }}
         />
       ))}

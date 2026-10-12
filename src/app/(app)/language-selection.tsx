@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { LanguageBadge } from '@/components/LanguageBadge';
 import { ErrorState, Icon, LoadingState, Screen, Text } from '@/components/ui';
 import { MIN_TOUCH_TARGET } from '@/constants/app';
 import { useAsyncData } from '@/hooks/useAsyncData';
@@ -51,12 +52,12 @@ export default function LanguageSelection() {
                     padding: spacing.md,
                     borderRadius: radius.lg,
                     borderWidth: isCurrent ? 2 : 1,
-                    borderColor: isCurrent ? colors.primary : colors.border,
+                    borderColor: isCurrent ? colors.primary : colors.borderStrong,
                     backgroundColor: colors.surface,
                   },
                 ]}
               >
-                <Text style={styles.flag}>{language.flag}</Text>
+                <LanguageBadge code={language.code} />
                 <View style={styles.flex}>
                   <Text variant="bodyStrong">{name}</Text>
                   {language.nativeName !== name ? (
@@ -78,5 +79,4 @@ export default function LanguageSelection() {
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
   flex: { flex: 1 },
-  flag: { fontSize: 32, lineHeight: 46 },
 });

@@ -1,3 +1,4 @@
+import { deviceStorage } from '../storage';
 import { createMockRepositories } from './mock';
 import type { Repositories } from './types';
 
@@ -5,7 +6,7 @@ export * from './types';
 
 // Screens read data only through this object; replacing the mock with a real backend
 // means calling registerRepositories once at startup.
-let current: Repositories = createMockRepositories();
+let current: Repositories = createMockRepositories({ storage: deviceStorage });
 
 export function getRepositories(): Repositories {
   return current;
