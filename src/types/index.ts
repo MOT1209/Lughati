@@ -16,7 +16,6 @@ export interface Language {
   name: Localized;
   /** Name of the language in itself (e.g. "Deutsch"). Rendered LTR-isolated. */
   nativeName: string;
-  flag: string;
   direction: 'ltr' | 'rtl';
   /** Adding 'target' to Arabic later is the only change needed to teach Arabic. */
   roles: LanguageRole[];
@@ -71,16 +70,21 @@ export interface Vocabulary {
 export interface Progress {
   userId: string;
   targetLanguage: LanguageCode;
-  /** The learner's level is per target language. */
+  /** The learner's level is per target language. XP is per language too; the streak is not. */
   levelId: LevelId;
   completedLessonIds: string[];
   currentLessonId: string | null;
   /** 0..1 progress inside the current level. */
   levelProgress: number;
-  streakDays: number;
   totalXp: number;
   wordsLearned: number;
   minutesLearned: number;
+}
+
+/** Consecutive days with learning activity. Per user, not per language. */
+export interface Streak {
+  userId: string;
+  days: number;
 }
 
 export interface Achievement {
