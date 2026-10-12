@@ -2,7 +2,11 @@
 jest.mock('@expo/vector-icons/Ionicons', () => {
   const { createElement } = require('react');
   const { Text } = require('react-native');
-  return { __esModule: true, default: () => createElement(Text) };
+  // Render the icon name as a testID and keep the style, so tests can assert on mirroring.
+  return {
+    __esModule: true,
+    default: ({ name, style }: { name: string; style?: unknown }) => createElement(Text, { testID: `icon-${name}`, style }),
+  };
 });
 
 // AsyncStorage has no native module under Jest; use the package's official in-memory mock.

@@ -1,4 +1,4 @@
-import type { Language, LanguageCode, LearningPlan, Lesson, Level, LevelId, Progress } from '@/types';
+import type { Language, LanguageCode, LearningPlan, Lesson, Level, LevelId, Progress, Streak } from '@/types';
 
 export interface LanguageRepository {
   getAll(): Promise<Language[]>;
@@ -21,6 +21,11 @@ export interface ProgressRepository {
   get(userId: string, language: LanguageCode): Promise<Progress | null>;
 }
 
+export interface StreakRepository {
+  /** User-level: shared by all target languages. */
+  get(userId: string): Promise<Streak>;
+}
+
 export interface LearningPlanRepository {
   get(userId: string, language: LanguageCode): Promise<LearningPlan>;
 }
@@ -30,5 +35,6 @@ export interface Repositories {
   levels: LevelRepository;
   lessons: LessonRepository;
   progress: ProgressRepository;
+  streaks: StreakRepository;
   plans: LearningPlanRepository;
 }

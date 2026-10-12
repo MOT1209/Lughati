@@ -30,7 +30,7 @@ export function Input({ label, error, password = false, ...rest }: InputProps) {
           styles.field,
           {
             backgroundColor: colors.surface,
-            borderColor: error ? colors.error : colors.border,
+            borderColor: error ? colors.error : colors.borderStrong,
             borderRadius: radius.md,
             paddingHorizontal: spacing.md,
           },

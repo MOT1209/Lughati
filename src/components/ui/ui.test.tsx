@@ -45,3 +45,19 @@ describe('Input', () => {
     expect(screen.getByLabelText('Password').props.secureTextEntry).toBe(false);
   });
 });
+
+describe('Input accessibility', () => {
+  it('labels the field and marks the error as a live region', () => {
+    render(<Input label="Email" error="Invalid email" />);
+    expect(screen.getByLabelText('Email')).toBeTruthy();
+    expect(screen.getByText('Invalid email').props.accessibilityLiveRegion).toBe('polite');
+  });
+
+  it('gives the password toggle a button role and a label that changes with the state', () => {
+    render(<Input label="Password" password />);
+    const toggle = screen.getByRole('button');
+    const before = toggle.props.accessibilityLabel;
+    fireEvent.press(toggle);
+    expect(screen.getByRole('button').props.accessibilityLabel).not.toBe(before);
+  });
+});

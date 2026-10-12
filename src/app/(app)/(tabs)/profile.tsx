@@ -53,7 +53,7 @@ export default function Profile() {
         <View style={styles.between}>
           <Text color="textSecondary">{t('profile.language')}</Text>
           <Text variant="bodyStrong">
-            {language ? `${language.flag} ${localize(language.name, locale)}` : ''}
+            {language ? localize(language.name, locale) : ''}
           </Text>
         </View>
         <View style={styles.between}>
@@ -71,7 +71,7 @@ export default function Profile() {
         <StatTile icon="flash-outline" value={String(progress?.totalXp ?? 0)} label={t('profile.statXp')} />
         <StatTile icon="text-outline" value={String(progress?.wordsLearned ?? 0)} label={t('profile.statWords')} />
         <StatTile icon="time-outline" value={String(progress?.minutesLearned ?? 0)} label={t('profile.statMinutes')} />
-        <StatTile icon="flame-outline" value={String(progress?.streakDays ?? 0)} label={t('profile.statStreak')} />
+        <StatTile icon="flame-outline" value={String(learning.data.streak.days)} label={t('profile.statStreak')} />
       </View>
 
       <Button title={t('profile.openSettings')} icon="settings-outline" variant="secondary" onPress={() => router.push(ROUTES.settings)} />

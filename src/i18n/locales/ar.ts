@@ -78,6 +78,8 @@ export const ar = {
     dailyGoalProgress: '{{done}} من {{goal}} دقيقة',
     dailyGoalDone: 'أحسنت! حققت هدف اليوم.',
     continueLearning: 'تابع التعلّم',
+    noCurrentLesson: 'لا يوجد درس حالي. اختر درساً لتبدأ.',
+    browseLessons: 'تصفّح الدروس',
     lessonMeta: '{{level}} · {{minutes}} دقيقة',
     overallProgress: 'التقدم في المستوى',
     streak: 'سلسلة الأيام',

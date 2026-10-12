@@ -1,27 +1,28 @@
-import type { LanguageCode, LearningPlan, Progress } from '@/types';
+import type { LanguageCode, LearningPlan, Progress, Streak } from '@/types';
 
 type ProgressSeed = Omit<Progress, 'userId'>;
 
-// Realistic spread: German is the learner's main language, the rest are barely started.
+// Invariants (enforced by mocks.test.ts): a level above A1 means every lesson of the lower
+// levels is completed, and the current lesson is an uncompleted lesson at or below that level.
+// German is the learner's main language; the rest are barely started.
 const seeds: Record<Exclude<LanguageCode, 'ar'>, ProgressSeed> = {
   de: {
     targetLanguage: 'de',
     levelId: 'A2',
-    completedLessonIds: ['de-a1-1', 'de-a1-2'],
-    currentLessonId: 'de-a1-3',
+    completedLessonIds: ['de-a1-1', 'de-a1-2', 'de-a1-3'],
+    currentLessonId: 'de-a2-1',
     levelProgress: 0.42,
-    streakDays: 7,
     totalXp: 1280,
     wordsLearned: 164,
     minutesLearned: 540,
   },
   en: {
     targetLanguage: 'en',
-    levelId: 'B1',
+    levelId: 'A2',
     completedLessonIds: ['en-a1-1', 'en-a1-2', 'en-a1-3'],
+    // No A2 lessons exist for English yet: this is the "no current lesson" case Home must handle.
     currentLessonId: null,
-    levelProgress: 0.15,
-    streakDays: 7,
+    levelProgress: 0,
     totalXp: 2210,
     wordsLearned: 420,
     minutesLearned: 960,
@@ -32,7 +33,6 @@ const seeds: Record<Exclude<LanguageCode, 'ar'>, ProgressSeed> = {
     completedLessonIds: [],
     currentLessonId: 'es-a1-1',
     levelProgress: 0.05,
-    streakDays: 0,
     totalXp: 40,
     wordsLearned: 9,
     minutesLearned: 12,
@@ -42,8 +42,7 @@ const seeds: Record<Exclude<LanguageCode, 'ar'>, ProgressSeed> = {
     levelId: 'A1',
     completedLessonIds: ['fr-a1-1'],
     currentLessonId: 'fr-a1-2',
-    levelProgress: 0.3,
-    streakDays: 2,
+    levelProgress: 0.33,
     totalXp: 310,
     wordsLearned: 48,
     minutesLearned: 95,
@@ -54,7 +53,6 @@ const seeds: Record<Exclude<LanguageCode, 'ar'>, ProgressSeed> = {
     completedLessonIds: [],
     currentLessonId: 'tr-a1-1',
     levelProgress: 0,
-    streakDays: 0,
     totalXp: 0,
     wordsLearned: 0,
     minutesLearned: 0,
@@ -64,6 +62,10 @@ const seeds: Record<Exclude<LanguageCode, 'ar'>, ProgressSeed> = {
 export function getMockProgress(userId: string, language: LanguageCode): Progress | null {
   if (language === 'ar') return null; // Arabic is not a target language yet
   return { userId, ...seeds[language] };
+}
+
+export function getMockStreak(userId: string): Streak {
+  return { userId, days: 7 };
 }
 
 export function getMockPlan(userId: string, language: LanguageCode): LearningPlan {

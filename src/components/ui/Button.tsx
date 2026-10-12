@@ -36,7 +36,7 @@ export function Button({
 
   const palettes: Record<ButtonVariant, { bg: string; fg: ForegroundKey; border: string }> = {
     primary: { bg: colors.primary, fg: 'onPrimary', border: colors.primary },
-    secondary: { bg: colors.surface, fg: 'primary', border: colors.border },
+    secondary: { bg: colors.surface, fg: 'primary', border: colors.borderStrong },
     ghost: { bg: 'transparent', fg: 'primary', border: 'transparent' },
     danger: { bg: colors.errorMuted, fg: 'onErrorMuted', border: colors.errorMuted },
   };

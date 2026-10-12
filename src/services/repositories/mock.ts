@@ -1,7 +1,7 @@
 import { languages } from '@/mocks/languages';
 import { lessons } from '@/mocks/lessons';
 import { levels } from '@/mocks/levels';
-import { getMockPlan, getMockProgress } from '@/mocks/progress';
+import { getMockPlan, getMockProgress, getMockStreak } from '@/mocks/progress';
 
 import type { Repositories } from './types';
 
@@ -24,6 +24,9 @@ export function createMockRepositories(): Repositories {
     },
     progress: {
       get: async (userId, language) => getMockProgress(userId, language),
+    },
+    streaks: {
+      get: async (userId) => getMockStreak(userId),
     },
     plans: {
       get: async (userId, language) => getMockPlan(userId, language),

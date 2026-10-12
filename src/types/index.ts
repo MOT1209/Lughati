@@ -14,9 +14,8 @@ export interface Language {
   code: LanguageCode;
   /** Name of the language in each UI locale. */
   name: Localized;
-  /** Name of the language in itself (e.g. "Deutsch"). Rendered LTR-isolated. */
+  /** Name of the language in itself (e.g. "Deutsch"). Rendered LTR-isolated. Flags are not used: a flag is a country, not a language. */
   nativeName: string;
-  flag: string;
   direction: 'ltr' | 'rtl';
   /** Adding 'target' to Arabic later is the only change needed to teach Arabic. */
   roles: LanguageRole[];
@@ -74,13 +73,19 @@ export interface Progress {
   /** The learner's level is per target language. */
   levelId: LevelId;
   completedLessonIds: string[];
+  /** `null` means "no lesson to continue" (nothing started or nothing available at this level yet). */
   currentLessonId: string | null;
   /** 0..1 progress inside the current level. */
   levelProgress: number;
-  streakDays: number;
   totalXp: number;
   wordsLearned: number;
   minutesLearned: number;
+}
+
+/** The streak belongs to the learner, not to a language: practising any language keeps it alive. */
+export interface Streak {
+  userId: string;
+  days: number;
 }
 
 export interface Achievement {

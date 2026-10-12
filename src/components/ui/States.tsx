@@ -12,7 +12,7 @@ export function LoadingState({ message }: { message?: string }) {
   const { t } = useTranslation();
   const label = message ?? t('common.loading');
   return (
-    <View style={[styles.center, { gap: spacing.md, padding: spacing.xl }]} accessibilityRole="progressbar" accessibilityLabel={label}>
+    <View style={[styles.center, { gap: spacing.md, padding: spacing.xl }]} accessible accessibilityRole="progressbar" accessibilityLabel={label}>
       <ActivityIndicator size="large" color={colors.primary} />
       <Text color="textSecondary">{label}</Text>
     </View>

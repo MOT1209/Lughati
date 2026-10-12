@@ -1,4 +1,4 @@
-import type { Lesson, LanguageCode, Localized } from '@/types';
+import type { LanguageCode, Lesson, LevelId, Localized } from '@/types';
 
 interface LessonTemplate {
   title: Localized;
@@ -25,16 +25,36 @@ const a1Templates: LessonTemplate[] = [
   },
 ];
 
+const a2Templates: LessonTemplate[] = [
+  {
+    title: { ar: 'الأسرة والأصدقاء', en: 'Family and friends' },
+    summary: { ar: 'تحدّث عن أسرتك وأصدقائك.', en: 'Talk about your family and friends.' },
+    estimatedMinutes: 12,
+  },
+  {
+    title: { ar: 'الروتين اليومي', en: 'Daily routine' },
+    summary: { ar: 'صف يومك من الصباح إلى المساء.', en: 'Describe your day from morning to evening.' },
+    estimatedMinutes: 14,
+  },
+];
+
 const targetCodes: LanguageCode[] = ['de', 'en', 'es', 'fr', 'tr'];
 
-export const lessons: Lesson[] = targetCodes.flatMap((code) =>
-  a1Templates.map((template, index) => ({
-    id: `${code}-a1-${index + 1}`,
+/** `firstOrder` keeps lesson order continuous across levels inside one language. */
+function buildLessons(code: LanguageCode, levelId: LevelId, templates: LessonTemplate[], firstOrder = 1): Lesson[] {
+  return templates.map((template, index) => ({
+    id: `${code}-${levelId.toLowerCase()}-${index + 1}`,
     targetLanguage: code,
-    levelId: 'A1' as const,
+    levelId,
     title: template.title,
     summary: template.summary,
-    order: index + 1,
+    order: firstOrder + index,
     estimatedMinutes: template.estimatedMinutes,
-  })),
-);
+  }));
+}
+
+// A1 for every target language; A2 only for German so far (more levels = more data, no code).
+export const lessons: Lesson[] = [
+  ...targetCodes.flatMap((code) => buildLessons(code, 'A1', a1Templates)),
+  ...buildLessons('de', 'A2', a2Templates, a1Templates.length + 1),
+];

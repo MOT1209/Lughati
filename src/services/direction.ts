@@ -1,4 +1,5 @@
-import { DevSettings, I18nManager, Platform } from 'react-native';
+import { reloadAppAsync } from 'expo';
+import { I18nManager, Platform } from 'react-native';
 
 export type DirectionAction = 'none' | 'restart-required';
 
@@ -21,6 +22,11 @@ export function applyLayoutDirection(desiredIsRtl: boolean): DirectionAction {
   return action;
 }
 
-export function reloadApp(): void {
-  DevSettings.reload();
+/**
+ * `reloadAppAsync` (expo) reloads the same JS bundle in release and debug builds, unlike
+ * `DevSettings.reload`, which is a development-only API. In Expo Go the reload works but the
+ * forced RTL flag may be reset (see TESTING.md), so a development build is needed to confirm.
+ */
+export function reloadApp(): Promise<void> {
+  return reloadAppAsync('Layout direction changed');
 }

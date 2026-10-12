@@ -79,6 +79,8 @@ export const en: Translation = {
     dailyGoalProgress: '{{done}} of {{goal}} minutes',
     dailyGoalDone: 'Well done! You hit today’s goal.',
     continueLearning: 'Continue learning',
+    noCurrentLesson: 'No lesson in progress. Pick one to get started.',
+    browseLessons: 'Browse lessons',
     lessonMeta: '{{level}} · {{minutes}} min',
     overallProgress: 'Level progress',
     streak: 'Streak',
