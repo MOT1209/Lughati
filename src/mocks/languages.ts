@@ -1,14 +1,14 @@
 import type { Language } from '@/types';
 
 // Data-driven: adding a language means adding an entry here, not touching any screen.
-// Arabic is source-only for now; adding 'target' to its roles is all it takes to teach it.
+// Arabic is both a source and a target language: adding a role is all it takes.
 export const languages: Language[] = [
   {
     code: 'ar',
     name: { ar: 'العربية', en: 'Arabic' },
     nativeName: 'العربية',
     direction: 'rtl',
-    roles: ['source'],
+    roles: ['source', 'target'],
   },
   {
     code: 'de',

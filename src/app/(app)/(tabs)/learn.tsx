@@ -2,86 +2,77 @@ import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { EmptyState, ErrorState, Icon, LoadingState, Screen, Text } from '@/components/ui';
+import { Card, EmptyState, ErrorState, Icon, LoadingState, Screen, Text } from '@/components/ui';
 import { MIN_TOUCH_TARGET } from '@/constants/app';
-import { useCurrentLearning } from '@/hooks/useCurrentLearning';
+import { useLessonList } from '@/hooks/useLessonList';
 import { useTheme } from '@/hooks/useTheme';
 import { useUiLocale } from '@/hooks/useUiLocale';
 import { localize } from '@/utils/localize';
-import { openLesson } from '@/utils/routing';
+import { ROUTES } from '@/utils/routing';
 
 export default function Learn() {
   const { t } = useTranslation();
-  const { colors, radius, spacing } = useTheme();
+  const { colors, spacing } = useTheme();
   const { locale } = useUiLocale();
-  const learning = useCurrentLearning();
+  const list = useLessonList();
 
-  if (learning.status === 'loading') {
+  if (list.status === 'loading') {
     return (
       <Screen edges={['top']}>
         <LoadingState />
       </Screen>
     );
   }
-  if (learning.status === 'error') {
+  if (list.status === 'error') {
     return (
       <Screen edges={['top']}>
-        <ErrorState onRetry={learning.reload} />
+        <ErrorState onRetry={list.reload} />
       </Screen>
     );
   }
 
-  const { lessons, progress, lesson: current } = learning.data;
-  if (lessons.length === 0) {
-    return (
-      <Screen edges={['top']} contentStyle={{ justifyContent: 'center' }}>
-        <EmptyState icon="book-outline" title={t('learn.emptyTitle')} message={t('learn.emptyMessage')} />
-      </Screen>
-    );
-  }
+  const { language, lessons, progress } = list.data;
 
   return (
     <Screen edges={['top']}>
       <Text variant="title" accessibilityRole="header">
-        {t('learn.lessonsOf')}
+        {t('learn.subtitle', { language: language ? localize(language.name, locale) : '' })}
       </Text>
-      <View style={{ gap: spacing.sm }}>
-        {lessons.map((lesson) => {
-          const done = progress?.completedLessonIds.includes(lesson.id) ?? false;
-          const isCurrent = lesson.id === current?.id;
-          const title = localize(lesson.title, locale);
-          const status = done ? t('learn.statusDone') : isCurrent ? t('learn.statusCurrent') : t('learn.statusOpen');
-          return (
-            <Pressable
-              key={lesson.id}
-              onPress={() => openLesson(router, lesson.id)}
-              accessibilityRole="button"
-              accessibilityLabel={`${t('learn.openLesson', { title })}. ${status}`}
-              style={[
-                styles.row,
-                {
-                  minHeight: MIN_TOUCH_TARGET + 16,
-                  gap: spacing.md,
-                  padding: spacing.md,
-                  borderRadius: radius.lg,
-                  borderWidth: isCurrent ? 2 : 1,
-                  borderColor: isCurrent ? colors.primary : colors.border,
-                  backgroundColor: colors.surface,
-                },
-              ]}
-            >
-              <Icon name={done ? 'checkmark-circle' : 'ellipse-outline'} color={done ? 'success' : 'textSecondary'} />
-              <View style={styles.flex}>
-                <Text variant="bodyStrong">{title}</Text>
-                <Text variant="small" color="textSecondary">
-                  {`${lesson.levelId} · ${t('learn.minutes', { minutes: lesson.estimatedMinutes })} · ${status}`}
-                </Text>
-              </View>
-              <Icon name="chevron-forward" directional color="textSecondary" />
-            </Pressable>
-          );
-        })}
-      </View>
+
+      {lessons.length === 0 ? (
+        <EmptyState icon="book-outline" title={t('learn.title')} message={t('learn.noLessons')} />
+      ) : (
+        <View style={{ gap: spacing.md }}>
+          {lessons.map((lesson) => {
+            const done = progress?.completedLessonIds.includes(lesson.id) ?? false;
+            const current = progress?.currentLessonId === lesson.id;
+            const status = t(done ? 'learn.statusDone' : current ? 'learn.statusCurrent' : 'learn.statusTodo');
+            const title = localize(lesson.title, locale);
+            return (
+              <Pressable
+                key={lesson.id}
+                onPress={() => router.push(ROUTES.lesson(lesson.id))}
+                accessibilityRole="button"
+                accessibilityLabel={t('learn.lessonLabel', { title, status })}
+              >
+                <Card style={[styles.row, { gap: spacing.md, minHeight: MIN_TOUCH_TARGET, borderColor: current ? colors.primary : colors.border }]}>
+                  <Icon name={done ? 'checkmark-circle' : current ? 'play-circle-outline' : 'ellipse-outline'} size={28} color={done ? 'success' : 'primary'} />
+                  <View style={styles.flex}>
+                    <Text variant="bodyStrong">{title}</Text>
+                    <Text variant="small" color="textSecondary">
+                      {localize(lesson.summary, locale)}
+                    </Text>
+                    <Text variant="caption" color="textSecondary">
+                      {t('learn.lessonMeta', { level: lesson.levelId, minutes: lesson.estimatedMinutes })} · {status}
+                    </Text>
+                  </View>
+                  <Icon name="chevron-forward" directional color="textSecondary" />
+                </Card>
+              </Pressable>
+            );
+          })}
+        </View>
+      )}
     </Screen>
   );
 }

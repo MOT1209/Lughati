@@ -23,10 +23,15 @@ export function applyLayoutDirection(desiredIsRtl: boolean): DirectionAction {
 }
 
 /**
- * `reloadAppAsync` (expo) reloads the same JS bundle in release and debug builds, unlike
- * `DevSettings.reload`, which is a development-only API. In Expo Go the reload works but the
- * forced RTL flag may be reset (see TESTING.md), so a development build is needed to confirm.
+ * Reloads the JS bundle so the native direction flag set above takes effect. `reloadAppAsync`
+ * (from `expo`) works in release and debug builds; `DevSettings.reload` is a no-op when
+ * `__DEV__` is false, so it must not be used here. Resolves false if the reload was refused.
  */
-export function reloadApp(): Promise<void> {
-  return reloadAppAsync('Layout direction changed');
+export async function reloadApp(): Promise<boolean> {
+  try {
+    await reloadAppAsync('Layout direction changed');
+    return true;
+  } catch {
+    return false;
+  }
 }

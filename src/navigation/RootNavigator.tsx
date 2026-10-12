@@ -1,15 +1,14 @@
 import { Stack } from 'expo-router';
 
 import { useTheme } from '@/hooks/useTheme';
+import { useAuthStore } from '@/store/authStore';
 import { getRouteAccess } from '@/utils/routing';
 
-/**
- * Root navigator. Route protection depends only on whether a session exists: signed-out
- * users can reach (auth), signed-in users can reach (app), never both. A new auth method or
- * a new screen does not change this file.
- */
-export function RootStack({ hasSession }: { hasSession: boolean }) {
+// Route protection depends only on whether a session exists (not on how it was created), so
+// adding Google/Apple sign-in later does not touch this file. Adding a screen = adding a file.
+export function RootNavigator() {
   const { colors } = useTheme();
+  const hasSession = useAuthStore((s) => s.session !== null);
   const access = getRouteAccess(hasSession);
 
   return (

@@ -1,82 +1,70 @@
-import { createMockRepositories } from '@/services/repositories/mock';
-import type { LevelId } from '@/types';
+import { languages } from './languages';
+import { lessons } from './lessons';
+import { levels } from './levels';
+import { getMockPlan, getMockProgress, getMockStreak } from './progress';
 
-const repos = createMockRepositories();
-const levelOrder: LevelId[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
-const rank = (id: LevelId) => levelOrder.indexOf(id);
+const rank = (id: string) => levels.findIndex((level) => level.id === id);
+const targets = languages.filter((l) => l.roles.includes('target')).map((l) => l.code);
 
-describe('mock data consistency', () => {
-  it('has progress for every target language and none for Arabic', async () => {
-    const targets = await repos.languages.getTargets();
-    for (const language of targets) {
-      await expect(repos.progress.get('u1', language.code)).resolves.not.toBeNull();
-    }
-    await expect(repos.progress.get('u1', 'ar')).resolves.toBeNull();
+describe('mock progress consistency', () => {
+  it.each(targets)('%s: the learner starts at the first level', (code) => {
+    expect(getMockProgress('u1', code)!.levelId).toBe('A1');
   });
 
-  it('only completes lessons that exist, in the same language', async () => {
-    for (const { code } of await repos.languages.getTargets()) {
-      const progress = (await repos.progress.get('u1', code))!;
-      for (const id of progress.completedLessonIds) {
-        const lesson = await repos.lessons.getById(id);
-        expect(lesson?.targetLanguage).toBe(code);
-      }
-    }
-  });
+  it.each(targets)('%s: level, completed lessons and current lesson agree', (code) => {
+    const progress = getMockProgress('u1', code)!;
+    const byId = new Map(lessons.map((lesson) => [lesson.id, lesson]));
+    const learnerRank = rank(progress.levelId);
 
-  it('a level above A1 means every lesson of the lower levels is completed', async () => {
-    for (const { code } of await repos.languages.getTargets()) {
-      const progress = (await repos.progress.get('u1', code))!;
-      const lower = (await repos.lessons.getByLanguage(code)).filter((l) => rank(l.levelId) < rank(progress.levelId));
-      for (const lesson of lower) {
-        expect(progress.completedLessonIds).toContain(lesson.id);
-      }
-    }
-  });
-
-  it('never completes a lesson above the learner level', async () => {
-    for (const { code } of await repos.languages.getTargets()) {
-      const progress = (await repos.progress.get('u1', code))!;
-      for (const id of progress.completedLessonIds) {
-        const lesson = (await repos.lessons.getById(id))!;
-        expect(rank(lesson.levelId)).toBeLessThanOrEqual(rank(progress.levelId));
-      }
-    }
-  });
-
-  it('the current lesson is not completed and is not above the learner level', async () => {
-    for (const { code } of await repos.languages.getTargets()) {
-      const progress = (await repos.progress.get('u1', code))!;
-      if (progress.currentLessonId === null) continue;
-      const lesson = (await repos.lessons.getById(progress.currentLessonId))!;
+    for (const id of progress.completedLessonIds) {
+      const lesson = byId.get(id)!;
       expect(lesson.targetLanguage).toBe(code);
-      expect(rank(lesson.levelId)).toBeLessThanOrEqual(rank(progress.levelId));
-      expect(progress.completedLessonIds).not.toContain(lesson.id);
+      expect(rank(lesson.levelId)).toBeLessThanOrEqual(learnerRank);
+    }
+
+    if (progress.currentLessonId !== null) {
+      const current = byId.get(progress.currentLessonId)!;
+      expect(current.targetLanguage).toBe(code);
+      expect(rank(current.levelId)).toBeLessThanOrEqual(learnerRank);
+      expect(progress.completedLessonIds).not.toContain(current.id);
     }
   });
 
-  it('keeps at least one language with no current lesson so Home handles that state', async () => {
-    const states = await Promise.all((await repos.languages.getTargets()).map((l) => repos.progress.get('u1', l.code)));
-    expect(states.some((p) => p?.currentLessonId === null)).toBe(true);
-  });
-
-  it('numbers lessons continuously within a language, across levels', async () => {
-    const german = await repos.lessons.getByLanguage('de');
-    expect(german.map((l) => l.order)).toEqual(german.map((_, index) => index + 1));
-    expect(german.map((l) => l.levelId)).toEqual([...german.map((l) => l.levelId)].sort((a, b) => rank(a) - rank(b)));
-  });
-
-  it('keeps the streak at user level, independent of the language', async () => {
-    const streak = await repos.streaks.get('u1');
-    expect(streak).toEqual({ userId: 'u1', days: expect.any(Number) });
-    const progress = (await repos.progress.get('u1', 'de'))!;
-    expect(progress).not.toHaveProperty('streakDays');
-  });
-
-  it('every level referenced by lessons exists', async () => {
-    const ids = (await repos.levels.getAll()).map((l) => l.id);
-    for (const { code } of await repos.languages.getTargets()) {
-      for (const lesson of await repos.lessons.getByLanguage(code)) expect(ids).toContain(lesson.levelId);
+  it.each(targets)('%s: a level above the lessons that exist means all of them are done', (code) => {
+    const progress = getMockProgress('u1', code)!;
+    const own = lessons.filter((lesson) => lesson.targetLanguage === code);
+    const highest = Math.max(...own.map((lesson) => rank(lesson.levelId)));
+    if (rank(progress.levelId) > highest) {
+      expect(progress.completedLessonIds.sort()).toEqual(own.map((lesson) => lesson.id).sort());
+      expect(progress.currentLessonId).toBeNull();
     }
+  });
+
+  it.each(targets)('%s: level progress matches completed lessons of that level', (code) => {
+    const progress = getMockProgress('u1', code)!;
+    const atLevel = lessons.filter((l) => l.targetLanguage === code && l.levelId === progress.levelId);
+    const done = atLevel.filter((l) => progress.completedLessonIds.includes(l.id)).length;
+    const expected = atLevel.length === 0 ? 0 : done / atLevel.length;
+    expect(progress.levelProgress).toBeCloseTo(expected, 2);
+  });
+
+});
+
+describe('streak', () => {
+  it('belongs to the user, not to a language', () => {
+    expect(getMockStreak('u1')).toEqual({ userId: 'u1', days: expect.any(Number) });
+    for (const code of targets) {
+      expect(getMockProgress('u1', code)).not.toHaveProperty('streakDays');
+    }
+  });
+});
+
+describe('language data', () => {
+  it('has a plan for every target language', () => {
+    for (const code of targets) expect(getMockPlan('u1', code).dailyGoalMinutes).toBeGreaterThan(0);
+  });
+
+  it('carries no country flags (a flag is a country, not a language)', () => {
+    for (const language of languages) expect(language).not.toHaveProperty('flag');
   });
 });

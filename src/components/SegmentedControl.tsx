@@ -48,6 +48,6 @@ export function SegmentedControl<T extends string>({ options, value, onChange, a
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row' },
-  segment: { flex: 1, minHeight: MIN_TOUCH_TARGET - 8, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 8 },
+  segment: { flex: 1, minHeight: MIN_TOUCH_TARGET, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 8 },
   label: { textAlign: 'center' },
 });

@@ -6,6 +6,8 @@ export const ROUTES = {
   home: '/home',
   languageSelection: '/language-selection',
   settings: '/settings',
+  learn: '/learn',
+  lesson: (id: string) => `/lesson/${id}` as const,
 } as const;
 
 export type InitialRoute = typeof ROUTES.onboarding | typeof ROUTES.login | typeof ROUTES.home;
@@ -22,9 +24,4 @@ export function resolveInitialRoute(state: {
 }): InitialRoute {
   if (state.hasSession) return ROUTES.home;
   return state.onboardingSeen ? ROUTES.login : ROUTES.onboarding;
-}
-
-/** Opens a lesson. Kept here so screens never build route strings themselves. */
-export function openLesson(router: { push: (href: { pathname: '/lesson/[id]'; params: { id: string } }) => void }, id: string) {
-  router.push({ pathname: '/lesson/[id]', params: { id } });
 }

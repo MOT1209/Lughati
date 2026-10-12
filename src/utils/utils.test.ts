@@ -1,4 +1,4 @@
-import { isolate, isolateLtr } from './bidi';
+import { isolate, isolateLtr, isolateNative } from './bidi';
 import { validateEmail, validateLogin, validatePassword, validateRegister } from './validation';
 
 describe('validation', () => {
@@ -34,5 +34,10 @@ describe('bidi isolation', () => {
   it('wraps text in matching isolate/pop characters', () => {
     expect(isolate('Sara')).toBe('⁨Sara⁩');
     expect(isolateLtr('Deutsch')).toBe('⁦Deutsch⁩');
+  });
+
+  it('isolates a native name by its language direction', () => {
+    expect(isolateNative('العربية', 'rtl')).toBe('⁨العربية⁩');
+    expect(isolateNative('Deutsch', 'ltr')).toBe('⁦Deutsch⁩');
   });
 });

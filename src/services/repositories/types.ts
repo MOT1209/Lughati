@@ -1,4 +1,16 @@
-import type { Exercise, Language, LanguageCode, LearningPlan, Lesson, Level, LevelId, Progress, Streak } from '@/types';
+import type {
+  Exercise,
+  Language,
+  LanguageCode,
+  LearningPlan,
+  Lesson,
+  LessonResult,
+  Level,
+  LevelId,
+  Progress,
+  Streak,
+  Vocabulary,
+} from '@/types';
 
 export interface LanguageRepository {
   getAll(): Promise<Language[]>;
@@ -15,20 +27,16 @@ export interface LevelRepository {
 export interface LessonRepository {
   getByLanguage(language: LanguageCode): Promise<Lesson[]>;
   getById(id: string): Promise<Lesson | null>;
-}
-
-export interface ExerciseRepository {
-  /** Empty when the lesson has no exercises yet. */
-  getByLesson(lessonId: string): Promise<Exercise[]>;
+  getVocabulary(lessonId: string): Promise<Vocabulary[]>;
+  getExercises(lessonId: string): Promise<Exercise[]>;
 }
 
 export interface ProgressRepository {
   get(userId: string, language: LanguageCode): Promise<Progress | null>;
-}
-
-export interface StreakRepository {
-  /** User-level: shared by all target languages. */
-  get(userId: string): Promise<Streak>;
+  /** The streak belongs to the user and is shared by every language they learn. */
+  getStreak(userId: string): Promise<Streak>;
+  /** Records a finished lesson run and returns the updated progress (also adds study time to the plan). */
+  completeLesson(userId: string, lessonId: string, result: LessonResult): Promise<Progress>;
 }
 
 export interface LearningPlanRepository {
@@ -39,8 +47,6 @@ export interface Repositories {
   languages: LanguageRepository;
   levels: LevelRepository;
   lessons: LessonRepository;
-  exercises: ExerciseRepository;
   progress: ProgressRepository;
-  streaks: StreakRepository;
   plans: LearningPlanRepository;
 }

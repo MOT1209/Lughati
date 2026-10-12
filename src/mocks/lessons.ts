@@ -1,4 +1,4 @@
-import type { LanguageCode, Lesson, LevelId, Localized } from '@/types';
+import type { Lesson, LanguageCode, Localized } from '@/types';
 
 interface LessonTemplate {
   title: Localized;
@@ -6,55 +6,71 @@ interface LessonTemplate {
   estimatedMinutes: number;
 }
 
-// The same beginner curriculum outline for each target language, so every language has data.
-const a1Templates: LessonTemplate[] = [
+// One CEFR A1 course outline, shared by every target language. The words of each lesson live in
+// mocks/vocabulary.ts at the same index, so the outline and the content cannot drift apart.
+export const a1Templates: LessonTemplate[] = [
   {
-    title: { ar: 'التحيات والتعارف', en: 'Greetings and introductions' },
-    summary: { ar: 'قل مرحباً وعرّف بنفسك.', en: 'Say hello and introduce yourself.' },
+    title: { ar: 'التحيات واللباقة', en: 'Greetings and politeness' },
+    summary: { ar: 'قل مرحباً واشكر واعتذر بأدب.', en: 'Say hello, thank people and apologise politely.' },
     estimatedMinutes: 8,
   },
   {
-    title: { ar: 'الأرقام من 1 إلى 20', en: 'Numbers 1–20' },
-    summary: { ar: 'عدّ واسأل عن الأسعار البسيطة.', en: 'Count and ask simple prices.' },
+    title: { ar: 'التعريف بالنفس', en: 'Introducing yourself' },
+    summary: { ar: 'قدّم نفسك واسأل عن حال الآخرين.', en: 'Introduce yourself and ask how others are.' },
     estimatedMinutes: 10,
   },
   {
+    title: { ar: 'الأرقام', en: 'Numbers' },
+    summary: { ar: 'عدّ من 1 إلى 5 وقل 10.', en: 'Count from 1 to 5 and say 10.' },
+    estimatedMinutes: 8,
+  },
+  {
+    title: { ar: 'الألوان', en: 'Colours' },
+    summary: { ar: 'سمِّ الألوان الأساسية.', en: 'Name the basic colours.' },
+    estimatedMinutes: 8,
+  },
+  {
+    title: { ar: 'العائلة والأصدقاء', en: 'Family and friends' },
+    summary: { ar: 'تحدّث عن أفراد عائلتك وأصدقائك.', en: 'Talk about your family and friends.' },
+    estimatedMinutes: 8,
+  },
+  {
+    title: { ar: 'الطعام', en: 'Food' },
+    summary: { ar: 'تعرّف على أسماء الأطعمة اليومية.', en: 'Learn the names of everyday foods.' },
+    estimatedMinutes: 8,
+  },
+  {
     title: { ar: 'في المقهى', en: 'At the café' },
-    summary: { ar: 'اطلب مشروباً بأدب.', en: 'Order a drink politely.' },
-    estimatedMinutes: 12,
+    summary: { ar: 'اطلب مشروباً واطلب الحساب بأدب.', en: 'Order a drink and ask for the bill politely.' },
+    estimatedMinutes: 10,
+  },
+  {
+    title: { ar: 'الوقت', en: 'Time' },
+    summary: { ar: 'تحدّث عن اليوم وغداً وأمس.', en: 'Talk about today, tomorrow and yesterday.' },
+    estimatedMinutes: 8,
+  },
+  {
+    title: { ar: 'الأماكن', en: 'Places' },
+    summary: { ar: 'سمِّ الأماكن التي تراها في المدينة.', en: 'Name the places you see in a city.' },
+    estimatedMinutes: 8,
+  },
+  {
+    title: { ar: 'التنقل', en: 'Getting around' },
+    summary: { ar: 'اسأل عن الاتجاهات وتذكرة السفر.', en: 'Ask for directions and a ticket.' },
+    estimatedMinutes: 10,
   },
 ];
 
-const a2Templates: LessonTemplate[] = [
-  {
-    title: { ar: 'الأسرة والأصدقاء', en: 'Family and friends' },
-    summary: { ar: 'تحدّث عن أسرتك وأصدقائك.', en: 'Talk about your family and friends.' },
-    estimatedMinutes: 12,
-  },
-  {
-    title: { ar: 'الروتين اليومي', en: 'Daily routine' },
-    summary: { ar: 'صف يومك من الصباح إلى المساء.', en: 'Describe your day from morning to evening.' },
-    estimatedMinutes: 14,
-  },
-];
+const targetCodes: LanguageCode[] = ['ar', 'de', 'en', 'es', 'fr', 'tr'];
 
-const targetCodes: LanguageCode[] = ['de', 'en', 'es', 'fr', 'tr'];
-
-/** `firstOrder` keeps lesson order continuous across levels inside one language. */
-function buildLessons(code: LanguageCode, levelId: LevelId, templates: LessonTemplate[], firstOrder = 1): Lesson[] {
-  return templates.map((template, index) => ({
-    id: `${code}-${levelId.toLowerCase()}-${index + 1}`,
+export const lessons: Lesson[] = targetCodes.flatMap((code) =>
+  a1Templates.map((template, index) => ({
+    id: `${code}-a1-${index + 1}`,
     targetLanguage: code,
-    levelId,
+    levelId: 'A1' as const,
     title: template.title,
     summary: template.summary,
-    order: firstOrder + index,
+    order: index + 1,
     estimatedMinutes: template.estimatedMinutes,
-  }));
-}
-
-// A1 for every target language; A2 only for German so far (more levels = more data, no code).
-export const lessons: Lesson[] = [
-  ...targetCodes.flatMap((code) => buildLessons(code, 'A1', a1Templates)),
-  ...buildLessons('de', 'A2', a2Templates, a1Templates.length + 1),
-];
+  })),
+);
