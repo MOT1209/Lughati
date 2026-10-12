@@ -1,4 +1,4 @@
-import { getAIProvider } from './ai';
+import { getAIProvider, registerAIProvider } from './ai';
 import { AuthError, MockAuthService, type Session } from './auth';
 import { createMockRepositories } from './repositories/mock';
 
@@ -88,6 +88,21 @@ describe('mock repositories', () => {
     expect(progress?.levelProgress).toBeLessThanOrEqual(1);
   });
 
+  it('returns one streak per user, independent of the language', async () => {
+    const streak = await repos.progress.getStreak('u1');
+    expect(streak.userId).toBe('u1');
+    expect(streak.days).toBeGreaterThanOrEqual(0);
+    expect(await repos.progress.getStreak('u1')).toEqual(streak);
+  });
+
+  it('has a daily goal for every target language', async () => {
+    for (const code of ['de', 'en', 'es', 'fr', 'tr'] as const) {
+      const plan = await repos.plans.get('u1', code);
+      expect(plan.dailyGoalMinutes).toBeGreaterThan(0);
+      expect(plan.minutesToday).toBeGreaterThanOrEqual(0);
+    }
+  });
+
   it('has no progress record for a non-target language', async () => {
     expect(await repos.progress.get('u1', 'ar')).toBeNull();
   });
@@ -101,6 +116,16 @@ describe('mock repositories', () => {
 });
 
 describe('AI provider registry', () => {
+  it('registers an additional provider and lets it become the default', async () => {
+    const custom = { id: 'custom', reply: jest.fn() };
+    registerAIProvider(custom);
+    expect(getAIProvider('custom')).toBe(custom);
+    expect(getAIProvider().id).toBe('mock'); // registering does not change the default
+    registerAIProvider(custom, { makeDefault: true });
+    expect(getAIProvider()).toBe(custom);
+    registerAIProvider(getAIProvider('mock'), { makeDefault: true }); // restore for other tests
+  });
+
   it('resolves the default mock provider without screens importing it', async () => {
     const provider = getAIProvider();
     expect(provider.id).toBe('mock');
