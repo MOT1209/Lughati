@@ -24,7 +24,8 @@ npx expo start      # افتح Expo Go على Android وامسح QR
 - `components/ui` مكونات التصميم، و`components` مكونات مركّبة.
 - `theme/` ألوان Light/Dark وtokens وطباعة (Cairo).
 - `i18n/` ترجمة `ar`/`en` وتحديد اللغة والاتجاه.
-- `services/` `auth` (واجهة + Mock)، `ai` (واجهة + Mock + سجل)، `repositories` (واجهات + Mock)، `direction`.
+- `services/` `auth` (واجهة + Mock)، `ai` (واجهة + Mock + سجل)، `repositories` (واجهات + Mock)، `direction` و`appLanguage` (ربط التفضيل المحفوظ بـ i18n والاتجاه).
+- `navigation/RootNavigator` حارس المسارات (جلسة فقط).
 - `store/` Zustand: التفضيلات (محفوظة)، الجلسة، اللغة المختارة.
 - `mocks/` بيانات وهمية بالعربية، و`types/` نموذج البيانات، و`utils/`، و`hooks/`.
 
