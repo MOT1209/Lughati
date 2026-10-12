@@ -1,0 +1,116 @@
+// Domain model. Source language (what the learner already speaks) and target language
+// (what they learn) are separate concepts: every learning record carries both.
+
+export type UiLocale = 'ar' | 'en';
+
+export type LanguageCode = 'ar' | 'de' | 'en' | 'es' | 'fr' | 'tr';
+
+export type LanguageRole = 'source' | 'target';
+
+/** Text that exists in every UI locale. Used for data-driven content (not UI chrome). */
+export type Localized = Record<UiLocale, string>;
+
+export interface Language {
+  code: LanguageCode;
+  /** Name of the language in each UI locale. */
+  name: Localized;
+  /** Name of the language in itself (e.g. "Deutsch"). Rendered LTR-isolated. */
+  nativeName: string;
+  flag: string;
+  direction: 'ltr' | 'rtl';
+  /** Adding 'target' to Arabic later is the only change needed to teach Arabic. */
+  roles: LanguageRole[];
+}
+
+export type LevelId = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
+
+export interface Level {
+  id: LevelId;
+  title: Localized;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  sourceLanguage: LanguageCode;
+  /** Default learning language; the learner can switch it at runtime. */
+  targetLanguage: LanguageCode;
+  joinedAt: string; // ISO date
+}
+
+export interface Lesson {
+  id: string;
+  targetLanguage: LanguageCode;
+  levelId: LevelId;
+  title: Localized;
+  summary: Localized;
+  order: number;
+  estimatedMinutes: number;
+}
+
+export type ExerciseType = 'multiple-choice' | 'translate' | 'listen' | 'match';
+
+export interface Exercise {
+  id: string;
+  lessonId: string;
+  type: ExerciseType;
+  prompt: Localized;
+  options?: string[];
+  answer: string;
+}
+
+export interface Vocabulary {
+  id: string;
+  targetLanguage: LanguageCode;
+  term: string;
+  translation: Localized;
+  levelId: LevelId;
+}
+
+export interface Progress {
+  userId: string;
+  targetLanguage: LanguageCode;
+  /** The learner's level is per target language. */
+  levelId: LevelId;
+  completedLessonIds: string[];
+  currentLessonId: string | null;
+  /** 0..1 progress inside the current level. */
+  levelProgress: number;
+  streakDays: number;
+  totalXp: number;
+  wordsLearned: number;
+  minutesLearned: number;
+}
+
+export interface Achievement {
+  id: string;
+  title: Localized;
+  description: Localized;
+  icon: string;
+  unlocked: boolean;
+}
+
+export interface LearningPlan {
+  userId: string;
+  targetLanguage: LanguageCode;
+  dailyGoalMinutes: number;
+  minutesToday: number;
+}
+
+export interface AIMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: string;
+}
+
+export interface AIConversation {
+  id: string;
+  userId: string;
+  targetLanguage: LanguageCode;
+  messages: AIMessage[];
+}
+
+export type ThemePreference = 'system' | 'light' | 'dark';
+export type LanguagePreference = 'system' | UiLocale;
