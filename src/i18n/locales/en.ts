@@ -20,7 +20,7 @@ export const en: Translation = {
   },
   onboarding: {
     slide1Title: 'Learn multiple languages',
-    slide1Body: 'German, English, Spanish, French and Turkish in a single app.',
+    slide1Body: 'Arabic, German, English, Spanish, French and Turkish in a single app.',
     slide2Title: 'A plan that fits you',
     slide2Body: 'Set a daily goal and track your progress level by level.',
     slide3Title: 'Keep going every day',

@@ -3,7 +3,18 @@ import type { LanguageCode, LearningPlan, Progress } from '@/types';
 type ProgressSeed = Omit<Progress, 'userId'>;
 
 // Realistic spread: German is the learner's main language, the rest are barely started.
-const seeds: Record<Exclude<LanguageCode, 'ar'>, ProgressSeed> = {
+const seeds: Record<LanguageCode, ProgressSeed> = {
+  ar: {
+    targetLanguage: 'ar',
+    levelId: 'A1',
+    completedLessonIds: [],
+    currentLessonId: 'ar-a1-1',
+    levelProgress: 0.1,
+    streakDays: 0,
+    totalXp: 60,
+    wordsLearned: 14,
+    minutesLearned: 20,
+  },
   de: {
     targetLanguage: 'de',
     levelId: 'A2',
@@ -62,7 +73,6 @@ const seeds: Record<Exclude<LanguageCode, 'ar'>, ProgressSeed> = {
 };
 
 export function getMockProgress(userId: string, language: LanguageCode): Progress | null {
-  if (language === 'ar') return null; // Arabic is not a target language yet
   return { userId, ...seeds[language] };
 }
 

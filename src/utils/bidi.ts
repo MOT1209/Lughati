@@ -13,3 +13,8 @@ export function isolate(text: string): string {
 export function isolateLtr(text: string): string {
   return `${LRI}${text}${PDI}`;
 }
+
+/** Isolate a language's own name using that language's direction ("العربية" is RTL). */
+export function isolateNative(text: string, direction: 'ltr' | 'rtl'): string {
+  return direction === 'rtl' ? isolate(text) : isolateLtr(text);
+}
