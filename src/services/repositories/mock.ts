@@ -1,3 +1,4 @@
+import { exercises } from '@/mocks/exercises';
 import { languages } from '@/mocks/languages';
 import { lessons } from '@/mocks/lessons';
 import { levels } from '@/mocks/levels';
@@ -21,6 +22,9 @@ export function createMockRepositories(): Repositories {
       getByLanguage: async (language) =>
         lessons.filter((l) => l.targetLanguage === language).sort((a, b) => a.order - b.order),
       getById: async (id) => lessons.find((l) => l.id === id) ?? null,
+    },
+    exercises: {
+      getByLesson: async (lessonId) => exercises.filter((e) => e.lessonId === lessonId),
     },
     progress: {
       get: async (userId, language) => getMockProgress(userId, language),

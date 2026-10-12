@@ -23,3 +23,8 @@ export function resolveInitialRoute(state: {
   if (state.hasSession) return ROUTES.home;
   return state.onboardingSeen ? ROUTES.login : ROUTES.onboarding;
 }
+
+/** Opens a lesson. Kept here so screens never build route strings themselves. */
+export function openLesson(router: { push: (href: { pathname: '/lesson/[id]'; params: { id: string } }) => void }, id: string) {
+  router.push({ pathname: '/lesson/[id]', params: { id } });
+}

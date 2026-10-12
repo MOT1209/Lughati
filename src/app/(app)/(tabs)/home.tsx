@@ -10,7 +10,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useUiLocale } from '@/hooks/useUiLocale';
 import { isolate, isolateLtr } from '@/utils/bidi';
 import { localize } from '@/utils/localize';
-import { ROUTES } from '@/utils/routing';
+import { openLesson, ROUTES } from '@/utils/routing';
 
 const quickActions: { icon: IconName; label: 'home.qaVocabulary' | 'home.qaPractice' | 'home.qaChat' }[] = [
   { icon: 'text-outline', label: 'home.qaVocabulary' },
@@ -93,7 +93,7 @@ export default function Home() {
             {t('home.lessonMeta', { level: lesson.levelId, minutes: lesson.estimatedMinutes })}
           </Text>
           <ProgressBar value={progress.levelProgress} accessibilityLabel={t('home.overallProgress')} />
-          <Button title={t('home.continueLearning')} icon="play-outline" onPress={() => router.push('/learn')} />
+          <Button title={t('home.continueLearning')} icon="play-outline" onPress={() => openLesson(router, lesson.id)} />
         </Card>
       ) : (
         <Card style={{ gap: spacing.sm }}>

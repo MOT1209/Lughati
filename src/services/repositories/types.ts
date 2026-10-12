@@ -1,4 +1,4 @@
-import type { Language, LanguageCode, LearningPlan, Lesson, Level, LevelId, Progress, Streak } from '@/types';
+import type { Exercise, Language, LanguageCode, LearningPlan, Lesson, Level, LevelId, Progress, Streak } from '@/types';
 
 export interface LanguageRepository {
   getAll(): Promise<Language[]>;
@@ -15,6 +15,11 @@ export interface LevelRepository {
 export interface LessonRepository {
   getByLanguage(language: LanguageCode): Promise<Lesson[]>;
   getById(id: string): Promise<Lesson | null>;
+}
+
+export interface ExerciseRepository {
+  /** Empty when the lesson has no exercises yet. */
+  getByLesson(lessonId: string): Promise<Exercise[]>;
 }
 
 export interface ProgressRepository {
@@ -34,6 +39,7 @@ export interface Repositories {
   languages: LanguageRepository;
   levels: LevelRepository;
   lessons: LessonRepository;
+  exercises: ExerciseRepository;
   progress: ProgressRepository;
   streaks: StreakRepository;
   plans: LearningPlanRepository;
