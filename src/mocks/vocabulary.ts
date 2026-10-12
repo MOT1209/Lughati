@@ -81,17 +81,22 @@ const terms: Record<TargetCode, string[][]> = {
   ],
 };
 
-export const vocabulary: Vocabulary[] = (Object.keys(terms) as TargetCode[]).flatMap((code) =>
-  terms[code].flatMap((lessonTerms, lessonIndex) =>
+const build = (code: LanguageCode, termLists: string[][], meaningKey: LanguageCode, meanings: string[][]): Vocabulary[] =>
+  termLists.flatMap((lessonTerms, lessonIndex) =>
     lessonTerms.map((term, wordIndex) => ({
       id: `${code}-a1-${lessonIndex + 1}-w${wordIndex + 1}`,
       lessonId: `${code}-a1-${lessonIndex + 1}`,
       targetLanguage: code,
       term,
-      translations: { ar: arabic[lessonIndex]![wordIndex]! },
+      translations: { [meaningKey]: meanings[lessonIndex]![wordIndex]! },
     })),
-  ),
-);
+  );
 
-/** Exposed so tests can check every language lists the same shape as the Arabic meanings. */
+export const vocabulary: Vocabulary[] = [
+  // Learners of Arabic read the same course with English meanings (the English list above).
+  ...build('ar', arabic, 'en', terms.en),
+  ...(Object.keys(terms) as TargetCode[]).flatMap((code) => build(code, terms[code], 'ar', arabic)),
+];
+
+/** Exposed so tests can check every language lists the same shape as the Arabic list. */
 export const arabicMeanings = arabic;

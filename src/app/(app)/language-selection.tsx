@@ -11,7 +11,7 @@ import { useUiLocale } from '@/hooks/useUiLocale';
 import { getRepositories } from '@/services/repositories';
 import { useAuthStore } from '@/store/authStore';
 import { useLearningStore } from '@/store/learningStore';
-import { isolateLtr } from '@/utils/bidi';
+import { isolateNative } from '@/utils/bidi';
 import { localize } from '@/utils/localize';
 
 export default function LanguageSelection() {
@@ -60,9 +60,11 @@ export default function LanguageSelection() {
                 <LanguageBadge code={language.code} />
                 <View style={styles.flex}>
                   <Text variant="bodyStrong">{name}</Text>
-                  <Text variant="small" color="textSecondary">
-                    {isolateLtr(language.nativeName)}
-                  </Text>
+                  {language.nativeName !== name ? (
+                    <Text variant="small" color="textSecondary">
+                      {isolateNative(language.nativeName, language.direction)}
+                    </Text>
+                  ) : null}
                 </View>
                 {isCurrent ? <Icon name="checkmark-circle" color="primary" /> : null}
               </Pressable>

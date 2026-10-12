@@ -12,8 +12,8 @@ import { getRepositories } from '@/services/repositories';
 import { useAuthStore } from '@/store/authStore';
 import { useLearningStore } from '@/store/learningStore';
 import type { LessonResult } from '@/types';
-import { isolateLtr } from '@/utils/bidi';
 import { localize } from '@/utils/localize';
+import { isolateTerm, meaningOf } from '@/utils/meaning';
 import { XP_LESSON_BONUS, XP_PER_CORRECT_ANSWER } from '@/utils/progression';
 
 type Step = 'intro' | 'quiz' | 'summary';
@@ -122,10 +122,10 @@ export default function LessonScreen() {
       <Card style={{ gap: spacing.md }}>
         <Text variant="subheading">{t('lesson.vocabulary')}</Text>
         {words.map((word) => (
-          <View key={word.id} style={{ gap: 2 }} accessible accessibilityLabel={`${word.term}: ${word.translations.ar ?? ''}`}>
-            <Text variant="bodyStrong">{isolateLtr(word.term)}</Text>
+          <View key={word.id} style={{ gap: 2 }} accessible accessibilityLabel={`${word.term}: ${meaningOf(word)}`}>
+            <Text variant="bodyStrong">{isolateTerm(word)}</Text>
             <Text variant="small" color="textSecondary">
-              {word.translations.ar}
+              {meaningOf(word)}
             </Text>
           </View>
         ))}

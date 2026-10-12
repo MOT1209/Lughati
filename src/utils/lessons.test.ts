@@ -4,6 +4,8 @@ import { levels } from '@/mocks/levels';
 import { arabicMeanings, vocabulary } from '@/mocks/vocabulary';
 import type { Progress } from '@/types';
 
+import { isolate, isolateLtr } from './bidi';
+import { isolateTerm, meaningLanguage, meaningOf } from './meaning';
 import { buildExercises, OPTIONS_PER_EXERCISE } from './exercises';
 import { answer, initialSession, isFinished, next } from './lessonSession';
 import { applyLessonCompletion, XP_LESSON_BONUS, XP_PER_CORRECT_ANSWER } from './progression';
@@ -16,9 +18,9 @@ describe('vocabulary data', () => {
     const words = wordsOf(id);
     expect(words.length).toBeGreaterThanOrEqual(OPTIONS_PER_EXERCISE);
     expect(new Set(words.map((w) => w.term)).size).toBe(words.length);
-    expect(new Set(words.map((w) => w.translations.ar)).size).toBe(words.length);
+    expect(new Set(words.map(meaningOf)).size).toBe(words.length);
     for (const word of words) {
-      expect(word.translations.ar?.trim()).toBeTruthy();
+      expect(meaningOf(word).trim()).toBeTruthy();
       expect(word.targetLanguage).toBe(lessons.find((l) => l.id === id)!.targetLanguage);
     }
   });
@@ -28,7 +30,8 @@ describe('vocabulary data', () => {
     for (const code of targets) {
       for (const [index, meanings] of arabicMeanings.entries()) {
         const words = wordsOf(`${code}-a1-${index + 1}`);
-        expect(words.map((w) => w.translations.ar)).toEqual(meanings);
+        // The Arabic course lists the Arabic words themselves; everyone else lists Arabic meanings.
+        expect(words.map((w) => (code === 'ar' ? w.term : (w.translations.ar ?? '')))).toEqual(meanings);
       }
     }
   });
@@ -40,6 +43,25 @@ describe('vocabulary data', () => {
       }
     }
     expect(new Set(vocabulary.map((w) => w.id)).size).toBe(vocabulary.length);
+  });
+});
+
+describe('meaning language', () => {
+  it('shows Arabic meanings to everyone except learners of Arabic, who get English', () => {
+    expect(meaningLanguage('de')).toBe('ar');
+    expect(meaningLanguage('ar')).toBe('en');
+    expect(meaningOf(wordsOf('ar-a1-1')[0]!)).toBe('Hello');
+    expect(meaningOf(wordsOf('de-a1-1')[0]!)).toBe('مرحباً');
+  });
+
+  it('isolates Arabic words as RTL and other target words as LTR', () => {
+    expect(isolateTerm(wordsOf('ar-a1-1')[0]!)).toBe(isolate('مرحباً'));
+    expect(isolateTerm(wordsOf('de-a1-1')[0]!)).toBe(isolateLtr('Hallo'));
+  });
+
+  it('the Arabic course is built from the English course meanings in the same order', () => {
+    const english = wordsOf('en-a1-5').map((w) => w.term);
+    expect(wordsOf('ar-a1-5').map((w) => w.translations.en)).toEqual(english);
   });
 });
 

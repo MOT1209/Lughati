@@ -8,7 +8,7 @@ import { Button, Card, ErrorState, Icon, LoadingState, Screen, Text, type IconNa
 import { useCurrentLearning } from '@/hooks/useCurrentLearning';
 import { useTheme } from '@/hooks/useTheme';
 import { useUiLocale } from '@/hooks/useUiLocale';
-import { isolate, isolateLtr } from '@/utils/bidi';
+import { isolate, isolateNative } from '@/utils/bidi';
 import { localize } from '@/utils/localize';
 import { ROUTES } from '@/utils/routing';
 
@@ -57,9 +57,9 @@ export default function Home() {
           {language ? <LanguageBadge code={language.code} /> : null}
           <View style={styles.flex}>
             <Text variant="heading">{language ? localize(language.name, locale) : ''}</Text>
-            {language ? (
+            {language && language.nativeName !== localize(language.name, locale) ? (
               <Text variant="small" color="textSecondary">
-                {isolateLtr(language.nativeName)}
+                {isolateNative(language.nativeName, language.direction)}
               </Text>
             ) : null}
           </View>

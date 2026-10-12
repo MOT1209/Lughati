@@ -33,7 +33,8 @@ describe('Learn screen', () => {
   });
 
   it('shows an empty state for a language without lessons', async () => {
-    useLearningStore.setState({ selectedTarget: 'ar' });
+    const repos = createMockRepositories();
+    registerRepositories({ ...repos, lessons: { ...repos.lessons, getByLanguage: async () => [] } });
     renderRouter({ learn: LearnScreen }, { initialUrl: '/learn' });
     expect(await screen.findByText('There are no lessons for this language yet.')).toBeTruthy();
   });

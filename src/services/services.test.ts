@@ -70,20 +70,21 @@ describe('MockAuthService', () => {
 describe('mock repositories', () => {
   const repos = createMockRepositories();
 
-  it('offers the five required target languages and not Arabic', async () => {
+  it('offers the five required target languages plus Arabic', async () => {
     const codes = (await repos.languages.getTargets()).map((l) => l.code).sort();
-    expect(codes).toEqual(['de', 'en', 'es', 'fr', 'tr']);
+    expect(codes).toEqual(['ar', 'de', 'en', 'es', 'fr', 'tr']);
   });
 
-  it('keeps Arabic as a source language only', async () => {
+  it('Arabic is both a source and a target language', async () => {
     const arabic = await repos.languages.getByCode('ar');
-    expect(arabic?.roles).toEqual(['source']);
+    expect(arabic?.roles).toEqual(['source', 'target']);
+    expect(arabic?.direction).toBe('rtl');
   });
 
-  it('returns lessons in order for a target language and none for Arabic', async () => {
-    const german = await repos.lessons.getByLanguage('de');
-    expect(german.map((l) => l.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-    expect(await repos.lessons.getByLanguage('ar')).toEqual([]);
+  it.each(['ar', 'de'] as const)('returns lessons in order for %s', async (code) => {
+    const lessons = await repos.lessons.getByLanguage(code);
+    expect(lessons.map((l) => l.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(lessons.every((l) => l.targetLanguage === code)).toBe(true);
   });
 
   it('progress points at an existing lesson of the same language', async () => {
@@ -102,19 +103,21 @@ describe('mock repositories', () => {
   });
 
   it('has a daily goal for every target language', async () => {
-    for (const code of ['de', 'en', 'es', 'fr', 'tr'] as const) {
+    for (const code of ['ar', 'de', 'en', 'es', 'fr', 'tr'] as const) {
       const plan = await repos.plans.get('u1', code);
       expect(plan.dailyGoalMinutes).toBeGreaterThan(0);
       expect(plan.minutesToday).toBeGreaterThanOrEqual(0);
     }
   });
 
-  it('has no progress record for a non-target language', async () => {
-    expect(await repos.progress.get('u1', 'ar')).toBeNull();
+  it('every target language has a progress record', async () => {
+    for (const language of await repos.languages.getTargets()) {
+      expect((await repos.progress.get('u1', language.code))?.targetLanguage).toBe(language.code);
+    }
   });
 
   it('every level referenced by progress exists', async () => {
-    for (const code of ['de', 'en', 'es', 'fr', 'tr'] as const) {
+    for (const code of ['ar', 'de', 'en', 'es', 'fr', 'tr'] as const) {
       const progress = await repos.progress.get('u1', code);
       expect(await repos.levels.getById(progress!.levelId)).not.toBeNull();
     }

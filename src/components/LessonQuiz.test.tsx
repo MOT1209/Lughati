@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import { setUiLocale } from '@/i18n';
 import { vocabulary } from '@/mocks/vocabulary';
-import { isolateLtr } from '@/utils/bidi';
+import { isolate, isolateLtr } from '@/utils/bidi';
 import { buildExercises } from '@/utils/exercises';
 
 import { LessonQuiz } from './LessonQuiz';
@@ -55,5 +55,16 @@ describe('LessonQuiz', () => {
     });
     expect(onFinish).toHaveBeenCalledTimes(1);
     expect(onFinish).toHaveBeenCalledWith({ correct: 3, total: 12 });
+  });
+});
+
+describe('LessonQuiz for learners of Arabic', () => {
+  const arWords = vocabulary.filter((w) => w.lessonId === 'ar-a1-1');
+  const arExercises = buildExercises('ar-a1-1', arWords);
+
+  it('shows the Arabic word (RTL-isolated) and offers English meanings', () => {
+    render(<LessonQuiz exercises={arExercises} words={arWords} onFinish={() => {}} />);
+    expect(screen.getByText(isolate('مرحباً'))).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Option: Hello' })).toBeTruthy();
   });
 });

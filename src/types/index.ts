@@ -68,9 +68,9 @@ export interface Vocabulary {
   id: string;
   lessonId: string;
   targetLanguage: LanguageCode;
-  /** The word in the language being learned. Always rendered inside an LTR isolate. */
+  /** The word in the language being learned. Render it isolated with that language's direction. */
   term: string;
-  /** Meaning keyed by the learner's source language (Arabic for now). */
+  /** Meaning keyed by the learner's source language: Arabic, or English for learners of Arabic. */
   translations: Partial<Record<LanguageCode, string>>;
 }
 

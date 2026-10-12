@@ -4,7 +4,17 @@ type ProgressSeed = Omit<Progress, 'userId'>;
 
 // Every learner starts at A1 and only A1 lessons exist, so a level above A1 would mean every
 // lesson is done and no lesson is current (`currentLessonId: null`). mocks.test.ts enforces this.
-const seeds: Record<Exclude<LanguageCode, 'ar'>, ProgressSeed> = {
+const seeds: Record<LanguageCode, ProgressSeed> = {
+  ar: {
+    targetLanguage: 'ar',
+    levelId: 'A1',
+    completedLessonIds: [],
+    currentLessonId: 'ar-a1-1',
+    levelProgress: 0,
+    totalXp: 0,
+    wordsLearned: 0,
+    minutesLearned: 0,
+  },
   de: {
     targetLanguage: 'de',
     levelId: 'A1',
@@ -58,7 +68,6 @@ const seeds: Record<Exclude<LanguageCode, 'ar'>, ProgressSeed> = {
 };
 
 export function getMockProgress(userId: string, language: LanguageCode): Progress | null {
-  if (language === 'ar') return null; // Arabic is not a target language yet
   return { userId, ...seeds[language] };
 }
 

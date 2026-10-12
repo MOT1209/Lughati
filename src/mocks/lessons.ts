@@ -61,7 +61,7 @@ export const a1Templates: LessonTemplate[] = [
   },
 ];
 
-const targetCodes: LanguageCode[] = ['de', 'en', 'es', 'fr', 'tr'];
+const targetCodes: LanguageCode[] = ['ar', 'de', 'en', 'es', 'fr', 'tr'];
 
 export const lessons: Lesson[] = targetCodes.flatMap((code) =>
   a1Templates.map((template, index) => ({

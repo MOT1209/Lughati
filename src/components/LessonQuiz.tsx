@@ -7,16 +7,14 @@ import { ProgressBar } from '@/components/ProgressBar';
 import { Button, Text } from '@/components/ui';
 import { useTheme } from '@/hooks/useTheme';
 import type { Exercise, LessonResult, Vocabulary } from '@/types';
-import { isolateLtr } from '@/utils/bidi';
 import { answer, initialSession, isFinished, next } from '@/utils/lessonSession';
+import { isolateTerm, meaningOf } from '@/utils/meaning';
 
 interface LessonQuizProps {
   exercises: Exercise[];
   words: Vocabulary[];
   onFinish: (result: LessonResult) => void;
 }
-
-const SOURCE_LANGUAGE = 'ar'; // meanings are shown in the learner's source language
 
 export function LessonQuiz({ exercises, words, onFinish }: LessonQuizProps) {
   const { t } = useTranslation();
@@ -32,10 +30,10 @@ export function LessonQuiz({ exercises, words, onFinish }: LessonQuizProps) {
   const label = (id: string) => {
     const word = byId.get(id);
     if (!word) return '';
-    return askMeaning ? (word.translations[SOURCE_LANGUAGE] ?? '') : isolateLtr(word.term);
+    return askMeaning ? meaningOf(word) : isolateTerm(word);
   };
   const subject = byId.get(exercise.subjectId);
-  const prompt = askMeaning ? isolateLtr(subject?.term ?? '') : (subject?.translations[SOURCE_LANGUAGE] ?? '');
+  const prompt = subject ? (askMeaning ? isolateTerm(subject) : meaningOf(subject)) : '';
   const answered = session.selected !== null;
   const wasCorrect = session.selected === exercise.answer;
   const isLast = session.index === exercises.length - 1;
