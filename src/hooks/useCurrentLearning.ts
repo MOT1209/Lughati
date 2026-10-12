@@ -18,6 +18,7 @@ export interface CurrentLearning {
 export function useCurrentLearning() {
   const user = useAuthStore((s) => s.session?.user ?? null);
   const selected = useLearningStore((s) => s.selectedTarget);
+  const progressVersion = useLearningStore((s) => s.progressVersion);
   const code: LanguageCode = selected ?? user?.targetLanguage ?? 'de';
   const userId = user?.id ?? '';
 
@@ -34,7 +35,7 @@ export function useCurrentLearning() {
       progress?.currentLessonId ? repos.lessons.getById(progress.currentLessonId) : null,
     ]);
     return { language, level, progress, plan, lesson, streak };
-  }, [userId, code]);
+  }, [userId, code, progressVersion]);
 
   return { user, code, ...result };
 }

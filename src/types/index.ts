@@ -48,23 +48,36 @@ export interface Lesson {
   estimatedMinutes: number;
 }
 
+// 'multiple-choice': see the target word, pick its meaning. 'translate': see the meaning, pick the
+// target word. 'listen' and 'match' are reserved for later phases.
 export type ExerciseType = 'multiple-choice' | 'translate' | 'listen' | 'match';
 
 export interface Exercise {
   id: string;
   lessonId: string;
   type: ExerciseType;
-  prompt: Localized;
-  options?: string[];
+  /** The vocabulary item being asked about. */
+  subjectId: string;
+  /** Vocabulary ids offered as answers, in display order. Includes `answer`. */
+  options: string[];
+  /** Vocabulary id of the correct option. */
   answer: string;
 }
 
 export interface Vocabulary {
   id: string;
+  lessonId: string;
   targetLanguage: LanguageCode;
+  /** The word in the language being learned. Always rendered inside an LTR isolate. */
   term: string;
-  translation: Localized;
-  levelId: LevelId;
+  /** Meaning keyed by the learner's source language (Arabic for now). */
+  translations: Partial<Record<LanguageCode, string>>;
+}
+
+/** What the learner did in one lesson run. */
+export interface LessonResult {
+  correct: number;
+  total: number;
 }
 
 export interface Progress {

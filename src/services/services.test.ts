@@ -115,6 +115,33 @@ describe('mock repositories', () => {
   });
 });
 
+describe('lesson content and completion', () => {
+  it('serves vocabulary and exercises for a lesson and none for an unknown one', async () => {
+    const repos = createMockRepositories();
+    expect((await repos.lessons.getVocabulary('fr-a1-3')).length).toBeGreaterThanOrEqual(4);
+    expect((await repos.lessons.getExercises('fr-a1-3')).length).toBeGreaterThan(0);
+    expect(await repos.lessons.getExercises('nope')).toEqual([]);
+  });
+
+  it('completeLesson updates progress and study time, and is isolated per repository instance', async () => {
+    const repos = createMockRepositories();
+    const other = createMockRepositories();
+    const planBefore = await repos.plans.get('u1', 'de');
+
+    const updated = await repos.progress.completeLesson('u1', 'de-a1-3', { correct: 8, total: 10 });
+
+    expect(updated.completedLessonIds).toContain('de-a1-3');
+    expect(await repos.progress.get('u1', 'de')).toEqual(updated);
+    expect((await repos.plans.get('u1', 'de')).minutesToday).toBeGreaterThan(planBefore.minutesToday);
+    expect((await other.progress.get('u1', 'de'))!.completedLessonIds).not.toContain('de-a1-3');
+  });
+
+  it('rejects an unknown lesson', async () => {
+    const repos = createMockRepositories();
+    await expect(repos.progress.completeLesson('u1', 'nope', { correct: 1, total: 1 })).rejects.toThrow();
+  });
+});
+
 describe('AI provider registry', () => {
   it('registers an additional provider and lets it become the default', async () => {
     const custom = { id: 'custom', reply: jest.fn() };
