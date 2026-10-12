@@ -1,5 +1,5 @@
 import { getLocales } from 'expo-localization';
-import i18n from 'i18next';
+import { changeLanguage, use as registerPlugin } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import type { UiLocale } from '@/types';
@@ -12,7 +12,7 @@ export function getDeviceLanguageCode(): string | null {
   return getLocales()[0]?.languageCode ?? null;
 }
 
-void i18n.use(initReactI18next).init({
+void registerPlugin(initReactI18next).init({
   resources: { ar: { translation: ar }, en: { translation: en } },
   lng: resolveLocale('system', getDeviceLanguageCode()),
   fallbackLng: 'ar',
@@ -21,7 +21,5 @@ void i18n.use(initReactI18next).init({
 });
 
 export function setUiLocale(locale: UiLocale): Promise<unknown> {
-  return i18n.changeLanguage(locale);
+  return changeLanguage(locale);
 }
-
-export default i18n;
