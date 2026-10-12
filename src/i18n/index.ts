@@ -1,3 +1,6 @@
+/* eslint-disable import/no-named-as-default-member --
+   The default export is i18next's shared instance, which is what react-i18next binds to; the
+   named `use` export would also trip react-hooks/rules-of-hooks because of its name. */
 import { getLocales } from 'expo-localization';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
