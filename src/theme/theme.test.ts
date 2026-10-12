@@ -39,6 +39,20 @@ describe.each(['light', 'dark'] as const)('%s palette', (scheme) => {
   });
 });
 
+// Non-text contrast (WCAG 1.4.11): the outline of an interactive control must reach 3:1
+// against every surface it can sit on.
+describe.each(['light', 'dark'] as const)('%s borderStrong', (scheme) => {
+  const palette = palettes[scheme];
+
+  it.each(['background', 'surface'] as const)('reaches 3:1 on %s', (bg) => {
+    expect(contrast(palette.borderStrong, palette[bg])).toBeGreaterThanOrEqual(3);
+  });
+
+  it('is visibly stronger than the decorative border', () => {
+    expect(contrast(palette.borderStrong, palette.surface)).toBeGreaterThan(contrast(palette.border, palette.surface));
+  });
+});
+
 it('light and dark palettes define exactly the same tokens', () => {
   expect(Object.keys(palettes.dark).sort()).toEqual(Object.keys(palettes.light).sort());
 });

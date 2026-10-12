@@ -15,6 +15,8 @@ interface ButtonProps {
   loading?: boolean;
   disabled?: boolean;
   icon?: IconName;
+  /** Mirror the icon in RTL (arrows, play triangles: anything that points "forward"). */
+  iconDirectional?: boolean;
   accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
 }
@@ -28,6 +30,7 @@ export function Button({
   loading = false,
   disabled = false,
   icon,
+  iconDirectional = false,
   accessibilityLabel,
   style,
 }: ButtonProps) {
@@ -36,7 +39,7 @@ export function Button({
 
   const palettes: Record<ButtonVariant, { bg: string; fg: ForegroundKey; border: string }> = {
     primary: { bg: colors.primary, fg: 'onPrimary', border: colors.primary },
-    secondary: { bg: colors.surface, fg: 'primary', border: colors.border },
+    secondary: { bg: colors.surface, fg: 'primary', border: colors.borderStrong },
     ghost: { bg: 'transparent', fg: 'primary', border: 'transparent' },
     danger: { bg: colors.errorMuted, fg: 'onErrorMuted', border: colors.errorMuted },
   };
@@ -66,7 +69,7 @@ export function Button({
         {loading ? (
           <ActivityIndicator color={colors[palette.fg]} />
         ) : icon ? (
-          <Icon name={icon} size={20} color={palette.fg} />
+          <Icon name={icon} size={20} color={palette.fg} directional={iconDirectional} />
         ) : null}
         <Text variant="button" color={palette.fg}>
           {title}

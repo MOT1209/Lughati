@@ -2,7 +2,10 @@ export interface ColorPalette {
   background: string;
   surface: string;
   surfaceMuted: string;
+  /** Decorative dividers and card outlines (not required to reach 3:1). */
   border: string;
+  /** Outline of interactive controls (inputs, secondary buttons): >= 3:1 on surfaces (WCAG 1.4.11). */
+  borderStrong: string;
   text: string;
   textSecondary: string;
   primary: string;
@@ -23,6 +26,7 @@ const light: ColorPalette = {
   surface: '#FFFFFF',
   surfaceMuted: '#EAEEF2',
   border: '#C9D0D8',
+  borderStrong: '#737D89',
   text: '#12171E',
   textSecondary: '#4B5563',
   primary: '#0F766E',
@@ -42,6 +46,7 @@ const dark: ColorPalette = {
   surface: '#171C22',
   surfaceMuted: '#212831',
   border: '#3A4552',
+  borderStrong: '#7C8896',
   text: '#F1F4F8',
   textSecondary: '#B6BFCB',
   primary: '#4FD1C0',
