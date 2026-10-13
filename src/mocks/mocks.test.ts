@@ -64,7 +64,7 @@ describe('language data', () => {
     for (const code of targets) expect(getMockPlan('u1', code).dailyGoalMinutes).toBeGreaterThan(0);
   });
 
-  it('carries no country flags (a flag is a country, not a language)', () => {
-    for (const language of languages) expect(language).not.toHaveProperty('flag');
+  it('gives every language a flag emoji', () => {
+    for (const language of languages) expect(language.flag).toMatch(/^\p{Regional_Indicator}{2}$/u);
   });
 });

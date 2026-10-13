@@ -54,7 +54,7 @@ export default function Profile() {
         <View style={styles.between}>
           <Text color="textSecondary">{t('profile.language')}</Text>
           <View style={[styles.row, { gap: spacing.sm }]}>
-            {language ? <LanguageBadge code={language.code} /> : null}
+            {language ? <LanguageBadge language={language} /> : null}
             <Text variant="bodyStrong">{language ? localize(language.name, locale) : ''}</Text>
           </View>
         </View>

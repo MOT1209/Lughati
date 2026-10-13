@@ -17,8 +17,16 @@ export interface Language {
   /** Name of the language in itself (e.g. "Deutsch"). Rendered LTR-isolated. */
   nativeName: string;
   direction: 'ltr' | 'rtl';
-  /** Adding 'target' to Arabic later is the only change needed to teach Arabic. */
+  /** Flag emoji shown next to the name. Decorative: the name is what screen readers announce. */
+  flag: string;
+  /** 'source': can be the learner's own language (meanings); 'target': can be learned. */
   roles: LanguageRole[];
+}
+
+/** What the learner chose after signing in: their own language and the one they learn. Never equal. */
+export interface LearningProfile {
+  source: LanguageCode;
+  target: LanguageCode;
 }
 
 export type LevelId = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
@@ -70,7 +78,7 @@ export interface Vocabulary {
   targetLanguage: LanguageCode;
   /** The word in the language being learned. Render it isolated with that language's direction. */
   term: string;
-  /** Meaning keyed by the learner's source language: Arabic, or English for learners of Arabic. */
+  /** Meaning in every other course language, keyed by language; shown in the learner's source language. */
   translations: Partial<Record<LanguageCode, string>>;
 }
 

@@ -13,9 +13,9 @@ export interface LessonList {
 /** Lessons of the learner's current target language together with their progress. */
 export function useLessonList() {
   const user = useAuthStore((s) => s.session?.user ?? null);
-  const selected = useLearningStore((s) => s.selectedTarget);
+  const chosen = useLearningStore((s) => s.profile?.target);
   const progressVersion = useLearningStore((s) => s.progressVersion);
-  const code: LanguageCode = selected ?? user?.targetLanguage ?? 'de';
+  const code: LanguageCode = chosen ?? user?.targetLanguage ?? 'de';
   const userId = user?.id ?? '';
 
   return useAsyncData<LessonList>(async () => {

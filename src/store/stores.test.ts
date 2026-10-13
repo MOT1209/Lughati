@@ -6,7 +6,15 @@ import { registerAuthService, MockAuthService } from '@/services/auth';
 import { useAuthStore } from './authStore';
 import { useLearningStore } from './learningStore';
 import { usePreferencesStore } from './preferencesStore';
+import { registerRepositories } from '@/services/repositories';
+import { createMockRepositories } from '@/services/repositories/mock';
 import { createMemoryStorage } from '@/services/storage';
+
+/** The profile is loaded in the background after a sign-in; wait until it is known. */
+const waitForProfile = async () => {
+  for (let i = 0; i < 50 && !useLearningStore.getState().profileLoaded; i++) await new Promise((r) => setTimeout(r, 0));
+  expect(useLearningStore.getState().profileLoaded).toBe(true);
+};
 
 const credentials = { method: 'password' as const, email: 'sara@example.com', password: 'password1' };
 
@@ -79,14 +87,41 @@ describe('auth store', () => {
 
   it('follows the service: sign in creates a session, sign out clears it and the learning choice', async () => {
     await useAuthStore.getState().init();
-    useLearningStore.getState().selectTarget('fr');
 
     await useAuthStore.getState().signIn(credentials);
     expect(useAuthStore.getState().session?.user.email).toBe('sara@example.com');
+    await waitForProfile();
+    await useLearningStore.getState().saveProfile({ source: 'ar', target: 'fr' });
 
     await useAuthStore.getState().signOut();
     expect(useAuthStore.getState().session).toBeNull();
-    expect(useLearningStore.getState().selectedTarget).toBeNull();
+    expect(useLearningStore.getState()).toMatchObject({ profile: null, profileLoaded: false, userId: null });
+  });
+
+  it("asks a new account for its languages, then remembers the choice for that account", async () => {
+    registerRepositories(createMockRepositories());
+    await useAuthStore.getState().init();
+    await useAuthStore.getState().signIn(credentials);
+    await waitForProfile();
+    expect(useLearningStore.getState().profile).toBeNull(); // not chosen yet: the splash sends to setup
+
+    await useLearningStore.getState().saveProfile({ source: 'de', target: 'es' });
+    await useLearningStore.getState().selectTarget('fr');
+    await useAuthStore.getState().signOut();
+
+    await useAuthStore.getState().signIn(credentials);
+    await waitForProfile();
+    expect(useLearningStore.getState().profile).toEqual({ source: 'de', target: 'fr' });
+  });
+
+  it('never makes the own language the learned one', async () => {
+    registerRepositories(createMockRepositories());
+    await useAuthStore.getState().init();
+    await useAuthStore.getState().signIn(credentials);
+    await waitForProfile();
+    await useLearningStore.getState().saveProfile({ source: 'de', target: 'es' });
+    await useLearningStore.getState().selectTarget('de');
+    expect(useLearningStore.getState().profile).toEqual({ source: 'de', target: 'es' });
   });
 
   it('restores a session that already exists when the app starts', async () => {

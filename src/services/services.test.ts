@@ -163,8 +163,8 @@ describe('progress persistence', () => {
     const restarted = createMockRepositories({ storage, now: day1 });
     const progress = await restarted.progress.get('u1', 'de');
     expect(progress?.completedLessonIds).toContain('de-a1-3');
-    expect(progress?.currentLessonId).toBe('de-a1-4');
-    expect((await restarted.plans.get('u1', 'de')).minutesToday).toBeGreaterThan(9);
+    expect(progress?.totalXp).toBeGreaterThan(0);
+    expect((await restarted.plans.get('u1', 'de')).minutesToday).toBeGreaterThan(0);
   });
 
   it('keeps users separate', async () => {
@@ -188,7 +188,8 @@ describe('progress persistence', () => {
       const storage = createMemoryStorage();
       await storage.setItem(STORAGE_KEYS.learningProgress, blob);
       const progress = await createMockRepositories({ storage }).progress.get('u1', 'de');
-      expect(progress?.completedLessonIds).toEqual(['de-a1-1', 'de-a1-2']);
+      expect(progress?.completedLessonIds).toEqual([]);
+      expect(progress?.currentLessonId).toBe('de-a1-1');
     }
   });
 
@@ -310,7 +311,7 @@ describe('Phase 1 stabilization regressions', () => {
     const afterMidnight = () => new RiyadhDate('2026-10-12T22:00:00Z'); // 01:00 local on the 13th, still the 12th in UTC
     await createMockRepositories({ storage, now: evening }).progress.completeLesson('u1', 'de-a1-3', result);
 
-    expect((await createMockRepositories({ storage, now: evening }).plans.get('u1', 'de')).minutesToday).toBeGreaterThan(9);
+    expect((await createMockRepositories({ storage, now: evening }).plans.get('u1', 'de')).minutesToday).toBeGreaterThan(0);
     expect((await createMockRepositories({ storage, now: afterMidnight }).plans.get('u1', 'de')).minutesToday).toBe(0);
   });
 
@@ -321,9 +322,39 @@ describe('Phase 1 stabilization regressions', () => {
 
     const repos = createMockRepositories({ storage });
     expect((await repos.progress.get('u1', 'de'))?.levelId).toBe('A1');
-    expect((await repos.progress.get('u1', 'fr'))?.completedLessonIds).toEqual(['fr-a1-1']);
+    expect((await repos.progress.get('u1', 'fr'))?.completedLessonIds).toEqual([]);
     expect((await repos.plans.get('u1', 'de')).dailyGoalMinutes).toBe(15);
     await expect(repos.progress.completeLesson('u1', 'de-a1-3', result)).resolves.toBeDefined();
+  });
+
+  it('starts a new account with honest, empty progress: no invented XP, minutes or streak', async () => {
+    const repos = createMockRepositories();
+    for (const code of ['ar', 'de', 'en', 'es', 'fr', 'tr'] as const) {
+      expect(await repos.progress.get('new', code)).toMatchObject({ completedLessonIds: [], currentLessonId: `${code}-a1-1`, totalXp: 0, minutesLearned: 0 });
+      expect((await repos.plans.get('new', code)).minutesToday).toBe(0);
+    }
+    expect((await repos.progress.getStreak('new')).days).toBe(0);
+  });
+
+  it("remembers each account's own and target language and ignores corrupt saved choices", async () => {
+    const storage = createMemoryStorage();
+    const repos = createMockRepositories({ storage });
+    expect(await repos.profiles.get('u1')).toBeNull();
+    await repos.profiles.set('u1', { source: 'de', target: 'es' });
+    expect(await createMockRepositories({ storage }).profiles.get('u1')).toEqual({ source: 'de', target: 'es' });
+    expect(await repos.profiles.get('u2')).toBeNull();
+    await expect(repos.profiles.set('u1', { source: 'de', target: 'de' })).rejects.toThrow();
+
+    await storage.setItem(STORAGE_KEYS.learningProfile, JSON.stringify({ u1: { source: 'xx', target: 'de' }, u2: { source: 'tr', target: 'ar' } }));
+    expect(await repos.profiles.get('u1')).toBeNull();
+    expect(await repos.profiles.get('u2')).toEqual({ source: 'tr', target: 'ar' });
+    await storage.setItem(STORAGE_KEYS.learningProfile, '{not json');
+    expect(await repos.profiles.get('u2')).toBeNull();
+  });
+
+  it("offers every language as the learner's own language", async () => {
+    const codes = (await createMockRepositories().languages.getSources()).map((l) => l.code).sort();
+    expect(codes).toEqual(['ar', 'de', 'en', 'es', 'fr', 'tr']);
   });
 
   it('signOut resolves only after the stored session is gone', async () => {

@@ -2,7 +2,7 @@ import { languages } from '@/mocks/languages';
 import { lessons } from '@/mocks/lessons';
 import { levels } from '@/mocks/levels';
 import { vocabulary } from '@/mocks/vocabulary';
-import type { LanguageCode, LearningPlan, Progress } from '@/types';
+import type { LanguageCode, LearningPlan, LearningProfile, Progress } from '@/types';
 
 /**
  * Validation of what was read back from device storage. Stored data is untrusted input (older
@@ -133,5 +133,31 @@ export function parseSavedLearning(raw: string | null): SavedLearning {
     };
   } catch {
     return empty;
+  }
+}
+
+/** A learner's own and target language: both supported, never the same. */
+export function isSavedProfile(value: unknown): value is LearningProfile {
+  return (
+    isRecord(value) &&
+    typeof value.source === 'string' &&
+    typeof value.target === 'string' &&
+    languageCodes.has(value.source) &&
+    languageCodes.has(value.target) &&
+    value.source !== value.target
+  );
+}
+
+/** Parses the stored language choices (keyed by user id). Anything unreadable is "nothing saved". */
+export function parseSavedProfiles(raw: string | null): Record<string, LearningProfile> {
+  if (!raw) return {};
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) return {};
+    const out: Record<string, LearningProfile> = {};
+    for (const [userId, value] of Object.entries(parsed)) if (isSavedProfile(value)) out[userId] = value;
+    return out;
+  } catch {
+    return {};
   }
 }

@@ -66,6 +66,8 @@ export default function Login() {
           autoCapitalize="none"
           autoComplete="current-password"
           textContentType="password"
+          returnKeyType="done"
+          onSubmitEditing={onSubmit}
         />
       </View>
 

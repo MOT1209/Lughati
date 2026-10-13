@@ -13,16 +13,20 @@ describe('route guard', () => {
 });
 
 describe('splash destination', () => {
-  it('sends a signed-in user home, even if onboarding was never marked', () => {
-    expect(resolveInitialRoute({ hasSession: true, onboardingSeen: false })).toBe(ROUTES.home);
+  it('sends a signed-in user home once they chose their languages, even if onboarding was never marked', () => {
+    expect(resolveInitialRoute({ hasSession: true, onboardingSeen: false, hasLanguageProfile: true })).toBe(ROUTES.home);
+  });
+
+  it('asks a signed-in user without a language choice to choose first', () => {
+    expect(resolveInitialRoute({ hasSession: true, onboardingSeen: true, hasLanguageProfile: false })).toBe(ROUTES.setupLanguages);
   });
 
   it('sends a first-time visitor to onboarding', () => {
-    expect(resolveInitialRoute({ hasSession: false, onboardingSeen: false })).toBe(ROUTES.onboarding);
+    expect(resolveInitialRoute({ hasSession: false, onboardingSeen: false, hasLanguageProfile: false })).toBe(ROUTES.onboarding);
   });
 
   it('sends a returning signed-out user to login', () => {
-    expect(resolveInitialRoute({ hasSession: false, onboardingSeen: true })).toBe(ROUTES.login);
+    expect(resolveInitialRoute({ hasSession: false, onboardingSeen: true, hasLanguageProfile: false })).toBe(ROUTES.login);
   });
 });
 

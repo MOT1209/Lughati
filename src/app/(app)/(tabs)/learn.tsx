@@ -62,7 +62,7 @@ export default function Learn() {
                       {localize(lesson.summary, locale)}
                     </Text>
                     <Text variant="caption" color="textSecondary">
-                      {t('learn.lessonMeta', { level: lesson.levelId, minutes: lesson.estimatedMinutes })} · {status}
+                      {t('learn.lessonMeta', { level: lesson.levelId, count: lesson.estimatedMinutes })} · {status}
                     </Text>
                   </View>
                   <Icon name="chevron-forward" directional color="textSecondary" />

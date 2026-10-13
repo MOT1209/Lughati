@@ -4,12 +4,12 @@ import { lessons } from '@/mocks/lessons';
 import { levels } from '@/mocks/levels';
 import { getMockPlan, getMockProgress, getMockStreak } from '@/mocks/progress';
 import { vocabulary } from '@/mocks/vocabulary';
-import type { LanguageCode, LearningPlan } from '@/types';
+import type { LanguageCode, LearningPlan, LearningProfile } from '@/types';
 import { buildExercises } from '@/utils/exercises';
 import { addStudyMinutes, applyLessonCompletion } from '@/utils/progression';
 
 import { createMemoryStorage, type KeyValueStorage } from '../storage';
-import { parseSavedLearning, progressKey, type SavedLearning } from './savedData';
+import { isSavedProfile, parseSavedLearning, parseSavedProfiles, progressKey, type SavedLearning } from './savedData';
 import type { Repositories } from './types';
 
 const key = progressKey;
@@ -23,6 +23,14 @@ async function readSaved(storage: KeyValueStorage): Promise<SavedLearning> {
     return parseSavedLearning(await storage.getItem(STORAGE_KEYS.learningProgress));
   } catch {
     return { progress: {}, plans: {} };
+  }
+}
+
+async function readProfiles(storage: KeyValueStorage): Promise<Record<string, LearningProfile>> {
+  try {
+    return parseSavedProfiles(await storage.getItem(STORAGE_KEYS.learningProfile));
+  } catch {
+    return {};
   }
 }
 
@@ -59,6 +67,7 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
     languages: {
       getAll: async () => languages,
       getTargets: async () => languages.filter((l) => l.roles.includes('target')),
+      getSources: async () => languages.filter((l) => l.roles.includes('source')),
       getByCode: async (code) => languages.find((l) => l.code === code) ?? null,
     },
     levels: {
@@ -102,6 +111,15 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
     },
     plans: {
       get: readPlan,
+    },
+    profiles: {
+      get: async (userId) => (await readProfiles(storage))[userId] ?? null,
+      set: (userId, profile) =>
+        exclusive(async () => {
+          if (!isSavedProfile(profile)) throw new Error('Invalid learning profile');
+          const saved = await readProfiles(storage);
+          await storage.setItem(STORAGE_KEYS.learningProfile, JSON.stringify({ ...saved, [userId]: profile }));
+        }),
     },
   };
 }

@@ -1,28 +1,29 @@
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { LanguageBadge } from '@/components/LanguageBadge';
-import { ErrorState, Icon, LoadingState, Screen, Text } from '@/components/ui';
-import { MIN_TOUCH_TARGET } from '@/constants/app';
+import { LanguageOption } from '@/components/LanguageOption';
+import { ErrorState, LoadingState, Screen, Text } from '@/components/ui';
 import { useAsyncData } from '@/hooks/useAsyncData';
 import { useTheme } from '@/hooks/useTheme';
-import { useUiLocale } from '@/hooks/useUiLocale';
 import { getRepositories } from '@/services/repositories';
-import { useAuthStore } from '@/store/authStore';
 import { useLearningStore } from '@/store/learningStore';
-import { isolateNative } from '@/utils/bidi';
-import { localize } from '@/utils/localize';
+import type { LanguageCode } from '@/types';
+import { ROUTES } from '@/utils/routing';
 
+// Switches the language being learned. The learner's own language is not offered here.
 export default function LanguageSelection() {
   const { t } = useTranslation();
-  const { colors, radius, spacing } = useTheme();
-  const { locale } = useUiLocale();
-  const userDefault = useAuthStore((s) => s.session?.user.targetLanguage);
-  const selected = useLearningStore((s) => s.selectedTarget);
+  const { spacing } = useTheme();
+  const profile = useLearningStore((s) => s.profile);
   const selectTarget = useLearningStore((s) => s.selectTarget);
-  const current = selected ?? userDefault;
   const languages = useAsyncData(() => getRepositories().languages.getTargets(), []);
+
+  const choose = async (code: LanguageCode) => {
+    await selectTarget(code).catch(() => undefined); // a failed save keeps the current language
+    if (router.canGoBack()) router.back();
+    else router.replace(ROUTES.home);
+  };
 
   return (
     <Screen>
@@ -30,53 +31,19 @@ export default function LanguageSelection() {
       {languages.status === 'loading' ? <LoadingState /> : null}
       {languages.status === 'error' ? <ErrorState onRetry={languages.reload} /> : null}
       {languages.status === 'success' ? (
-        <View style={{ gap: spacing.sm }}>
-          {languages.data.map((language) => {
-            const isCurrent = language.code === current;
-            const name = localize(language.name, locale);
-            return (
-              <Pressable
+        <View style={{ gap: spacing.sm }} accessibilityRole="radiogroup">
+          {languages.data
+            .filter((language) => language.code !== profile?.source)
+            .map((language) => (
+              <LanguageOption
                 key={language.code}
-                onPress={() => {
-                  selectTarget(language.code);
-                  router.back();
-                }}
-                accessibilityRole="radio"
-                accessibilityLabel={t('languageSelection.select', { language: name })}
-                accessibilityState={{ selected: isCurrent }}
-                style={[
-                  styles.row,
-                  {
-                    minHeight: MIN_TOUCH_TARGET + 16,
-                    gap: spacing.md,
-                    padding: spacing.md,
-                    borderRadius: radius.lg,
-                    borderWidth: isCurrent ? 2 : 1,
-                    borderColor: isCurrent ? colors.primary : colors.borderStrong,
-                    backgroundColor: colors.surface,
-                  },
-                ]}
-              >
-                <LanguageBadge code={language.code} />
-                <View style={styles.flex}>
-                  <Text variant="bodyStrong">{name}</Text>
-                  {language.nativeName !== name ? (
-                    <Text variant="small" color="textSecondary">
-                      {isolateNative(language.nativeName, language.direction)}
-                    </Text>
-                  ) : null}
-                </View>
-                {isCurrent ? <Icon name="checkmark-circle" color="primary" /> : null}
-              </Pressable>
-            );
-          })}
+                language={language}
+                checked={language.code === profile?.target}
+                onPress={() => void choose(language.code)}
+              />
+            ))}
         </View>
       ) : null}
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center' },
-  flex: { flex: 1 },
-});

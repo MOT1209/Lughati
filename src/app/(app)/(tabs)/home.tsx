@@ -4,19 +4,13 @@ import { useTranslation } from 'react-i18next';
 
 import { LanguageBadge } from '@/components/LanguageBadge';
 import { ProgressBar } from '@/components/ProgressBar';
-import { Button, Card, ErrorState, Icon, LoadingState, Screen, Text, type IconName } from '@/components/ui';
+import { Button, Card, ErrorState, Icon, LoadingState, Screen, Text } from '@/components/ui';
 import { useCurrentLearning } from '@/hooks/useCurrentLearning';
 import { useTheme } from '@/hooks/useTheme';
 import { useUiLocale } from '@/hooks/useUiLocale';
 import { isolate, isolateNative } from '@/utils/bidi';
 import { localize } from '@/utils/localize';
 import { ROUTES } from '@/utils/routing';
-
-const quickActions: { icon: IconName; label: 'home.qaVocabulary' | 'home.qaPractice' | 'home.qaChat' }[] = [
-  { icon: 'text-outline', label: 'home.qaVocabulary' },
-  { icon: 'barbell-outline', label: 'home.qaPractice' },
-  { icon: 'chatbubbles-outline', label: 'home.qaChat' },
-];
 
 export default function Home() {
   const { t } = useTranslation();
@@ -54,7 +48,7 @@ export default function Home() {
           {t('home.currentLanguage')}
         </Text>
         <View style={[styles.row, { gap: spacing.md }]}>
-          {language ? <LanguageBadge code={language.code} /> : null}
+          {language ? <LanguageBadge language={language} /> : null}
           <View style={styles.flex}>
             <Text variant="heading">{language ? localize(language.name, locale) : ''}</Text>
             {language && language.nativeName !== localize(language.name, locale) ? (
@@ -90,7 +84,7 @@ export default function Home() {
           <Text variant="subheading">{t('home.continueLearning')}</Text>
           <Text variant="heading">{localize(lesson.title, locale)}</Text>
           <Text variant="small" color="textSecondary">
-            {t('home.lessonMeta', { level: lesson.levelId, minutes: lesson.estimatedMinutes })}
+            {t('home.lessonMeta', { level: lesson.levelId, count: lesson.estimatedMinutes })}
           </Text>
           <ProgressBar value={progress.levelProgress} accessibilityLabel={t('home.overallProgress')} />
           <Button title={t('home.continueLearning')} icon="play-outline" iconDirectional onPress={() => router.push({ pathname: '/lesson/[id]', params: { id: lesson.id } })} />
@@ -114,14 +108,6 @@ export default function Home() {
           <Text variant="heading">{t('home.streakDays', { count: streak.days })}</Text>
         </View>
       </Card>
-
-      <View style={{ gap: spacing.sm }}>
-        <Text variant="subheading">{t('home.quickActions')}</Text>
-        {quickActions.map((action) => (
-          <Button key={action.label} title={t(action.label)} icon={action.icon} variant="secondary" onPress={() => router.push(ROUTES.learn)} />
-        ))}
-        <Button title={t('home.qaLanguages')} icon="language-outline" variant="secondary" onPress={() => router.push(ROUTES.languageSelection)} />
-      </View>
     </Screen>
   );
 }

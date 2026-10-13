@@ -21,7 +21,7 @@ export function Screen({ children, scroll = true, edges = ['top', 'bottom'], con
 
   return (
     <SafeAreaView edges={edges} style={[styles.fill, { backgroundColor: colors.background }]}>
-      <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         {scroll ? (
           <ScrollView
             contentContainerStyle={[styles.grow, padded, contentStyle]}

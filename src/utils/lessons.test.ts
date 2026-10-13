@@ -18,7 +18,7 @@ describe('vocabulary data', () => {
     const words = wordsOf(id);
     expect(words.length).toBeGreaterThanOrEqual(OPTIONS_PER_EXERCISE);
     expect(new Set(words.map((w) => w.term)).size).toBe(words.length);
-    expect(new Set(words.map(meaningOf)).size).toBe(words.length);
+    expect(new Set(words.map((w) => meaningOf(w))).size).toBe(words.length);
     for (const word of words) {
       expect(meaningOf(word).trim()).toBeTruthy();
       expect(word.targetLanguage).toBe(lessons.find((l) => l.id === id)!.targetLanguage);
@@ -52,6 +52,25 @@ describe('meaning language', () => {
     expect(meaningLanguage('ar')).toBe('en');
     expect(meaningOf(wordsOf('ar-a1-1')[0]!)).toBe('Hello');
     expect(meaningOf(wordsOf('de-a1-1')[0]!)).toBe('مرحباً');
+  });
+
+  it("uses the learner's own language when one is chosen", () => {
+    expect(meaningLanguage('de', 'es')).toBe('es');
+    expect(meaningOf(wordsOf('de-a1-1')[0]!, 'es')).toBe('Hola');
+    expect(meaningOf(wordsOf('ar-a1-1')[0]!, 'tr')).toBe('Merhaba');
+    // Own language equal to the learned one cannot give a meaning: fall back.
+    expect(meaningLanguage('de', 'de')).toBe('ar');
+    expect(meaningOf(wordsOf('de-a1-1')[0]!, 'de')).toBe('مرحباً');
+  });
+
+  it('gives every word a meaning in every other course language', () => {
+    const codes = ['ar', 'de', 'en', 'es', 'fr', 'tr'] as const;
+    for (const word of vocabulary) {
+      for (const code of codes) {
+        if (code === word.targetLanguage) expect(word.translations[code]).toBeUndefined();
+        else expect(word.translations[code]?.trim()).toBeTruthy();
+      }
+    }
   });
 
   it('isolates Arabic words as RTL and other target words as LTR', () => {

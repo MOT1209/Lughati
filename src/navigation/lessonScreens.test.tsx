@@ -18,7 +18,7 @@ const routes = {
 
 beforeEach(async () => {
   registerRepositories(createMockRepositories());
-  useLearningStore.setState({ selectedTarget: 'de', progressVersion: 0 });
+  useLearningStore.setState({ userId: '', profile: { source: 'ar', target: 'de' }, profileLoaded: true, progressVersion: 0 });
   await setUiLocale('en');
 });
 
@@ -26,9 +26,10 @@ describe('Learn screen', () => {
   it('lists the lessons of the current language with their status', async () => {
     renderRouter({ learn: LearnScreen }, { initialUrl: '/learn' });
     expect(await screen.findAllByRole('button')).toHaveLength(10);
-    expect(screen.getByRole('button', { name: 'Greetings and politeness, Completed' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Introducing yourself, Completed' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Numbers, Current lesson' })).toBeTruthy();
+    // A new learner starts at the first lesson with nothing completed.
+    expect(screen.getByRole('button', { name: 'Greetings and politeness, Current lesson' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Introducing yourself, Not started' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Numbers, Not started' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Getting around, Not started' })).toBeTruthy();
   });
 
@@ -100,6 +101,14 @@ describe('Lesson screen', () => {
     });
     await waitFor(() => expect(screen.getByText('Well done! Lesson complete')).toBeTruthy());
     expect(attempts).toBe(2);
+  });
+
+  it("shows meanings in the learner's own language", async () => {
+    useLearningStore.setState({ profile: { source: 'es', target: 'de' } });
+    renderRouter(routes, { initialUrl: '/lesson/de-a1-1' });
+    expect(await screen.findByText(isolateLtr('Hallo'))).toBeTruthy();
+    expect(screen.getByText('Hola')).toBeTruthy();
+    expect(screen.queryByText('مرحباً')).toBeNull();
   });
 
   it('shows a not-found state for an unknown lesson', async () => {

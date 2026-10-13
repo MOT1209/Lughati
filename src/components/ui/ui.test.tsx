@@ -5,7 +5,6 @@ import { setUiLocale } from '@/i18n';
 import { LanguageBadge } from '@/components/LanguageBadge';
 import { palettes } from '@/theme/colors';
 import { typography } from '@/theme/typography';
-import { isolateLtr } from '@/utils/bidi';
 
 import { Button } from './Button';
 import { Icon } from './Icon';
@@ -156,10 +155,10 @@ describe('state components', () => {
 });
 
 describe('LanguageBadge', () => {
-  it('shows the language code, not a flag, and is decorative for screen readers', () => {
-    render(<LanguageBadge code="de" />);
-    expect(screen.getByText(isolateLtr('DE'), { includeHiddenElements: true })).toBeTruthy();
-    expect(screen.queryByText('DE')).toBeNull(); // hidden from the accessibility tree
+  it('shows the flag and is decorative for screen readers', () => {
+    render(<LanguageBadge language={{ flag: '🇩🇪' }} />);
+    expect(screen.getByText('🇩🇪', { includeHiddenElements: true })).toBeTruthy();
+    expect(screen.queryByText('🇩🇪')).toBeNull(); // hidden from the accessibility tree
   });
 });
 

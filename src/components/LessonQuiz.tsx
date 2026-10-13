@@ -6,17 +6,19 @@ import { OptionButton, type OptionState } from '@/components/OptionButton';
 import { ProgressBar } from '@/components/ProgressBar';
 import { Button, Text } from '@/components/ui';
 import { useTheme } from '@/hooks/useTheme';
-import type { Exercise, LessonResult, Vocabulary } from '@/types';
+import type { Exercise, LanguageCode, LessonResult, Vocabulary } from '@/types';
 import { answer, initialSession, isFinished, next } from '@/utils/lessonSession';
 import { isolateTerm, meaningOf } from '@/utils/meaning';
 
 interface LessonQuizProps {
   exercises: Exercise[];
   words: Vocabulary[];
+  /** The learner's own language; meanings are shown in it. */
+  source?: LanguageCode | null;
   onFinish: (result: LessonResult) => void;
 }
 
-export function LessonQuiz({ exercises, words, onFinish }: LessonQuizProps) {
+export function LessonQuiz({ exercises, words, source, onFinish }: LessonQuizProps) {
   const { t } = useTranslation();
   const { spacing } = useTheme();
   const [session, setSession] = useState(initialSession);
@@ -30,10 +32,10 @@ export function LessonQuiz({ exercises, words, onFinish }: LessonQuizProps) {
   const label = (id: string) => {
     const word = byId.get(id);
     if (!word) return '';
-    return askMeaning ? meaningOf(word) : isolateTerm(word);
+    return askMeaning ? meaningOf(word, source) : isolateTerm(word);
   };
   const subject = byId.get(exercise.subjectId);
-  const prompt = subject ? (askMeaning ? isolateTerm(subject) : meaningOf(subject)) : '';
+  const prompt = subject ? (askMeaning ? isolateTerm(subject) : meaningOf(subject, source)) : '';
   const answered = session.selected !== null;
   const wasCorrect = session.selected === exercise.answer;
   const isLast = session.index === exercises.length - 1;

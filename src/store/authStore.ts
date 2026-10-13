@@ -16,6 +16,13 @@ interface AuthState {
 
 let unsubscribe: (() => void) | null = null;
 
+/** Keeps the learner's language choice in step with who is signed in. */
+function syncLearning(session: Session | null) {
+  const learning = useLearningStore.getState();
+  if (!session) learning.reset();
+  else if (learning.userId !== session.user.id) void learning.loadProfile(session.user.id);
+}
+
 // Session state is driven only by the service's onAuthStateChange, so a different
 // AuthService implementation behaves identically from the app's point of view.
 export const useAuthStore = create<AuthState>()((set) => ({
@@ -25,11 +32,12 @@ export const useAuthStore = create<AuthState>()((set) => ({
     const service = getAuthService();
     unsubscribe?.();
     unsubscribe = service.onAuthStateChange((session) => {
-      if (!session) useLearningStore.getState().reset();
+      syncLearning(session);
       set({ session });
     });
     // A failing session read must not keep the app on the splash forever: start signed out.
     const session = await service.getSession().catch(() => null);
+    syncLearning(session);
     set({ session, initialized: true });
   },
   signIn: async (request) => {

@@ -64,7 +64,7 @@ export default function Register() {
           textContentType="emailAddress"
         />
         <Input label={t('auth.fields.password')} value={values.password} onChangeText={set('password')} error={fieldText('password')} password autoCapitalize="none" autoComplete="new-password" textContentType="newPassword" />
-        <Input label={t('auth.fields.confirmPassword')} value={values.confirmPassword} onChangeText={set('confirmPassword')} error={fieldText('confirmPassword')} password autoCapitalize="none" autoComplete="new-password" textContentType="newPassword" />
+        <Input label={t('auth.fields.confirmPassword')} value={values.confirmPassword} onChangeText={set('confirmPassword')} error={fieldText('confirmPassword')} password autoCapitalize="none" autoComplete="new-password" textContentType="newPassword" returnKeyType="done" onSubmitEditing={onSubmit} />
       </View>
 
       {submitError ? (

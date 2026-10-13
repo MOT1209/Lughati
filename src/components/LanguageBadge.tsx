@@ -1,33 +1,20 @@
 import { View } from 'react-native';
 
 import { Text } from '@/components/ui';
-import { useTheme } from '@/hooks/useTheme';
-import type { LanguageCode } from '@/types';
-import { isolateLtr } from '@/utils/bidi';
+import type { Language } from '@/types';
 
 /**
- * Text badge for a language ("DE", "EN"). A flag stands for a country, not a language, so the
- * code is used instead; it is decorative because the language name is always rendered beside it.
+ * Flag shown next to a language name. It is decorative: the language name is always rendered
+ * beside it and is what screen readers announce.
  */
-export function LanguageBadge({ code }: { code: LanguageCode }) {
-  const { colors, radius, spacing } = useTheme();
+export function LanguageBadge({ language }: { language: Pick<Language, 'flag'> }) {
   return (
     <View
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={{
-        backgroundColor: colors.primaryMuted,
-        borderRadius: radius.md,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
-        alignItems: 'center',
-        justifyContent: 'center',
-        minWidth: 48,
-      }}
+      style={{ alignItems: 'center', justifyContent: 'center', minWidth: 48 }}
     >
-      <Text variant="bodyStrong" color="onPrimaryMuted">
-        {isolateLtr(code.toUpperCase())}
-      </Text>
+      <Text variant="heading">{language.flag}</Text>
     </View>
   );
 }

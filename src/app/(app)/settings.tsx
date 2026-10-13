@@ -121,6 +121,11 @@ export default function Settings() {
       </Card>
 
       <Card style={{ gap: spacing.sm }}>
+        <Text variant="subheading">{t('settings.learningLanguages')}</Text>
+        <Button title={t('settings.learningLanguages')} variant="secondary" icon="language-outline" onPress={() => router.push(ROUTES.setupLanguages)} />
+      </Card>
+
+      <Card style={{ gap: spacing.sm }}>
         <Text variant="subheading">{t('settings.notifications')}</Text>
         <View style={[styles.row, { gap: spacing.md }]}>
           <Text style={styles.flex}>{t('settings.notificationsDaily')}</Text>

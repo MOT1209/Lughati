@@ -25,6 +25,7 @@ export default function LessonScreen() {
   const { locale } = useUiLocale();
   const userId = useAuthStore((s) => s.session?.user.id ?? '');
   const notifyProgressChanged = useLearningStore((s) => s.notifyProgressChanged);
+  const source = useLearningStore((s) => s.profile?.source ?? null);
   const [step, setStep] = useState<Step>('intro');
   const [result, setResult] = useState<LessonResult | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
@@ -83,7 +84,7 @@ export default function LessonScreen() {
   if (step === 'quiz') {
     return (
       <Screen edges={['bottom']}>
-        <LessonQuiz exercises={exercises} words={words} onFinish={finish} />
+        <LessonQuiz exercises={exercises} words={words} source={source} onFinish={finish} />
         {saveFailed && result ? (
           <View style={{ gap: spacing.sm }} accessibilityLiveRegion="polite">
             <Text color="error">{t('lesson.saveFailed')}</Text>
@@ -122,10 +123,10 @@ export default function LessonScreen() {
       <Card style={{ gap: spacing.md }}>
         <Text variant="subheading">{t('lesson.vocabulary')}</Text>
         {words.map((word) => (
-          <View key={word.id} style={{ gap: 2 }} accessible accessibilityLabel={`${word.term}: ${meaningOf(word)}`}>
+          <View key={word.id} style={{ gap: 2 }} accessible accessibilityLabel={`${word.term}: ${meaningOf(word, source)}`}>
             <Text variant="bodyStrong">{isolateTerm(word)}</Text>
             <Text variant="small" color="textSecondary">
-              {meaningOf(word)}
+              {meaningOf(word, source)}
             </Text>
           </View>
         ))}

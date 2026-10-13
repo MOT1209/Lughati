@@ -17,9 +17,9 @@ export interface CurrentLearning {
 /** The learner's current target language plus everything Home and Profile show about it. */
 export function useCurrentLearning() {
   const user = useAuthStore((s) => s.session?.user ?? null);
-  const selected = useLearningStore((s) => s.selectedTarget);
+  const chosen = useLearningStore((s) => s.profile?.target);
   const progressVersion = useLearningStore((s) => s.progressVersion);
-  const code: LanguageCode = selected ?? user?.targetLanguage ?? 'de';
+  const code: LanguageCode = chosen ?? user?.targetLanguage ?? 'de';
   const userId = user?.id ?? '';
 
   const result = useAsyncData<CurrentLearning>(async () => {

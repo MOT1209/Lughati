@@ -3,6 +3,7 @@ import type {
   Language,
   LanguageCode,
   LearningPlan,
+  LearningProfile,
   Lesson,
   LessonResult,
   Level,
@@ -16,6 +17,8 @@ export interface LanguageRepository {
   getAll(): Promise<Language[]>;
   /** Languages that can currently be learned (role 'target'). */
   getTargets(): Promise<Language[]>;
+  /** Languages a learner can name as their own (role 'source'); meanings are shown in it. */
+  getSources(): Promise<Language[]>;
   getByCode(code: LanguageCode): Promise<Language | null>;
 }
 
@@ -43,10 +46,17 @@ export interface LearningPlanRepository {
   get(userId: string, language: LanguageCode): Promise<LearningPlan>;
 }
 
+/** The learner's chosen own and target language, per account. Null until they chose. */
+export interface LearningProfileRepository {
+  get(userId: string): Promise<LearningProfile | null>;
+  set(userId: string, profile: LearningProfile): Promise<void>;
+}
+
 export interface Repositories {
   languages: LanguageRepository;
   levels: LevelRepository;
   lessons: LessonRepository;
   progress: ProgressRepository;
   plans: LearningPlanRepository;
+  profiles: LearningProfileRepository;
 }

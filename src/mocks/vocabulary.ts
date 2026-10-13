@@ -2,7 +2,7 @@ import type { LanguageCode, Vocabulary } from '@/types';
 
 type TargetCode = Exclude<LanguageCode, 'ar'>;
 
-// Meanings in the learner's source language (Arabic), one list per lesson, six items each.
+// The Arabic course list, one list per lesson, six items each.
 // Every target language below lists its terms in exactly the same order, so index i of a lesson
 // in any language means the same thing as index i here. vocabulary.test checks the shape.
 const arabic: string[][] = [
@@ -81,22 +81,25 @@ const terms: Record<TargetCode, string[][]> = {
   ],
 };
 
-const build = (code: LanguageCode, termLists: string[][], meaningKey: LanguageCode, meanings: string[][]): Vocabulary[] =>
-  termLists.flatMap((lessonTerms, lessonIndex) =>
+// Index i of a lesson means the same thing in every language, so each word gets its meaning in
+// every other course language and the learner sees it in their own (source) language.
+const lists: Record<LanguageCode, string[][]> = { ar: arabic, ...terms };
+const codes = Object.keys(lists) as LanguageCode[];
+
+const build = (code: LanguageCode): Vocabulary[] =>
+  lists[code].flatMap((lessonTerms, lessonIndex) =>
     lessonTerms.map((term, wordIndex) => ({
       id: `${code}-a1-${lessonIndex + 1}-w${wordIndex + 1}`,
       lessonId: `${code}-a1-${lessonIndex + 1}`,
       targetLanguage: code,
       term,
-      translations: { [meaningKey]: meanings[lessonIndex]![wordIndex]! },
+      translations: Object.fromEntries(
+        codes.filter((other) => other !== code).map((other) => [other, lists[other][lessonIndex]![wordIndex]!]),
+      ),
     })),
   );
 
-export const vocabulary: Vocabulary[] = [
-  // Learners of Arabic read the same course with English meanings (the English list above).
-  ...build('ar', arabic, 'en', terms.en),
-  ...(Object.keys(terms) as TargetCode[]).flatMap((code) => build(code, terms[code], 'ar', arabic)),
-];
+export const vocabulary: Vocabulary[] = codes.flatMap(build);
 
 /** Exposed so tests can check every language lists the same shape as the Arabic list. */
 export const arabicMeanings = arabic;
