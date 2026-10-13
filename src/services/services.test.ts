@@ -293,3 +293,54 @@ describe('MockAuthService session persistence', () => {
     await expect(auth.getSession()).resolves.not.toBeNull();
   });
 });
+
+describe('Phase 1 stabilization regressions', () => {
+  const result = { correct: 10, total: 12 };
+
+  it('study minutes reset at local midnight, not at UTC midnight', async () => {
+    // Simulates a device in UTC+3 (the process time zone cannot be changed from inside a test).
+    class RiyadhDate extends Date {
+      private shifted = () => new Date(this.getTime() + 3 * 3600_000);
+      getFullYear = () => this.shifted().getUTCFullYear();
+      getMonth = () => this.shifted().getUTCMonth();
+      getDate = () => this.shifted().getUTCDate();
+    }
+    const storage = createMemoryStorage();
+    const evening = () => new RiyadhDate('2026-10-12T20:00:00Z'); // 23:00 local on the 12th
+    const afterMidnight = () => new RiyadhDate('2026-10-12T22:00:00Z'); // 01:00 local on the 13th, still the 12th in UTC
+    await createMockRepositories({ storage, now: evening }).progress.completeLesson('u1', 'de-a1-3', result);
+
+    expect((await createMockRepositories({ storage, now: evening }).plans.get('u1', 'de')).minutesToday).toBeGreaterThan(9);
+    expect((await createMockRepositories({ storage, now: afterMidnight }).plans.get('u1', 'de')).minutesToday).toBe(0);
+  });
+
+  it('discards a saved progress entry with an unknown level instead of failing every later save', async () => {
+    const storage = createMemoryStorage();
+    const bad = { userId: 'u1', targetLanguage: 'de', levelId: 'Z9', completedLessonIds: [], currentLessonId: null, levelProgress: 0, totalXp: 0, wordsLearned: 0, minutesLearned: 0 };
+    await storage.setItem(STORAGE_KEYS.learningProgress, JSON.stringify({ progress: { 'u1:de': bad, 'u1:fr': 'junk' }, plans: { 'u1:de': 5 } }));
+
+    const repos = createMockRepositories({ storage });
+    expect((await repos.progress.get('u1', 'de'))?.levelId).toBe('A1');
+    expect((await repos.progress.get('u1', 'fr'))?.completedLessonIds).toEqual(['fr-a1-1']);
+    expect((await repos.plans.get('u1', 'de')).dailyGoalMinutes).toBe(15);
+    await expect(repos.progress.completeLesson('u1', 'de-a1-3', result)).resolves.toBeDefined();
+  });
+
+  it('signOut resolves only after the stored session is gone', async () => {
+    const inner = createMemoryStorage();
+    let removed = false;
+    const slow = {
+      ...inner,
+      removeItem: async (key: string) => {
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        await inner.removeItem(key);
+        removed = true;
+      },
+    };
+    const auth = new MockAuthService(0, slow);
+    await auth.signIn({ method: 'password', email: 'sara@example.com', password: 'password1' });
+    await auth.signOut();
+    expect(removed).toBe(true);
+    await expect(new MockAuthService(0, inner).getSession()).resolves.toBeNull();
+  });
+});

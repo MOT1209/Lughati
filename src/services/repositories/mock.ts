@@ -12,7 +12,9 @@ import { createMemoryStorage, type KeyValueStorage } from '../storage';
 import type { Repositories } from './types';
 
 const key = (userId: string, language: LanguageCode) => `${userId}:${language}`;
-const dayOf = (date: Date) => date.toISOString().slice(0, 10);
+// The learner's calendar day (device time zone), so "today" ends at local midnight, not UTC midnight.
+const pad = (n: number) => String(n).padStart(2, '0');
+const dayOf = (date: Date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
 interface Saved {
   progress: Record<string, Progress>;
@@ -23,7 +25,41 @@ interface Saved {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-/** A corrupt or foreign blob must never block the app: it is treated as "nothing saved". */
+const finite = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value);
+const languageCodes = new Set<string>(languages.map((l) => l.code));
+const levelIds = new Set<string>(levels.map((l) => l.id));
+
+function isProgress(value: unknown): value is Progress {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.userId === 'string' &&
+    typeof value.targetLanguage === 'string' &&
+    languageCodes.has(value.targetLanguage) &&
+    typeof value.levelId === 'string' &&
+    levelIds.has(value.levelId) &&
+    Array.isArray(value.completedLessonIds) &&
+    value.completedLessonIds.every((id) => typeof id === 'string') &&
+    (value.currentLessonId === null || typeof value.currentLessonId === 'string') &&
+    finite(value.levelProgress) &&
+    finite(value.totalXp) &&
+    finite(value.wordsLearned) &&
+    finite(value.minutesLearned)
+  );
+}
+
+function isPlanEntry(value: unknown): value is Saved['plans'][string] {
+  if (!isRecord(value) || typeof value.day !== 'string' || !isRecord(value.plan)) return false;
+  const { plan } = value;
+  return typeof plan.userId === 'string' && typeof plan.targetLanguage === 'string' && finite(plan.dailyGoalMinutes) && finite(plan.minutesToday);
+}
+
+function pickValid<T>(source: Record<string, unknown>, isValid: (value: unknown) => value is T): Record<string, T> {
+  const out: Record<string, T> = {};
+  for (const [name, value] of Object.entries(source)) if (isValid(value)) out[name] = value;
+  return out;
+}
+
+/** A corrupt or foreign blob must never block the app: it is treated as "nothing saved", and a single bad entry is dropped on its own. */
 async function readSaved(storage: KeyValueStorage): Promise<Saved> {
   const empty: Saved = { progress: {}, plans: {} };
   try {
@@ -31,7 +67,7 @@ async function readSaved(storage: KeyValueStorage): Promise<Saved> {
     if (!raw) return empty;
     const parsed: unknown = JSON.parse(raw);
     if (!isRecord(parsed) || !isRecord(parsed.progress) || !isRecord(parsed.plans)) return empty;
-    return { progress: parsed.progress as Saved['progress'], plans: parsed.plans as Saved['plans'] };
+    return { progress: pickValid(parsed.progress, isProgress), plans: pickValid(parsed.plans, isPlanEntry) };
   } catch {
     return empty;
   }

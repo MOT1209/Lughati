@@ -31,7 +31,10 @@ export default function RootLayout() {
   // Apply the stored language choice once preferences are loaded, and on every change.
   useEffect(() => {
     if (!hasHydrated) return;
-    void applyLanguagePreference(languagePreference).then(() => setLocaleApplied(true));
+    // Even if applying fails, the app starts with the default locale instead of a permanent splash.
+    applyLanguagePreference(languagePreference)
+      .catch(() => undefined)
+      .finally(() => setLocaleApplied(true));
   }, [hasHydrated, languagePreference]);
 
   // A font failure must not hold the splash forever: fall back to the system font instead.

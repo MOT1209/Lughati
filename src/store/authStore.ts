@@ -28,7 +28,9 @@ export const useAuthStore = create<AuthState>()((set) => ({
       if (!session) useLearningStore.getState().reset();
       set({ session });
     });
-    set({ session: await service.getSession(), initialized: true });
+    // A failing session read must not keep the app on the splash forever: start signed out.
+    const session = await service.getSession().catch(() => null);
+    set({ session, initialized: true });
   },
   signIn: async (request) => {
     await getAuthService().signIn(request);

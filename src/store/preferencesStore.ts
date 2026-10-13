@@ -16,6 +16,9 @@ interface PreferencesState {
   completeOnboarding: () => void;
 }
 
+const isTheme = (v: unknown): v is ThemePreference => v === 'system' || v === 'light' || v === 'dark';
+const isLanguage = (v: unknown): v is LanguagePreference => v === 'system' || v === 'ar' || v === 'en';
+
 export const usePreferencesStore = create<PreferencesState>()(
   persist(
     (set) => ({
@@ -35,6 +38,17 @@ export const usePreferencesStore = create<PreferencesState>()(
         languagePreference,
         onboardingSeen,
       }),
+      // Stored values come from disk: an unknown one (older build, manual edit) falls back to the
+      // default instead of reaching i18n/layout direction as an unsupported locale.
+      merge: (persisted, current) => {
+        const saved = (typeof persisted === 'object' && persisted !== null ? persisted : {}) as Record<string, unknown>;
+        return {
+          ...current,
+          themePreference: isTheme(saved.themePreference) ? saved.themePreference : current.themePreference,
+          languagePreference: isLanguage(saved.languagePreference) ? saved.languagePreference : current.languagePreference,
+          onboardingSeen: typeof saved.onboardingSeen === 'boolean' ? saved.onboardingSeen : current.onboardingSeen,
+        };
+      },
       // Runs on success and on failure: a corrupt store must not block startup forever.
       onRehydrateStorage: () => () => {
         usePreferencesStore.setState({ hasHydrated: true });

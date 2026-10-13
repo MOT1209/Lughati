@@ -39,7 +39,7 @@ export class MockAuthService implements AuthService {
   async signIn(request: SignInRequest): Promise<Session> {
     await wait(this.latencyMs);
     this.failIfScripted(request.email);
-    return this.start(createMockUser({ email: request.email }));
+    return await this.start(createMockUser({ email: request.email }));
   }
 
   async signUp(request: SignUpRequest): Promise<Session> {
@@ -48,12 +48,12 @@ export class MockAuthService implements AuthService {
     if (request.email.trim().toLowerCase().startsWith('taken@')) {
       throw new AuthError('email_in_use');
     }
-    return this.start(createMockUser({ name: request.name, email: request.email }));
+    return await this.start(createMockUser({ name: request.name, email: request.email }));
   }
 
   async signOut(): Promise<void> {
     await wait(this.latencyMs / 3);
-    this.setSession(null);
+    await this.setSession(null);
   }
 
   async getSession(): Promise<Session | null> {
@@ -77,21 +77,24 @@ export class MockAuthService implements AuthService {
     if (value.startsWith('offline@')) throw new AuthError('network');
   }
 
-  private start(user: Session['user']): Session {
+  private async start(user: Session['user']): Promise<Session> {
     const session: Session = { user, issuedAt: new Date().toISOString() };
-    this.setSession(session);
+    await this.setSession(session);
     return session;
   }
 
-  private setSession(session: Session | null): void {
+  private async setSession(session: Session | null): Promise<void> {
     this.session = session;
     this.loaded = true;
-    // Persisting is best effort: a storage failure must not break sign-in or sign-out.
-    const write = session
-      ? this.storage.setItem(STORAGE_KEYS.session, JSON.stringify(session))
-      : this.storage.removeItem(STORAGE_KEYS.session);
-    write.catch(() => undefined);
     this.listeners.forEach((listener) => listener(session));
+    // Persisting is best effort (a storage failure must not break sign-in or sign-out), but it is
+    // awaited so a sign-out is durable once it resolves: the session cannot reappear after a restart.
+    try {
+      if (session) await this.storage.setItem(STORAGE_KEYS.session, JSON.stringify(session));
+      else await this.storage.removeItem(STORAGE_KEYS.session);
+    } catch {
+      // ignored on purpose
+    }
   }
 
   private async readStored(): Promise<Session | null> {

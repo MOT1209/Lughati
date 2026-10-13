@@ -45,8 +45,12 @@ export default function Settings() {
 
   const onSignOut = async () => {
     setSigningOut(true);
-    await signOut();
-    router.replace(ROUTES.splash);
+    try {
+      await signOut();
+      router.replace(ROUTES.splash);
+    } catch {
+      setSigningOut(false); // the session is unchanged; the button is usable again
+    }
   };
 
   return (

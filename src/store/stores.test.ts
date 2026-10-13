@@ -43,6 +43,18 @@ describe('preferences store', () => {
   });
 });
 
+describe('preferences store: invalid saved values', () => {
+  it('falls back to defaults for unknown theme/language values (would otherwise yield LTR layout with an unknown locale)', async () => {
+    usePreferencesStore.setState({ themePreference: 'system', languagePreference: 'system', onboardingSeen: false, hasHydrated: false });
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.preferences,
+      JSON.stringify({ state: { themePreference: 'neon', languagePreference: 'xx', onboardingSeen: 'yes' }, version: 0 }),
+    );
+    await usePreferencesStore.persist.rehydrate();
+    expect(usePreferencesStore.getState()).toMatchObject({ themePreference: 'system', languagePreference: 'system', onboardingSeen: false, hasHydrated: true });
+  });
+});
+
 describe('auth store', () => {
   beforeEach(() => {
     registerAuthService(new MockAuthService(0, createMemoryStorage()));
@@ -51,6 +63,16 @@ describe('auth store', () => {
 
   it('is not initialized until the saved session was read', async () => {
     expect(useAuthStore.getState().initialized).toBe(false);
+    await useAuthStore.getState().init();
+    expect(useAuthStore.getState()).toMatchObject({ initialized: true, session: null });
+  });
+
+  it('finishes initialization even if reading the session fails, so the app is not stuck on the splash', async () => {
+    const failing = new MockAuthService(0, createMemoryStorage());
+    failing.getSession = async () => {
+      throw new Error('boom');
+    };
+    registerAuthService(failing);
     await useAuthStore.getState().init();
     expect(useAuthStore.getState()).toMatchObject({ initialized: true, session: null });
   });
