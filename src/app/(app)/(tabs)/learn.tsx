@@ -8,7 +8,6 @@ import { useLessonList } from '@/hooks/useLessonList';
 import { useTheme } from '@/hooks/useTheme';
 import { useUiLocale } from '@/hooks/useUiLocale';
 import { localize } from '@/utils/localize';
-import { ROUTES } from '@/utils/routing';
 
 export default function Learn() {
   const { t } = useTranslation();
@@ -51,7 +50,7 @@ export default function Learn() {
             return (
               <Pressable
                 key={lesson.id}
-                onPress={() => router.push(ROUTES.lesson(lesson.id))}
+                onPress={() => router.push({ pathname: '/lesson/[id]', params: { id: lesson.id } })}
                 accessibilityRole="button"
                 accessibilityLabel={t('learn.lessonLabel', { title, status })}
               >

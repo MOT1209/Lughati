@@ -93,7 +93,7 @@ export default function Home() {
             {t('home.lessonMeta', { level: lesson.levelId, minutes: lesson.estimatedMinutes })}
           </Text>
           <ProgressBar value={progress.levelProgress} accessibilityLabel={t('home.overallProgress')} />
-          <Button title={t('home.continueLearning')} icon="play-outline" iconDirectional onPress={() => router.push(ROUTES.lesson(lesson.id))} />
+          <Button title={t('home.continueLearning')} icon="play-outline" iconDirectional onPress={() => router.push({ pathname: '/lesson/[id]', params: { id: lesson.id } })} />
         </Card>
       ) : (
         // currentLessonId === null means "no current lesson", not an error.
