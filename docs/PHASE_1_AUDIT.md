@@ -129,8 +129,14 @@ Device: **OPPO CPH2069, Android 11**, Expo Go **57.0.9**, USB (`adb reverse tcp:
 | `npm ci` / typecheck / lint / tests | PASS | `ci exit=0`; `tsc` exit 0 (after fixing 2 typed-route errors, see below); `expo lint` clean; 264/264 tests |
 | App starts in Expo Go | PASS (after Metro fix) | First launch failed with `java.io.IOException: Failed to download remote update` (screenshot). Cause: `expo start --localhost` listened on `[::1]:8081` only (IPv6) while `adb reverse` connects to `127.0.0.1` (IPv4). With `expo start --lan` (listens on `0.0.0.0:8081`) the app loaded. |
 | Home in Arabic, RTL, dark mode | PASS (owner's screenshot) | Home rendered RTL with Cairo, dark palette, Arabic text |
-| New flow: language setup after login, flags, meanings in own language | **NOT VERIFIED on device** | Covered by tests; the phone disconnected (`adb: no devices`) and Metro stopped before the re-check |
-| Auth/session restore after kill, protected routes, lesson persistence after restart, Settings language switch + reload, large font, keyboard | **NOT VERIFIED on device** | Not reached in this session |
+| Language setup after login (existing session, no saved choice) | PASS | Screenshots: step 1 "ما لغتك؟" with all 6 languages and flags, no header back button; German chosen (check + border); step 2 lists 5 languages without German, "ابدأ التعلّم" disabled until a choice |
+| Flags next to language names | PASS | 🇸🇦 🇩🇪 🇺🇸 🇪🇸 🇫🇷 🇹🇷 rendered on setup and Home |
+| Home after setup | PASS | Spanish 🇪🇸, A1, "0 من 15 دقيقة", first lesson current, streak "لا أيام بعد", no fake quick actions |
+| Meanings in the learner's own language | PASS | Lesson "التحيات واللباقة": Hola/Hallo, Adiós/Tschüss, Gracias/Danke … (Spanish words, German meanings) |
+| Session and language choice survive `am force-stop` + relaunch | PASS | Relaunch opened Home with Spanish directly, no login, no setup |
+| Arabic plurals | **FAIL → fixed, device re-check pending** | Device showed "8 دقيقة" (should be "8 دقائق"). Root cause: Hermes has no `Intl.PluralRules`, so i18next always used `_other` (affects every Arabic plural except `_zero`). Fixed with `@formatjs/intl-pluralrules` (loaded only where missing); regression test deletes `Intl.PluralRules` and fails without the fix. The phone disconnected before the re-check. |
+| Directional arrows / native header in Expo Go | Observation | "التالي"/"رجوع"/"تابع التعلّم" arrows are not mirrored and the native header back arrow sits on the left while content is RTL. Consistent with the known Expo Go RTL-override caveat; needs a development build to judge. |
+| Sign out/in, protected routes, lesson completion persistence, Settings language switch + reload, large font, keyboard, dark/light switch | **NOT VERIFIED on device** | Not reached (the phone disconnected twice: OPPO turns USB debugging off) |
 
 Found during the device run and fixed:
 - Typecheck failed once `expo start` had generated `.expo/types/router.d.ts`: `router.push(ROUTES.lesson(id))` in `home.tsx`/`learn.tsx`. Now `{ pathname: '/lesson/[id]', params: { id } }`.
@@ -166,4 +172,4 @@ Found during the device run and fixed:
 | L24 | Low | Streak card not grouped for TalkBack; foreign words spoken with the UI voice | `home.tsx`, `lesson/[id].tsx` |
 | – | Low | First-time setup: Android back can leave `setup-languages` for Home before a choice (Home then uses the account default) | `setup-languages.tsx` |
 
-**Readiness:** stable at code/test level; **only partially device-verified** (app start, Home RTL/dark). The new language flow is not yet device-verified.
+**Readiness:** stable at code/test level; **partially device-verified** on OPPO CPH2069 / Android 11: app start, language setup after login, flags, meanings in the own language, session + choice after a restart. Plural fix and the remaining TESTING.md items are not yet device-verified.
