@@ -65,3 +65,25 @@ describe('direction', () => {
     expect(isRtlLocale('en')).toBe(false);
   });
 });
+
+describe('Arabic plurals without a native Intl.PluralRules (Hermes)', () => {
+  it('still picks the right plural form, e.g. "8 دقائق" and "يومان"', () => {
+    const native = Intl.PluralRules;
+    // Hermes (the engine in Expo Go) ships no Intl.PluralRules; i18next then falls back to `_other`.
+    delete (Intl as { PluralRules?: unknown }).PluralRules;
+    try {
+      jest.isolateModules(() => {
+        // A fresh i18next and i18n setup, loaded while Intl.PluralRules is missing.
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const { t } = require('i18next') as typeof import('i18next');
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        require('./index');
+        expect(t('home.lessonMeta', { lng: 'ar', level: 'A1', count: 8 })).toBe('A1 · 8 دقائق');
+        expect(t('home.streakDays', { lng: 'ar', count: 2 })).toBe('يومان');
+        expect(t('home.streakDays', { lng: 'ar', count: 11 })).toBe('11 يوماً');
+      });
+    } finally {
+      (Intl as { PluralRules?: unknown }).PluralRules = native;
+    }
+  });
+});

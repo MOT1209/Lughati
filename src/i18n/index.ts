@@ -1,3 +1,8 @@
+// Hermes (the engine in Expo Go and release builds) has no Intl.PluralRules, so i18next would
+// always fall back to `_other` ("8 دقيقة" instead of "8 دقائق"). Installed only where missing.
+import '@formatjs/intl-pluralrules/polyfill.js';
+import '@formatjs/intl-pluralrules/locale-data/ar.js';
+import '@formatjs/intl-pluralrules/locale-data/en.js';
 import { getLocales } from 'expo-localization';
 import { changeLanguage, use as registerPlugin } from 'i18next';
 import { initReactI18next } from 'react-i18next';
