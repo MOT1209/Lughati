@@ -14,12 +14,12 @@ export function getDirectionAction(currentIsRtl: boolean, desiredIsRtl: boolean)
  */
 export function applyLayoutDirection(desiredIsRtl: boolean): DirectionAction {
   if (Platform.OS === 'web') return 'none';
-  const action = getDirectionAction(I18nManager.isRTL, desiredIsRtl);
-  if (action === 'restart-required') {
-    I18nManager.allowRTL(desiredIsRtl);
-    I18nManager.forceRTL(desiredIsRtl);
-  }
-  return action;
+  // Always store the desired direction. `isRTL` only changes after a reload, so after switching
+  // ar -> en -> ar without restarting it still reads RTL; skipping the call then would leave the
+  // stored LTR flag from the first switch and the next launch would lay Arabic out LTR.
+  I18nManager.allowRTL(desiredIsRtl);
+  I18nManager.forceRTL(desiredIsRtl);
+  return getDirectionAction(I18nManager.isRTL, desiredIsRtl);
 }
 
 /**

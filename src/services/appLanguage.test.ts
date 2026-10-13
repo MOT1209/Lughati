@@ -38,7 +38,8 @@ describe('applyLanguagePreference', () => {
     jest.replaceProperty(I18nManager, 'isRTL', false);
     const result = await applyLanguagePreference('system', 'en');
     expect(result).toEqual({ locale: 'en', direction: 'none' });
-    expect(forceRTL).not.toHaveBeenCalled();
+    // The direction is always stored (see direction.ts), but no restart is needed.
+    expect(forceRTL).toHaveBeenCalledWith(false);
   });
 
   it('falls back to Arabic (RTL) for an unsupported device language', async () => {
