@@ -117,3 +117,53 @@ Results below were produced in the same container as §5 (Node 22.22.0, npm 10.9
 
 ### 9.5 Readiness
 **Stable at the code/test level but not yet device-verified.** Recommendation: Phase 1 can be closed *as a code-level phase* once the CI workflow has run green on GitHub; closing it as "device-verified" requires the TESTING.md checklist on a real Android device.
+
+---
+
+## 10. Device verification (2026-10-13)
+Device: **OPPO CPH2069, Android 11**, Expo Go **57.0.9**, USB (`adb reverse tcp:8081 tcp:8081`).
+
+| Check | Result | Evidence |
+|---|---|---|
+| Phone visible to adb | PASS | `adb devices -l`: `a7595e4c device model:CPH2069` |
+| `npm ci` / typecheck / lint / tests | PASS | `ci exit=0`; `tsc` exit 0 (after fixing 2 typed-route errors, see below); `expo lint` clean; 264/264 tests |
+| App starts in Expo Go | PASS (after Metro fix) | First launch failed with `java.io.IOException: Failed to download remote update` (screenshot). Cause: `expo start --localhost` listened on `[::1]:8081` only (IPv6) while `adb reverse` connects to `127.0.0.1` (IPv4). With `expo start --lan` (listens on `0.0.0.0:8081`) the app loaded. |
+| Home in Arabic, RTL, dark mode | PASS (owner's screenshot) | Home rendered RTL with Cairo, dark palette, Arabic text |
+| New flow: language setup after login, flags, meanings in own language | **NOT VERIFIED on device** | Covered by tests; the phone disconnected (`adb: no devices`) and Metro stopped before the re-check |
+| Auth/session restore after kill, protected routes, lesson persistence after restart, Settings language switch + reload, large font, keyboard | **NOT VERIFIED on device** | Not reached in this session |
+
+Found during the device run and fixed:
+- Typecheck failed once `expo start` had generated `.expo/types/router.d.ts`: `router.push(ROUTES.lesson(id))` in `home.tsx`/`learn.tsx`. Now `{ pathname: '/lesson/[id]', params: { id } }`.
+
+## 11. Changes after the device run
+- **Flags** next to language names (`Language.flag`, `LanguageBadge`), decorative for screen readers.
+- **Own language + language to learn, chosen after sign-in**, once per account and persisted (`(app)/setup-languages`, `repositories.profiles`, `STORAGE_KEYS.learningProfile`, `learningStore.profile`). All 6 languages can be the source; meanings come from the index-aligned course lists, so every pair works without new content. Changeable in Settings; the target is switchable from Home (the own language is excluded).
+- **H1 (fixed, regression test):** switching ar -> en -> ar without a restart left the stored LTR flag (`applyLayoutDirection` only called `forceRTL` when `isRTL` differed, but `isRTL` only changes after a reload). Now the desired direction is always stored. Not handled: a mismatch detected at startup (Expo Go resets RTL overrides, so an automatic reload there could loop).
+- **H2:** removed the fake Home quick actions (Vocabulary, Practice, Smart chat all opened /learn; "Languages" duplicated "Change language").
+- **H3/H4:** new accounts start with empty progress and a streak of 0 instead of invented XP/lessons/minutes/7-day streak.
+- **H5:** Arabic plural forms for lesson minutes ("8 دقائق", not "8 دقيقة").
+- **M8/M9:** `KeyboardAvoidingView` uses `height` on Android (was off); the last field of login/register submits with "Done". Needs a device check.
+- **M12:** radio controls report `checked` instead of `selected`.
+- Test note: in one full run under heavy machine load two lesson-screen tests failed (file took 96 s instead of 18 s); they pass alone and in the next full run (264/264).
+
+## 12. Review findings still open
+| # | Priority | Finding | Where |
+|---|---|---|---|
+| M6 | Medium | Daily reminder switch is not saved and does nothing; its caption shows a developer note | `settings.tsx`, `ar.ts`/`en.ts` `notificationsNote` |
+| M7 | Medium | Language change in Settings has no error handling and is applied twice (screen + root layout) | `settings.tsx:35-40`, `_layout.tsx:32-38` |
+| M10 | Medium | `useAsyncData` drops data on key change, so Home/Learn flash a spinner after each lesson | `hooks/useAsyncData.ts:30` |
+| M11 | Medium | Errors are swallowed; `ErrorState` cannot tell offline from bug | `hooks/useAsyncData.ts:21` |
+| M13 | Medium | After answering, screen readers cannot tell the right option from the wrong one | `components/OptionButton.tsx:28` |
+| M14 | Medium | Lesson cards give no press feedback | `(tabs)/learn.tsx:51-56` |
+| M15 | Medium | Progress tab is a "coming soon" placeholder | `(tabs)/progress.tsx` |
+| M16 | Medium | No screen tests for Home, Profile, Settings, Login/Register, Onboarding, setup-languages, root layout | `src/app` |
+| L17 | Low | Leaving a quiz loses all answers without confirmation | `lesson/[id].tsx` |
+| L19 | Low | A few strings are concatenated in code instead of one interpolated key | `settings.tsx:128`, `learn.tsx:65`, `profile.tsx:63` |
+| L20 | Low | Unused i18n keys (`app.tagline`, `common.continue`, `common.back`, `common.comingSoon`, `common.minutesShort`, `languageSelection.selected`, `profile.title`, `progress.title`) | locales |
+| L21 | Low | Dead code: `APP_NAME`; `services/ai` only used in tests | `constants/app.ts:3` |
+| L22 | Low | `supportsRTL` not set for `expo-localization`; launcher name not localised | `app.json` |
+| L23 | Low | `ProgressBar` has no NaN guard | `components/ProgressBar.tsx:13` |
+| L24 | Low | Streak card not grouped for TalkBack; foreign words spoken with the UI voice | `home.tsx`, `lesson/[id].tsx` |
+| – | Low | First-time setup: Android back can leave `setup-languages` for Home before a choice (Home then uses the account default) | `setup-languages.tsx` |
+
+**Readiness:** stable at code/test level; **only partially device-verified** (app start, Home RTL/dark). The new language flow is not yet device-verified.
