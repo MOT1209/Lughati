@@ -34,8 +34,8 @@ Expo SDK 57 / RN 0.86 / TypeScript strict / Expo Router (typed routes, React Com
 - **Passwords are not persisted** (session = user + timestamp). Confirmed by existing and new tests.
 - **Account isolation:** progress keys are `userId:language` with `userId = user-<normalized email>`; no cross-account leakage found (existing test "keeps users separate"). On logout the learning store is reset; progress of other accounts intentionally stays on the device (not wiped on logout) — a privacy decision to revisit before a real backend.
 - **Not a vulnerability but a limitation:** the mock `userId` is derived from an email without any proof of ownership; anyone typing an email gets that "account"'s local data. Only acceptable because auth is a mock.
-- **Dependencies:** `npm audit --omit=dev` reports 61 findings (16 moderate, 45 high), all in the Expo build/config tooling chain (`@expo/config*`, `expo-splash-screen` plugin dependencies). Not assessed for exploitability in this app's threat model; **not fixed** (a forced upgrade would change the SDK tree, which this phase forbids without demonstrated need).
-- No CI exists, so nothing enforces the checks below on pull requests.
+- **Dependencies:** `npm audit --omit=dev` reports 61 findings (16 moderate, 45 high) that trace to 5 advisories. Fully analysed in [`docs/audit/DEPENDENCY_AUDIT.md`](./audit/DEPENDENCY_AUDIT.md) (raw output in `docs/audit/npm-audit-omit-dev.json`); summary in §9.
+- At the time of the first audit no CI existed; `.github/workflows/ci.yml` was added in the final verification (§9).
 
 ## 5. Test results
 Executed in this container. "Pre-existing" = same result on the untouched baseline.
@@ -73,3 +73,47 @@ Executed in this container. "Pre-existing" = same result on the untouched baseli
 
 ## 8. Final readiness assessment
 **Stable at the code/test level but not yet device-verified.** The project installs, type-checks, lints, passes 254 tests and produces an Android bundle. No physical-device or emulator testing happened, and `expo-doctor` could only partially run.
+
+
+---
+
+## 9. Final verification (branch `fix/phase-1-final-verification`)
+
+Results below were produced in the same container as §5 (Node 22.22.0, npm 10.9.4). **No physical device or emulator was used.**
+
+### 9.1 Changes
+| Area | Change | Verified by |
+|---|---|---|
+| Persisted learning data | New `services/repositories/savedData.ts`: every stored progress/plan record is validated individually and dropped if invalid: unknown language/level/lesson ids, lessons of another language, duplicate or already-completed current lessons, a level above A1 without the lower levels finished, negative/fractional/absurd XP, minutes and word counts (word count capped by the course size), `levelProgress` outside 0..1, bad goal/minutes/day, and records stored under a key that does not match their own user and language (also blocks `__proto__` keys). Valid records survive and the app starts. | `savedData.test.ts` (50 cases incl. integration with the repositories and a full-course round trip proving app-written data always validates) |
+| Stored session | `isSession` now also requires a normalized email, an id consistent with that email, supported languages and a parsable timestamp. | `services.test.ts` › "ignores a stored session with …" |
+| Sign-out | If the stored session cannot be removed, `signOut()` still ends the session for this run but **rejects with `sign_out_not_persisted`**; Settings shows an alert saying the saved session may return after a restart (previously the failure was swallowed and sign-out looked durable). Other sign-out errors leave the button usable. | `services.test.ts`, `settingsAndLayout.test.tsx` |
+| Language change | `Settings.onLanguageChange` had an unhandled rejection when applying the language failed. It now reverts the preference and shows `settings.languageChangeFailed`. | `settingsAndLayout.test.tsx` (fails when the fix is reverted: checked) |
+| Mock labelling | Login and register screens now show a `auth.demoNotice` caption: sign-in is simulated, verifies no identity and sends nothing to a server. | typecheck + i18n key parity test |
+| Root layout / Settings tests | New `navigation/settingsAndLayout.test.tsx`: layout starts and hides the splash; starts if applying the language fails; starts signed out if reading the session fails; keeps the splash while preferences load; Settings sign-out and language-change failures. Reverting the layout/Settings fixes makes the corresponding tests fail (mutation check done by hand). | itself |
+| CI | `.github/workflows/ci.yml`: `npm ci` → typecheck → lint → `npm test -- --runInBand` → `npx expo export --platform android`; Node 22, npm cache, `permissions: contents: read`, no secrets, concurrency group, 20 min timeout. | Each step was run locally with the same commands. **The workflow itself has not run on GitHub yet** (it needs a push/PR to execute). |
+| Dependencies | **No change** to `package.json` / `package-lock.json`. | `DEPENDENCY_AUDIT.md` |
+
+### 9.2 Dependency audit summary
+61 findings = 5 advisories (`decode-uri-component`, `braces`, `node-forge`, `sprintf-js`, `uuid`). A source-map export of the Android bundle shows that only `decode-uri-component` (via `expo-router` → `query-string@7`) ships in the app, with a theoretical deep-link availability impact. Its only patched release (0.5.0) is ESM-only and returns an object when `require()`d (checked), which would break `query-string@7`; `braces`, `node-forge` and `sprintf-js` have no patched release; `uuid@7` is used by prebuild tooling with an unused vulnerable path. `npm audit`'s suggested "fixes" are downgrades/major jumps (e.g. `expo@44`) and were not applied. Nothing was fixed; everything is documented with reasons in `docs/audit/DEPENDENCY_AUDIT.md`.
+
+### 9.3 Test results
+| Command | Result | Output / reason | Existed before? |
+|---|---|---|---|
+| `npm ci` | PASS | exit 0 | – |
+| `npm run typecheck` | PASS | exit 0 | – |
+| `npm run lint` | PASS | exit 0, no warnings or errors | – |
+| `npm test -- --runInBand` | PASS | 16 suites, **319 tests** (254 at the end of §5) | – |
+| `CI=1 npx expo export --platform android` | PASS | Hermes bundle written, exit 0 | – |
+| `npx expo-doctor` | **BLOCKED (partial)** | 19/21 checks passed; the 2 failures (config schema, React Native Directory) need network (`getaddrinfo ENOTFOUND exp.host`) | environment |
+| `npm audit --omit=dev` | 61 findings, unresolved | see 9.2 | yes |
+| GitHub Actions workflow run | **NOT RUN** | cannot execute GitHub runners from this container | – |
+| Android/iOS device or emulator | **NOT RUN** | no device available | – |
+
+### 9.4 Remaining risks and limitations
+- **High:** nothing has been run on a device (auth flow, protected routes, RTL/LTR switching with reload, keyboard behaviour). The new CI workflow has never executed on GitHub.
+- **Medium:** 61 audit findings remain (analysed; 1 advisory reaches the bundle, low practical impact); `expo-doctor` network checks unrun; other accounts' local progress remains on the device after sign-out (by design, to be revisited with a real backend).
+- **Low:** the mock auth/ID model (`user-<email>`) offers no ownership proof (clearly labelled as a demo in UI and docs); streak and seeded progress for `de`/`fr` are fabricated mock data; the persisted-session validation is mock-specific and must be replaced with real token handling later.
+- **Deferred:** real backend/auth, real AI, notifications, persisted target-language choice.
+
+### 9.5 Readiness
+**Stable at the code/test level but not yet device-verified.** Recommendation: Phase 1 can be closed *as a code-level phase* once the CI workflow has run green on GitHub; closing it as "device-verified" requires the TESTING.md checklist on a real Android device.

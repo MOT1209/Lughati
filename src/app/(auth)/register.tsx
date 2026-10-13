@@ -73,6 +73,10 @@ export default function Register() {
         </Text>
       ) : null}
 
+      <Text variant="caption" color="textSecondary">
+        {t('auth.demoNotice')}
+      </Text>
+
       <Button title={t('auth.register.submit')} onPress={onSubmit} loading={loading} />
 
       <View style={{ alignItems: 'center', gap: spacing.xs }}>

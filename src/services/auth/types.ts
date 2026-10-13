@@ -24,7 +24,9 @@ export interface Session {
   issuedAt: string; // ISO date
 }
 
-export type AuthErrorCode = 'invalid_credentials' | 'email_in_use' | 'network' | 'unknown';
+// 'sign_out_not_persisted': the session is gone for this run, but the stored copy could not be
+// removed, so it may come back after a restart. Callers must tell the user instead of hiding it.
+export type AuthErrorCode = 'invalid_credentials' | 'email_in_use' | 'network' | 'sign_out_not_persisted' | 'unknown';
 
 export class AuthError extends Error {
   readonly code: AuthErrorCode;

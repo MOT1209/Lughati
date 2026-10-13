@@ -75,6 +75,10 @@ export default function Login() {
         </Text>
       ) : null}
 
+      <Text variant="caption" color="textSecondary">
+        {t('auth.demoNotice')}
+      </Text>
+
       <Button title={t('auth.login.submit')} onPress={onSubmit} loading={loading} />
 
       <View style={{ alignItems: 'center', gap: spacing.xs }}>

@@ -1,4 +1,5 @@
 import { STORAGE_KEYS } from '@/constants/app';
+import { languages } from '@/mocks/languages';
 import { createMockUser } from '@/mocks/users';
 
 import { deviceStorage, type KeyValueStorage } from '../storage';
@@ -12,10 +13,24 @@ import {
   type SignUpRequest,
 } from './types';
 
+const languageCodes = new Set<string>(languages.map((l) => l.code));
+
+// A stored session is untrusted input: it must be well-formed and internally consistent (the mock
+// derives the user id from the email, and progress is keyed by that id), otherwise it is ignored.
 function isSession(value: unknown): value is Session {
   if (typeof value !== 'object' || value === null) return false;
   const { user, issuedAt } = value as Partial<Session>;
-  return typeof issuedAt === 'string' && typeof user?.id === 'string' && typeof user.email === 'string';
+  if (typeof issuedAt !== 'string' || Number.isNaN(Date.parse(issuedAt))) return false;
+  if (typeof user !== 'object' || user === null) return false;
+  if (typeof user.email !== 'string' || user.email.trim() === '' || user.email !== user.email.trim().toLowerCase()) return false;
+  return (
+    user.id === createMockUser({ email: user.email }).id &&
+    typeof user.name === 'string' &&
+    typeof user.sourceLanguage === 'string' &&
+    languageCodes.has(user.sourceLanguage) &&
+    typeof user.targetLanguage === 'string' &&
+    languageCodes.has(user.targetLanguage)
+  );
 }
 
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -53,7 +68,10 @@ export class MockAuthService implements AuthService {
 
   async signOut(): Promise<void> {
     await wait(this.latencyMs / 3);
-    await this.setSession(null);
+    const removed = await this.setSession(null);
+    // Signed out for this run either way (listeners were told), but never report the stored
+    // session as removed when it was not: it could be restored after a restart.
+    if (!removed) throw new AuthError('sign_out_not_persisted');
   }
 
   async getSession(): Promise<Session | null> {
@@ -83,17 +101,19 @@ export class MockAuthService implements AuthService {
     return session;
   }
 
-  private async setSession(session: Session | null): Promise<void> {
+  /** Resolves true when the stored copy now matches `session`, false when storage refused. */
+  private async setSession(session: Session | null): Promise<boolean> {
     this.session = session;
     this.loaded = true;
     this.listeners.forEach((listener) => listener(session));
-    // Persisting is best effort (a storage failure must not break sign-in or sign-out), but it is
-    // awaited so a sign-out is durable once it resolves: the session cannot reappear after a restart.
+    // Persisting is awaited so a resolved sign-out is durable. A storage failure never blocks signing
+    // in or out for this run; sign-out reports it (see signOut) while sign-in just won't be restored.
     try {
       if (session) await this.storage.setItem(STORAGE_KEYS.session, JSON.stringify(session));
       else await this.storage.removeItem(STORAGE_KEYS.session);
+      return true;
     } catch {
-      // ignored on purpose
+      return false;
     }
   }
 

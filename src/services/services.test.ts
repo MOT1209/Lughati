@@ -344,3 +344,47 @@ describe('Phase 1 stabilization regressions', () => {
     await expect(new MockAuthService(0, inner).getSession()).resolves.toBeNull();
   });
 });
+
+describe('Phase 1 final verification: auth persistence', () => {
+  const credentials = { method: 'password' as const, email: 'sara@example.com', password: 'password1' };
+  const storedSession = (patch: Record<string, unknown> = {}, userPatch: Record<string, unknown> = {}) =>
+    JSON.stringify({
+      user: { id: 'user-sara@example.com', name: 'Sara', email: 'sara@example.com', sourceLanguage: 'ar', targetLanguage: 'de', joinedAt: '2026-09-01T09:00:00.000Z', ...userPatch },
+      issuedAt: '2026-10-01T10:00:00.000Z',
+      ...patch,
+    });
+
+  it('signOut ends the session for this run but REJECTS when the stored copy could not be removed', async () => {
+    const inner = createMemoryStorage();
+    const broken = { ...inner, removeItem: async () => { throw new Error('disk'); } };
+    const auth = new MockAuthService(0, broken);
+    const seen: (Session | null)[] = [];
+    auth.onAuthStateChange((s) => seen.push(s));
+    await auth.signIn(credentials);
+
+    await expect(auth.signOut()).rejects.toMatchObject({ code: 'sign_out_not_persisted' });
+    await expect(auth.getSession()).resolves.toBeNull(); // protected routes close right away
+    expect(seen.at(-1)).toBeNull();
+    // ...and the stored session really is still there, which is exactly what the error reports.
+    await expect(new MockAuthService(0, inner).getSession()).resolves.not.toBeNull();
+  });
+
+  it('accepts a well-formed stored session', async () => {
+    const storage = createMemoryStorage();
+    await storage.setItem(STORAGE_KEYS.session, storedSession());
+    await expect(new MockAuthService(0, storage).getSession()).resolves.toMatchObject({ user: { email: 'sara@example.com' } });
+  });
+
+  it.each([
+    ['an id that does not belong to the email', {}, { id: 'user-someone-else@example.com' }],
+    ['an unsupported language', {}, { targetLanguage: 'xx' }],
+    ['an empty email', {}, { email: '', id: 'user-' }],
+    ['a non-normalized email', {}, { email: 'Sara@Example.com' }],
+    ['a missing name', {}, { name: undefined }],
+    ['an unparsable timestamp', { issuedAt: 'yesterday' }, {}],
+  ])('ignores a stored session with %s', async (_name, patch, userPatch) => {
+    const storage = createMemoryStorage();
+    await storage.setItem(STORAGE_KEYS.session, storedSession(patch, userPatch));
+    await expect(new MockAuthService(0, storage).getSession()).resolves.toBeNull();
+  });
+});

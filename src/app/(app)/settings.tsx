@@ -1,13 +1,14 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Switch, View } from 'react-native';
+import { Alert, StyleSheet, Switch, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Button, Card, Screen, Text } from '@/components/ui';
 import { useTheme } from '@/hooks/useTheme';
 import { applyLanguagePreference } from '@/services/appLanguage';
+import { AuthError } from '@/services/auth';
 import { reloadApp } from '@/services/direction';
 import { useAuthStore } from '@/store/authStore';
 import { usePreferencesStore } from '@/store/preferencesStore';
@@ -29,14 +30,23 @@ export default function Settings() {
   const [signingOut, setSigningOut] = useState(false);
 
   const [restartFailed, setRestartFailed] = useState(false);
+  const [languageChangeFailed, setLanguageChangeFailed] = useState(false);
 
   // The persisted preference also drives the root layout; applying here updates the texts
   // immediately and tells us whether the direction needs a restart.
   const onLanguageChange = async (value: LanguagePreference) => {
+    const previous = languagePreference;
     setLanguagePreference(value);
-    const { direction } = await applyLanguagePreference(value);
-    setRestartNeeded(direction === 'restart-required');
-    setRestartFailed(false);
+    setLanguageChangeFailed(false);
+    try {
+      const { direction } = await applyLanguagePreference(value);
+      setRestartNeeded(direction === 'restart-required');
+      setRestartFailed(false);
+    } catch {
+      // Applying failed: keep the choice that is actually in effect instead of a half-applied one.
+      setLanguagePreference(previous);
+      setLanguageChangeFailed(true);
+    }
   };
 
   const onRestart = async () => {
@@ -47,10 +57,16 @@ export default function Settings() {
     setSigningOut(true);
     try {
       await signOut();
-      router.replace(ROUTES.splash);
-    } catch {
-      setSigningOut(false); // the session is unchanged; the button is usable again
+    } catch (error) {
+      if (error instanceof AuthError && error.code === 'sign_out_not_persisted') {
+        // Signed out for now, but the stored session survived: say so instead of pretending.
+        Alert.alert(t('settings.signOut'), t('auth.errors.sign_out_not_persisted'));
+      } else {
+        setSigningOut(false); // the session is unchanged; the button is usable again
+        return;
+      }
     }
+    router.replace(ROUTES.splash);
   };
 
   return (
@@ -83,6 +99,11 @@ export default function Settings() {
             { value: 'en', label: t('settings.langEn') },
           ]}
         />
+        {languageChangeFailed ? (
+          <Text variant="small" color="error" accessibilityLiveRegion="polite">
+            {t('settings.languageChangeFailed')}
+          </Text>
+        ) : null}
         {restartNeeded ? (
           <View style={{ gap: spacing.sm }} accessibilityLiveRegion="polite">
             <Text variant="bodyStrong">{t('settings.restartTitle')}</Text>

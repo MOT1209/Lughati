@@ -29,6 +29,7 @@ export const en: Translation = {
     pageOf: 'Slide {{current}} of {{total}}',
   },
   auth: {
+    demoNotice: 'Demo build: sign-in is simulated and does not verify your identity. Nothing is sent to a server.',
     login: {
       title: 'Sign in',
       subtitle: 'Welcome back! Continue your learning journey.',
@@ -61,6 +62,7 @@ export const en: Translation = {
       invalid_credentials: 'Incorrect email or password.',
       email_in_use: 'This email is already registered.',
       network: 'Could not connect. Check your internet and try again.',
+      sign_out_not_persisted: 'You were signed out, but the saved session could not be removed from this device. It may be restored when the app restarts.',
       unknown: 'An unexpected error occurred. Please try again.',
     },
   },
@@ -163,6 +165,7 @@ export const en: Translation = {
     langEn: 'English',
     restartTitle: 'Restart required',
     restartMessage: 'Changing the layout direction needs an app restart to take full effect.',
+    languageChangeFailed: 'Could not change the app language. The previous language was kept.',
     restartFailed: 'Automatic restart failed. Close the app and open it again.',
     restartNow: 'Restart now',
     notifications: 'Notifications',
