@@ -6,7 +6,16 @@ import { createMemoryStorage } from '../storage';
 import { createMockRepositories } from './mock';
 import { isSavedPlan, isSavedProgress, parseSavedLearning, progressKey } from './savedData';
 
-const validProgress = () => ({ ...getMockProgress('u1', 'de')! });
+// A learner part-way through German: two lessons done, the third current.
+const validProgress = () => ({
+  ...getMockProgress('u1', 'de')!,
+  completedLessonIds: ['de-a1-1', 'de-a1-2'],
+  currentLessonId: 'de-a1-3',
+  levelProgress: 0.2,
+  totalXp: 300,
+  wordsLearned: 12,
+  minutesLearned: 18,
+});
 const validPlan = () => ({ plan: { ...getMockPlan('u1', 'de') }, day: '2026-10-12' });
 const blob = (progress: Record<string, unknown>, plans: Record<string, unknown> = {}) => JSON.stringify({ progress, plans });
 
@@ -113,9 +122,9 @@ describe('repositories with a partly corrupt store', () => {
 
     const repos = createMockRepositories({ storage, now: () => new Date(2026, 9, 12, 12) });
     expect((await repos.progress.get('u1', 'de'))?.totalXp).toBe(500);
-    expect((await repos.progress.get('u1', 'fr'))?.totalXp).toBe(140);
+    expect((await repos.progress.get('u1', 'fr'))?.totalXp).toBe(0); // invalid record -> fresh start
     expect((await repos.progress.get('u1', 'es'))?.completedLessonIds).toEqual([]);
-    expect((await repos.plans.get('u1', 'de')).minutesToday).toBe(9);
+    expect((await repos.plans.get('u1', 'de')).minutesToday).toBe(0); // invalid plan -> fresh start
 
     await expect(repos.progress.completeLesson('u1', 'de-a1-4', { correct: 12, total: 12 })).resolves.toBeDefined();
     const restarted = createMockRepositories({ storage, now: () => new Date(2026, 9, 12, 12) });
