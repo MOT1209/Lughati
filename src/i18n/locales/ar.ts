@@ -90,6 +90,7 @@ export const ar = {
     lessonMeta_other: '{{level}} · {{count}} دقيقة',
     overallProgress: 'التقدم في المستوى',
     streak: 'سلسلة الأيام',
+    streakAria: 'أيام {{days}}',
     streakDays_zero: 'لا أيام بعد',
     streakDays_one: 'يوم واحد',
     streakDays_two: 'يومان',
@@ -126,6 +127,7 @@ export const ar = {
     correctAnswerWas: 'الإجابة الصحيحة: {{answer}}',
     next: 'التالي',
     finish: 'إنهاء',
+    finishConfirmation: 'هل تريد إنهاء الدرس؟',
     summaryTitle: 'أحسنت! أنهيت الدرس',
     summaryScore: 'أجبت صحيحاً عن {{correct}} من {{total}}',
     summaryXp: 'حصلت على {{xp}} نقطة خبرة',
@@ -148,6 +150,7 @@ export const ar = {
     statWords: 'كلمات متعلَّمة',
     statMinutes: 'دقائق التعلّم',
     statStreak: 'أيام متتالية',
+    streakAria: 'أيام {{days}}',
     openSettings: 'الإعدادات',
   },
   languageSelection: {

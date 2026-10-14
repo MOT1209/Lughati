@@ -1,5 +1,5 @@
-import { router, Stack } from 'expo-router';
-import { useState } from 'react';
+import { router, Stack, useBackHandler } from 'expo-router';
+import { useState, useCallback } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -9,14 +9,9 @@ import { useAsyncData } from '@/hooks/useAsyncData';
 import { useTheme } from '@/hooks/useTheme';
 import { getRepositories } from '@/services/repositories';
 import { useLearningStore } from '@/store/learningStore';
-import type { LanguageCode } from '@/types';
-import { ROUTES } from '@/utils/routing';
-
 type Step = 'source' | 'target';
 
-// After sign-in the learner names their own language (meanings are shown in it) and the
-// language they want to learn. Opened again from Settings, it edits the saved choice.
-export default function SetupLanguages() {
+// After sign-in the learner names their own language (meanings are shown in it) and the// language they want to learn. Opened again from Settings, it edits the saved choice.export default function SetupLanguages() {
   const { t } = useTranslation();
   const { spacing } = useTheme();
   const saved = useLearningStore((s) => s.profile);
@@ -51,6 +46,16 @@ export default function SetupLanguages() {
       setSaving(false);
     }
   };
+  // Handle Android back button: go back a step in setup, or close if at first step  const goBack = useCallback(() => {
+    if (isSourceStep) {
+      // At first step, close the setup and return to profile
+      if (router.canGoBack()) router.back();
+      else router.replace(ROUTES.splash);
+    } else {
+      // At target step, go back to source step
+      setStep('source');
+    }
+  }, [isSourceStep, router]);
 
   const isSourceStep = step === 'source';
   const list = languages.status === 'success' ? (isSourceStep ? languages.data.sources : languages.data.targets.filter((l) => l.code !== source)) : [];
@@ -100,3 +105,7 @@ export default function SetupLanguages() {
     </Screen>
   );
 }
+
+// Register Android back button handler for this screen
+useBackHandler(() => goBack(), 'setup-languages');
+

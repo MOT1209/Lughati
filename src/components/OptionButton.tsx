@@ -19,13 +19,20 @@ export function OptionButton({ text, accessibilityLabel, state, disabled, onPres
   const { colors, radius, spacing } = useTheme();
   const border = state === 'correct' ? colors.success : state === 'wrong' ? colors.error : colors.borderStrong;
 
+  // Provide distinct screen reader feedback for each state
+  const accessibilityState: Record<string, unknown> = {
+    disabled,
+    selected: state === 'correct' || state === 'wrong',
+    activated: state === 'correct' || state === 'wrong',
+  };
+
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
-      accessibilityState={{ disabled, selected: state === 'correct' || state === 'wrong' }}
+      accessibilityState={accessibilityState}
       style={[
         styles.base,
         {

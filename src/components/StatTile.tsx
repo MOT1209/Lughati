@@ -7,14 +7,17 @@ interface StatTileProps {
   icon: IconName;
   value: string;
   label: string;
+  accessibilityLabel?: string;
 }
 
-export function StatTile({ icon, value, label }: StatTileProps) {
+export function StatTile({ icon, value, label, accessibilityLabel }: StatTileProps) {
   const { colors, radius, spacing } = useTheme();
+  const ariaLabel = accessibilityLabel ?? `${label}: ${value}`;
   return (
     <View
       accessible
-      accessibilityLabel={`${label}: ${value}`}
+      accessibilityRole="adjustment"
+      accessibilityLabel={ariaLabel}
       style={{
         flexGrow: 1,
         flexBasis: '45%',

@@ -79,4 +79,4 @@ export default function Learn() {
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
   flex: { flex: 1 },
-});
+});

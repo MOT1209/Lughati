@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
+export type AsyncError = Error | { message: string; code?: string };
+
 export type AsyncState<T> =
   | { status: 'loading' }
-  | { status: 'error' }
+  | { status: 'error'; error: AsyncError }
   | { status: 'success'; data: T };
 
 /**
@@ -18,7 +20,7 @@ export function useAsyncData<T>(load: () => Promise<T>, deps: readonly (string |
     let cancelled = false;
     load().then(
       (data) => !cancelled && setSettled({ key, state: { status: 'success', data } }),
-      () => !cancelled && setSettled({ key, state: { status: 'error' } }),
+      (err) => !cancelled && setSettled({ key, state: { status: 'error', error: err } }),
     );
     return () => {
       cancelled = true;
@@ -27,6 +29,16 @@ export function useAsyncData<T>(load: () => Promise<T>, deps: readonly (string |
   }, [key]);
 
   const reload = useCallback(() => setAttempt((n) => n + 1), []);
-  const state: AsyncState<T> = settled?.key === key ? settled.state : { status: 'loading' };
+  // When the key changes due to attempt (reload = key includes old attempt),
+  // always show loading to trigger a refetch.
+  // When the key changes due to deps only (e.g. navigation), preserve the previous
+  // settled state so the UI doesn't flash a spinner/loading state.
+  const isReload = attempt > 0;
+  const state: AsyncState<T> =
+    settled === null
+      ? { status: 'loading' }
+      : isReload
+        ? { status: 'loading' }
+        : settled.state;
   return { ...state, reload };
 }

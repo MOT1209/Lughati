@@ -91,6 +91,7 @@ export const en: Translation = {
     lessonMeta_other: '{{level}} · {{count}} min',
     overallProgress: 'Level progress',
     streak: 'Streak',
+    streakAria: 'Day streak, {{days}} days',
     streakDays_zero: 'No days yet',
     streakDays_one: '1 day',
     streakDays_two: '2 days',
@@ -127,6 +128,7 @@ export const en: Translation = {
     correctAnswerWas: 'Correct answer: {{answer}}',
     next: 'Next',
     finish: 'Finish',
+    finishConfirmation: 'Are you sure you want to finish the lesson?',
     summaryTitle: 'Well done! Lesson complete',
     summaryScore: 'You got {{correct}} of {{total}} right',
     summaryXp: 'You earned {{xp}} XP',
@@ -149,6 +151,7 @@ export const en: Translation = {
     statWords: 'Words learned',
     statMinutes: 'Minutes learned',
     statStreak: 'Day streak',
+    streakAria: 'Day streak, {{days}} days',
     openSettings: 'Settings',
   },
   languageSelection: {

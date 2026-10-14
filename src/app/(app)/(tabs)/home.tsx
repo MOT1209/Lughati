@@ -101,7 +101,7 @@ export default function Home() {
 
       <Card style={[styles.row, { gap: spacing.md }]}>
         <Icon name="flame" size={32} color="accent" />
-        <View style={styles.flex}>
+        <View style={styles.flex} accessible accessibilityLabel={t('home.streakAria', { days: String(streak.days)})}>
           <Text variant="small" color="textSecondary">
             {t('home.streak')}
           </Text>

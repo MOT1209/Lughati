@@ -1,9 +1,11 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Alert, StyleSheet, Switch, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { STORAGE_KEYS } from '@/constants/app';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Button, Card, Screen, Text } from '@/components/ui';
 import { useTheme } from '@/hooks/useTheme';
@@ -28,6 +30,31 @@ export default function Settings() {
   const [restartNeeded, setRestartNeeded] = useState(false);
   const [dailyReminder, setDailyReminder] = useState(false); // UI only: no permission is requested
   const [signingOut, setSigningOut] = useState(false);
+
+  // Load saved daily reminder preference from AsyncStorage
+  useEffect(() => {
+    async function loadDailyReminder() {
+      try {
+        const raw = await AsyncStorage.getItem(STORAGE_KEYS.dailyReminder);
+        if (raw !== null) setDailyReminder(JSON.parse(raw));
+      } catch {
+        // keep default false if we can't read
+      }
+    }
+    loadDailyReminder();
+  }, []);
+
+  // Persist daily reminder preference whenever it changes
+  useEffect(() => {
+    async function saveDailyReminder() {
+      try {
+        await AsyncStorage.setItem(STORAGE_KEYS.dailyReminder, JSON.stringify(dailyReminder));
+      } catch {
+        // keep UI usable even if persist fails
+      }
+    }
+    saveDailyReminder();
+  }, [dailyReminder]);
 
   const [restartFailed, setRestartFailed] = useState(false);
   const [languageChangeFailed, setLanguageChangeFailed] = useState(false);

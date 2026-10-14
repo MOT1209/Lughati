@@ -47,8 +47,15 @@ export function LessonQuiz({ exercises, words, source, onFinish }: LessonQuizPro
   };
 
   const onNext = () => {
-    if (isLast) onFinish({ correct: session.correct, total: exercises.length });
-    else setSession(next(session));
+    if (isLast) {
+      // Show confirmation before finishing the quiz
+      const confirmed = window.confirm(t('lesson.finishConfirmation'));
+      if (confirmed) {
+        onFinish({ correct: session.correct, total: exercises.length });
+      }
+    } else {
+      setSession(next(session));
+    }
   };
 
   return (
