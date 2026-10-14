@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { OptionButton, type OptionState } from '@/components/OptionButton';
@@ -48,11 +48,16 @@ export function LessonQuiz({ exercises, words, source, onFinish }: LessonQuizPro
 
   const onNext = () => {
     if (isLast) {
-      // Show confirmation before finishing the quiz
-      const confirmed = window.confirm(t('lesson.finishConfirmation'));
-      if (confirmed) {
-        onFinish({ correct: session.correct, total: exercises.length });
-      }
+      // Confirm before finishing the lesson; RN has no window.confirm, so use Alert.alert.
+      Alert.alert(
+        t('lesson.summaryTitle'),
+        t('lesson.finishConfirmation'),
+        [
+          { text: t('lesson.cancel'), style: 'cancel' },
+          { text: t('lesson.finish'), onPress: () => onFinish({ correct: session.correct, total: exercises.length }) },
+        ],
+        { cancelable: false },
+      );
     } else {
       setSession(next(session));
     }

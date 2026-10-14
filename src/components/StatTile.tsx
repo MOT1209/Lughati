@@ -16,7 +16,6 @@ export function StatTile({ icon, value, label, accessibilityLabel }: StatTilePro
   return (
     <View
       accessible
-      accessibilityRole="adjustment"
       accessibilityLabel={ariaLabel}
       style={{
         flexGrow: 1,

@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { Alert } from 'react-native';
 
 import { setUiLocale } from '@/i18n';
 import { vocabulary } from '@/mocks/vocabulary';
@@ -44,8 +45,13 @@ describe('LessonQuiz', () => {
     expect(screen.getByText(`Correct answer: ${byId.get(first.answer)!.translations.ar}`)).toBeTruthy();
   });
 
-  it('reports the score after the last question', () => {
+  it('reports the score after the last question once confirmed', () => {
     const onFinish = jest.fn();
+    // Capture the confirm Alert buttons so the test can accept it.
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => {
+      const confirm = buttons?.find((b) => b.text === 'Finish');
+      confirm?.onPress?.();
+    });
     render(<LessonQuiz exercises={exercises} words={words} onFinish={onFinish} />);
     exercises.forEach((exercise, index) => {
       // Answer the first three correctly and the rest wrongly.
@@ -53,8 +59,24 @@ describe('LessonQuiz', () => {
       fireEvent.press(screen.getByRole('button', { name: optionName(exercise.type, id) }));
       fireEvent.press(screen.getByRole('button', { name: index === exercises.length - 1 ? 'Finish' : 'Next' }));
     });
+    expect(alertSpy).toHaveBeenCalledTimes(1);
     expect(onFinish).toHaveBeenCalledTimes(1);
     expect(onFinish).toHaveBeenCalledWith({ correct: 3, total: 12 });
+    alertSpy.mockRestore();
+  });
+
+  it('does not report the score when the confirmation is cancelled', () => {
+    const onFinish = jest.fn();
+    // No buttons pressed: the alert stays open and the lesson is not finished.
+    jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    render(<LessonQuiz exercises={exercises} words={words} onFinish={onFinish} />);
+    exercises.forEach((exercise, index) => {
+      const id = exercise.answer;
+      fireEvent.press(screen.getByRole('button', { name: optionName(exercise.type, id) }));
+      fireEvent.press(screen.getByRole('button', { name: index === exercises.length - 1 ? 'Finish' : 'Next' }));
+    });
+    expect(onFinish).not.toHaveBeenCalled();
+    jest.restoreAllMocks();
   });
 });
 

@@ -1,5 +1,6 @@
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
 import { renderRouter, screen } from 'expo-router/testing-library';
+import { Alert } from 'react-native';
 
 import LearnScreen from '@/app/(app)/(tabs)/learn';
 import LessonScreen from '@/app/(app)/lesson/[id]';
@@ -17,10 +18,17 @@ const routes = {
 };
 
 beforeEach(async () => {
+  // The quiz asks for confirmation before finishing; auto-accept it in these tests.
+  jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => {
+    const confirm = buttons?.find((b) => b.text === 'Finish');
+    confirm?.onPress?.();
+  });
   registerRepositories(createMockRepositories());
   useLearningStore.setState({ userId: '', profile: { source: 'ar', target: 'de' }, profileLoaded: true, progressVersion: 0 });
   await setUiLocale('en');
 });
+
+afterEach(() => jest.restoreAllMocks());
 
 describe('Learn screen', () => {
   it('lists the lessons of the current language with their status', async () => {
