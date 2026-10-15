@@ -65,7 +65,7 @@ export default function Home() {
         <Text variant="subheading">{t('home.dailyGoal')}</Text>
         <ProgressBar value={goalRatio} accessibilityLabel={t('home.dailyGoal')} />
         <Text variant="small" color="textSecondary">
-          {goalReached ? t('home.dailyGoalDone') : `${plan.minutesToday} / ${plan.dailyGoalMinutes}`}
+          {goalReached ? t('home.dailyGoalDone') : plan.minutesToday + ' / ' + plan.dailyGoalMinutes}
         </Text>
       </Card>
 
@@ -74,7 +74,7 @@ export default function Home() {
           <Text variant="subheading">{t('home.continueLearning')}</Text>
           <Text variant="heading">{localize(lesson.title, locale)}</Text>
           <Text variant="small" color="textSecondary">
-            {t('home.lessonMeta')} {lesson.levelId} - {lesson.estimatedMinutes} min
+            t('home.lessonMeta') + ' ' + lesson.levelId + ' - ' + lesson.estimatedMinutes + ' min'
           </Text>
           <ProgressBar value={progress.levelProgress} accessibilityLabel={t('home.overallProgress')} />
           <Button title={t('home.continueLearning')} icon="play-outline" iconDirectional onPress={() => router.push({ pathname: '/lesson/[id]', params: { id: lesson.id } })} />

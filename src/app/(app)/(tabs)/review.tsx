@@ -40,8 +40,8 @@ export default async function Review() {
   const { reviews } = await repos.reviews.get('u1', code);
 
   const due = reviews
-    .filter((s: { nextReviewAt: string }) => s.nextReviewAt <= new Date().toISOString())
-    .sort((a: { nextReviewAt: string }, b: { nextReviewAt: string }) => a.nextReviewAt.localeCompare(b.nextReviewAt));
+    .filter((s) => s.nextReviewAt <= new Date().toISOString())
+    .sort((a, b) => a.nextReviewAt.localeCompare(b.nextReviewAt));
 
   if (due.length === 0) {
     return (
@@ -82,7 +82,7 @@ export default async function Review() {
 
         <Card style={{ gap: 'sm' }}>
           <Text variant="subtitle" color="textSecondary">
-            {t('review.due', { nextReviewAt: word.nextReviewAt })}
+            {t('review.due')} {word.nextReviewAt}
           </Text>
           <Text variant="body">{t('review.outcomes')}:</Text>
           <View style={{ gap: 'xs' }}>
@@ -96,10 +96,10 @@ export default async function Review() {
         {word.lastReviewedAt ? (
           <Card style={{ gap: 'sm', marginTop: 12 }}>
             <Text variant="small" color="textSecondary">
-              {t('review.lastReviewed', { date: word.lastReviewedAt })}
+              {t('review.lastReviewed')} {word.lastReviewedAt}
             </Text>
             <Text variant="caption" color="textSecondary">
-              {t('review.nextReview', { nextReviewAt: word.nextReviewAt })}
+              {t('review.nextReview')} {word.nextReviewAt}
             </Text>
           </Card>
         ) : null}

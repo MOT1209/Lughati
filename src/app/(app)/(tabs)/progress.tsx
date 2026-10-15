@@ -51,7 +51,7 @@ export default function Progress() {
           Level {progress?.levelId ?? 'A1'}
         </Text>
 
-        <View style={styles.summary} accessible accessibilityLabel={t('progress.summaryAria', { xp, words, minutes })}>
+        <View style={styles.summary} accessible accessibilityLabel={t('progress.summaryAria') + ' ' + String(xp) + ' ' + String(words) + ' ' + String(minutes)}>
           <Text style={{ textAlign: 'center' }}>
             {t('progress.xp')} {xp}
           </Text>

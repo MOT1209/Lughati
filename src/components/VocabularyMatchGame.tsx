@@ -83,7 +83,7 @@ export function VocabularyMatchGame({ words, source }: VocabularyMatchProps) {
     <View style={{ gap: spacing.lg }}>
       <View style={{ gap: spacing.xs }}>
         <Text variant="caption" color="textSecondary">
-          Question {session.index + 1} of {words.length}
+          {t('lesson.questionOf')} {session.index + 1} {t('lesson.of')} {words.length}
         </Text>
       </View>
 
