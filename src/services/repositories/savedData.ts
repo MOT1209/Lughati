@@ -2,7 +2,15 @@ import { languages } from '@/mocks/languages';
 import { lessons } from '@/mocks/lessons';
 import { levels } from '@/mocks/levels';
 import { vocabulary } from '@/mocks/vocabulary';
-import type { LanguageCode, LearningPlan, LearningProfile, Progress } from '@/types';
+import type {
+  ActivityDay,
+  LanguageCode,
+  LearningPlan,
+  LearningProfile,
+  LessonAttempt,
+  Progress,
+  VocabularyReviewState,
+} from '@/types';
 
 /**
  * Validation of what was read back from device storage. Stored data is untrusted input (older
@@ -21,6 +29,10 @@ export interface SavedPlan {
 export interface SavedLearning {
   progress: Record<string, Progress>;
   plans: Record<string, SavedPlan>;
+  /** Keyed `userId:language`; optional so blobs written by older builds still parse. */
+  attempts?: Record<string, LessonAttempt[]>;
+  /** Keyed `userId:day`; local calendar days with recorded study activity. */
+  activity?: Record<string, ActivityDay>;
 }
 
 /** Generous sanity ceilings: they only exist to reject absurd values, not to limit real use. */
@@ -48,6 +60,15 @@ function isValidDay(value: unknown): value is string {
   const date = new Date(`${value}T00:00:00Z`);
   return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value);
 }
+
+/** Local calendar day (device time zone) of a date, `YYYY-MM-DD` — the same form activity is keyed by. */
+export function dayOf(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/** Exposed so activity records and streak logic agree on what a real calendar day is. */
+export { isValidDay };
 
 /**
  * A progress record is accepted only if it is self-consistent and matches the app's data:
@@ -130,9 +151,109 @@ export function parseSavedLearning(raw: string | null): SavedLearning {
     return {
       progress: pickValid(parsed.progress, isSavedProgress, (p) => progressKey(p.userId, p.targetLanguage)),
       plans: pickValid(parsed.plans, isSavedPlan, (p) => progressKey(p.plan.userId, p.plan.targetLanguage)),
+      attempts: isRecord(parsed.attempts) ? pickValid(parsed.attempts, isSavedAttemptList, attemptListKey) : undefined,
+      activity: isRecord(parsed.activity) ? pickValid(parsed.activity, isSavedActivity, (a) => activityKey(a.userId, a.day)) : undefined,
     };
   } catch {
     return empty;
+  }
+}
+
+// ------------------------------------------------------------------
+// Attempts, activity days and vocabulary review states. Each record class adds fields to what
+// older builds stored, so every check below tolerates records without the newer fields
+// (backwards compatibility) and rejects nonsensical newer values.
+// ------------------------------------------------------------------
+
+export const MAX_ATTEMPTS_PER_RECORD = 500;
+
+/** Storage key of one user/language attempt list; every listed attempt shares it. */
+export function attemptListKey(attempts: LessonAttempt[]): string {
+  const first = attempts[0];
+  return progressKey(first.userId, first.targetLanguage);
+}
+
+/**
+ * An attempt list for one user/language: unique stable ids, every lesson of that language, real
+ * timestamps, and 0 <= correct <= total within sane bounds.
+ */
+export function isSavedAttemptList(value: unknown): value is LessonAttempt[] {
+  if (!Array.isArray(value) || value.length === 0 || value.length > MAX_ATTEMPTS_PER_RECORD) return false;
+  const seenIds = new Set<string>();
+  let userId: string | null = null;
+  let language: string | null = null;
+  for (const entry of value) {
+    if (!isRecord(entry)) return false;
+    const { id, lessonId } = entry;
+    const entryUserId = entry.userId;
+    const entryLanguage = entry.targetLanguage;
+    const attemptUserId = typeof entryUserId === 'string' ? entryUserId : '';
+    const attemptLanguage = typeof entryLanguage === 'string' && languageCodes.has(entryLanguage) ? entryLanguage : null;
+    if (attemptUserId.length === 0 || attemptLanguage === null) return false;
+    if (typeof lessonId !== 'string' || lessonById.get(lessonId)?.targetLanguage !== attemptLanguage) return false;
+    if (userId === null) {
+      userId = attemptUserId;
+      language = attemptLanguage;
+    } else if (userId !== attemptUserId || language !== attemptLanguage) {
+      return false; // one record belongs to exactly one user/language pair
+    }
+    if (typeof id !== 'string' || id.length === 0 || seenIds.has(id)) return false;
+    seenIds.add(id);
+    const { attemptedAt, result, completed } = entry;
+    if (typeof attemptedAt !== 'string' || Number.isNaN(new Date(attemptedAt).getTime())) return false;
+    if (!isRecord(result)) return false;
+    const { correct, total } = result as Record<string, unknown>;
+    if (!isCount(correct) || !isCount(total) || correct > total) return false;
+    if (completed !== true && completed !== false) return false;
+  }
+  return true;
+}
+
+export const activityKey = (userId: string, day: string) => `${userId}:${day}`;
+
+/** One day's activity: a real calendar day and non-negative counters of sane magnitude. */
+export function isSavedActivity(value: unknown): value is ActivityDay {
+  return (
+    isRecord(value) &&
+    typeof value.userId === 'string' &&
+    value.userId.length > 0 &&
+    isValidDay(value.day) &&
+    isCount(value.minutes, MAX_COUNTER) &&
+    isCount(value.xp) &&
+    isCount(value.lessonsCompleted) &&
+    isCount(value.correctAnswers)
+  );
+}
+
+const reviewStateKeyOf = (state: VocabularyReviewState) => `${state.userId}:${state.wordId}`;
+
+/** One word's review state: known language, whole counters, real timestamps, sane step. */
+export function isSavedReviewState(value: unknown): value is VocabularyReviewState {
+  if (!isRecord(value)) return false;
+  const { userId, targetLanguage, wordId, step, correctCount, wrongCount, lastReviewedAt, nextReviewAt } = value;
+  if (typeof userId !== 'string' || userId.length === 0) return false;
+  if (typeof targetLanguage !== 'string' || !languageCodes.has(targetLanguage)) return false;
+  if (typeof wordId !== 'string' || wordId.length === 0) return false;
+  const word = vocabulary.find((w) => w.id === wordId);
+  if (!word || word.targetLanguage !== targetLanguage) return false;
+  if (!isCount(step, MAX_COUNTER)) return false;
+  if (!isCount(correctCount) || !isCount(wrongCount)) return false;
+  if (lastReviewedAt !== null && (typeof lastReviewedAt !== 'string' || Number.isNaN(new Date(lastReviewedAt).getTime()))) return false;
+  if (typeof nextReviewAt !== 'string' || Number.isNaN(new Date(nextReviewAt).getTime())) return false;
+  return true;
+}
+
+export { reviewStateKeyOf as reviewStateKey };
+
+/** Parses the stored review-state blob (keyed `userId:wordId`). Unreadable is "nothing saved". */
+export function parseSavedReviews(raw: string | null): Record<string, VocabularyReviewState> {
+  if (!raw) return {};
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed) || !isRecord(parsed.reviews)) return {};
+    return pickValid(parsed.reviews, isSavedReviewState, reviewStateKeyOf);
+  } catch {
+    return {};
   }
 }
 

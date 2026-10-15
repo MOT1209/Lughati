@@ -54,6 +54,18 @@ export interface Lesson {
   summary: Localized;
   order: number;
   estimatedMinutes: number;
+  /** Optional grouping into a unit; absent means the lesson stands alone in its level. */
+  unitId?: string;
+  /** What to do, shown before the words. Data-driven so it follows the app locale. */
+  instructions?: Localized;
+}
+
+/** A named group of lessons inside one level. Not used by the current mock course yet. */
+export interface Unit {
+  id: string;
+  levelId: LevelId;
+  order: number;
+  title: Localized;
 }
 
 // 'multiple-choice': see the target word, pick its meaning. 'translate': see the meaning, pick the
@@ -80,6 +92,10 @@ export interface Vocabulary {
   term: string;
   /** Meaning in every other course language, keyed by language; shown in the learner's source language. */
   translations: Partial<Record<LanguageCode, string>>;
+  /** Example sentence in the target language, optional. */
+  exampleSentence?: string;
+  /** Optional short, data-driven explanation shown with the word. */
+  note?: Localized;
 }
 
 /** What the learner did in one lesson run. */
@@ -105,7 +121,10 @@ export interface Progress {
 /** Consecutive days with learning activity. Per user, not per language. */
 export interface Streak {
   userId: string;
+  /** Current streak: consecutive activity days ending today or yesterday. 0 when cold. */
   days: number;
+  /** Longest streak ever seen in the activity history. Same as `days` when that is the record. */
+  best?: number;
 }
 
 export interface Achievement {
@@ -139,3 +158,64 @@ export interface AIConversation {
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 export type LanguagePreference = 'system' | UiLocale;
+
+// ------------------------------------------------------------------
+// Learning-progress domain (Agent 1): attempts, activity, reviews.
+// Everything below is additive; existing types above are unchanged.
+// ------------------------------------------------------------------
+
+/** One recorded lesson run. Recorded even when the lesson stayed incomplete. */
+export interface LessonAttempt {
+  /** Stable id: userId:language:lessonId:timestamp:sequence. */
+  id: string;
+  userId: string;
+  lessonId: string;
+  targetLanguage: LanguageCode;
+  /** ISO timestamp of the run. */
+  attemptedAt: string;
+  result: LessonResult;
+  /** True only when this run completed the lesson (the progression recorded it). */
+  completed: boolean;
+}
+
+/** What the learner did on one local calendar day, across all languages they learn. */
+export interface ActivityDay {
+  userId: string;
+  /** Calendar day in the device time zone, `YYYY-MM-DD`. */
+  day: string;
+  minutes: number;
+  xp: number;
+  lessonsCompleted: number;
+  correctAnswers: number;
+}
+
+/** How the answer went in a vocabulary review. */
+export type ReviewOutcome = 'again' | 'difficult' | 'good' | 'easy';
+
+/** One word's spaced-repetition state, per user. Scheduled by src/utils/srs.ts only. */
+export interface VocabularyReviewState {
+  userId: string;
+  targetLanguage: LanguageCode;
+  wordId: string;
+  /** 0-based position on the SRS interval ladder. 0 = new / relearning. */
+  step: number;
+  correctCount: number;
+  wrongCount: number;
+  /** ISO timestamp of the last review; null until reviewed at least once. */
+  lastReviewedAt: string | null;
+  /** ISO timestamp of when the word is due next. */
+  nextReviewAt: string;
+}
+
+/** What the app recommends the learner does next; computed by src/utils/recommendations.ts. */
+export type RecommendationKind = 'daily-goal' | 'review-due' | 'retry-lesson' | 'continue-lesson' | 'continue-unit';
+
+export interface Recommendation {
+  kind: RecommendationKind;
+  /** The lesson this points at, when there is one. */
+  lessonId?: string;
+  /** Deterministic ordering weight; callers sort by this descending. */
+  score: number;
+  /** Plain-English why, for debugging or as an accessible fallback. UIs may render their own copy. */
+  reason: string;
+}

@@ -4,7 +4,51 @@ import { getMockPlan, getMockProgress } from '@/mocks/progress';
 
 import { createMemoryStorage } from '../storage';
 import { createMockRepositories } from './mock';
-import { isSavedPlan, isSavedProgress, parseSavedLearning, progressKey } from './savedData';
+import type { ActivityDay, LanguageCode, LessonAttempt, VocabularyReviewState } from '@/types';
+import {
+  activityKey,
+  attemptListKey,
+  isSavedActivity,
+  isSavedAttemptList,
+  isSavedReviewState,
+  parseSavedLearning,
+  parseSavedReviews,
+  isSavedPlan,
+  isSavedProgress,
+  progressKey,
+  reviewStateKey,
+} from './savedData';
+
+const validAttempt = (overrides: Partial<LessonAttempt> = {}): LessonAttempt => ({
+  id: `a1`,
+  userId: 'u1',
+  lessonId: 'de-a1-1',
+  targetLanguage: 'de',
+  attemptedAt: '2026-10-12T10:00:00.000Z',
+  result: { correct: 10, total: 12 },
+  completed: true,
+  ...overrides,
+});
+const validActivity = (overrides: Partial<ActivityDay> = {}): ActivityDay => ({
+  userId: 'u1',
+  day: '2026-10-12',
+  minutes: 18,
+  xp: 140,
+  lessonsCompleted: 2,
+  correctAnswers: 20,
+  ...overrides,
+});
+const validReview = (overrides: Partial<VocabularyReviewState> = {}): VocabularyReviewState => ({
+  userId: 'u1',
+  targetLanguage: 'de',
+  wordId: 'de-a1-1-w1',
+  step: 2,
+  correctCount: 3,
+  wrongCount: 1,
+  lastReviewedAt: '2026-10-12T10:00:00.000Z',
+  nextReviewAt: '2026-10-19T10:00:00.000Z',
+  ...overrides,
+});
 
 // A learner part-way through German: two lessons done, the third current.
 const validProgress = () => ({
@@ -143,5 +187,148 @@ describe('repositories with a partly corrupt store', () => {
     expect(progress?.completedLessonIds).toEqual(ids);
     expect(progress?.currentLessonId).toBeNull();
     expect(progress?.wordsLearned).toBe(60);
+  });
+});
+
+describe('new records: attempts, activity and review states', () => {
+  it('isSavedAttemptList accepts a valid list and rejects broken ones', () => {
+    expect(isSavedAttemptList([validAttempt()])).toBe(true);
+    expect(isSavedAttemptList([validAttempt(), validAttempt({ id: 'a2', lessonId: 'de-a1-2', completed: false, result: { correct: 4, total: 12 } })])).toBe(true);
+
+    expect(isSavedAttemptList([])).toBe(false);
+    expect(isSavedAttemptList('array-not')).toBe(false);
+    expect(isSavedAttemptList([validAttempt({ lessonId: 'fr-a1-1' })])).toBe(false); // lesson of another language
+    expect(isSavedAttemptList([validAttempt({ targetLanguage: 'xx' as unknown as LanguageCode })])).toBe(false);
+    expect(isSavedAttemptList([validAttempt({ result: { correct: 13, total: 12 } })])).toBe(false);
+    expect(isSavedAttemptList([validAttempt({ attemptedAt: 'not-a-date' })])).toBe(false);
+    expect(isSavedAttemptList([validAttempt({ id: '' })])).toBe(false);
+    expect(isSavedAttemptList([validAttempt(), validAttempt()])).toBe(false); // duplicate ids
+    expect(isSavedAttemptList([validAttempt(), validAttempt({ id: 'a2', userId: 'u2' })])).toBe(false); // mixed users
+  });
+
+  it('isSavedActivity accepts a valid day and rejects broken ones', () => {
+    expect(isSavedActivity(validActivity())).toBe(true);
+    expect(isSavedActivity(validActivity({ day: '2026-02-31' }))).toBe(false);
+    expect(isSavedActivity(validActivity({ day: 'montag' }))).toBe(false);
+    expect(isSavedActivity(validActivity({ minutes: -1 }))).toBe(false);
+    expect(isSavedActivity(validActivity({ xp: 1.5 }))).toBe(false);
+    expect(isSavedActivity(validActivity({ userId: '' }))).toBe(false);
+  });
+
+  it('isSavedReviewState accepts a known word and rejects unknown or foreign ones', () => {
+    expect(isSavedReviewState(validReview())).toBe(true);
+    expect(isSavedReviewState(validReview({ wordId: 'ghost' }))).toBe(false);
+    expect(isSavedReviewState(validReview({ targetLanguage: 'fr' }))).toBe(false); // word is not French
+    expect(isSavedReviewState(validReview({ step: -1 }))).toBe(false);
+    expect(isSavedReviewState(validReview({ nextReviewAt: 'yesterday' }))).toBe(false);
+    expect(isSavedReviewState(validReview({ lastReviewedAt: null }))).toBe(true);
+  });
+
+  it('a blob written by an older build (no attempts/activity) still parses', () => {
+    const parsed = parseSavedLearning(blob({ 'u1:de': validProgress() }, { 'u1:de': validPlan() }));
+    expect(parsed.attempts).toBeUndefined();
+    expect(parsed.activity).toBeUndefined();
+    expect(Object.keys(parsed.progress)).toEqual(['u1:de']);
+  });
+
+  it('new parsing keeps valid attempts/activity and drops records under foreign keys', () => {
+    const attempts = [validAttempt(), validAttempt({ id: 'a2', lessonId: 'de-a1-2' })];
+    const wrongSpot = [validAttempt({ userId: 'u2' })]; // consistent on its own, but stored in the wrong slot
+    const parsed = parseSavedLearning(
+      JSON.stringify({
+        progress: { 'u1:de': validProgress() },
+        plans: {},
+        attempts: { [attemptListKey(attempts)]: attempts, 'someone-else:de': wrongSpot },
+        activity: { [activityKey('u1', '2026-10-12')]: validActivity(), other: validActivity() },
+      }),
+    );
+    expect(Object.keys(parsed.attempts!)).toEqual([attemptListKey(attempts)]);
+    expect(Object.keys(parsed.activity!)).toEqual([activityKey('u1', '2026-10-12')]);
+  });
+
+  it('attempts stored under a key that does not match their first record are dropped', () => {
+    const attempts = [validAttempt()];
+    const parsed = parseSavedLearning(
+      JSON.stringify({ progress: {}, plans: {}, attempts: { 'someone-else:de': attempts } }),
+    );
+    expect(parsed.attempts).toEqual({}); // the outer field exists, its only record was dropped
+  });
+
+  it('repositories persist attempts and activity from completeLesson and survive a restart', async () => {
+    const storage = createMemoryStorage();
+    let seq = 0;
+    const repos = createMockRepositories({ storage, now: () => new Date(2026, 9, 12, 12, 0, ++seq) });
+
+    await repos.progress.completeLesson('u1', 'de-a1-1', { correct: 11, total: 12 });
+    const attempts = await repos.progress.getAttempts('u1', 'de');
+    expect(attempts).toHaveLength(1);
+    expect(attempts[0]).toMatchObject({ lessonId: 'de-a1-1', completed: true, result: { correct: 11, total: 12 } });
+
+    const day = await repos.activity.getDay('u1', '2026-10-12');
+    expect(day).toMatchObject({ minutes: 8, xp: 130, lessonsCompleted: 1, correctAnswers: 11 });
+
+    const restarted = createMockRepositories({ storage, now: () => new Date(2026, 9, 12, 15) });
+    expect(await restarted.progress.getAttempts('u1', 'de')).toHaveLength(1);
+    expect((await restarted.activity.getDay('u1', '2026-10-12'))?.correctAnswers).toBe(11);
+  });
+
+  it('streaks come only from recorded activity, never from anything invented', async () => {
+    const storage = createMemoryStorage();
+    const repos = createMockRepositories({ storage, now: () => new Date(2026, 9, 12, 12) });
+    expect(await repos.progress.getStreak('u1')).toEqual({ userId: 'u1', days: 0, best: 0 });
+
+    await repos.progress.completeLesson('u1', 'de-a1-1', { correct: 12, total: 12 });
+    expect(await repos.progress.getStreak('u1')).toEqual({ userId: 'u1', days: 1, best: 1 });
+  });
+
+  it('the daily goal is configurable and clamped, and survives a restart', async () => {    const storage = createMemoryStorage();
+    const repos = createMockRepositories({ storage, now: () => new Date(2026, 9, 12, 12) });
+
+    expect((await repos.plans.setDailyGoal('u1', 'de', 25)).dailyGoalMinutes).toBe(25);
+    expect((await repos.plans.setDailyGoal('u1', 'de', 1)).dailyGoalMinutes).toBe(5); // clamped low
+    expect((await repos.plans.setDailyGoal('u1', 'de', 99_999)).dailyGoalMinutes).toBe(24 * 60); // clamped high
+
+    // The last written goal (24*60) survives a restart with the same day
+    const restarted = createMockRepositories({ storage, now: () => new Date(2026, 9, 12, 18) });
+    expect((await restarted.plans.get('u1', 'de')).dailyGoalMinutes).toBe(24 * 60);
+  });
+
+  it('vocabulary reviews are scheduled by the one scheduler, persisted and readable on restart', async () => {
+    const storage = createMemoryStorage();
+    let t = 0;
+    const repos = createMockRepositories({ storage, now: () => new Date(2026, 9, 12, 9, 0, t++) });
+
+    const state = await repos.reviews.recordReview('u1', 'de', 'de-a1-1-w1', 'good');
+    expect(state.step).toBe(1);
+    expect(state.lastReviewedAt).toBe(new Date(2026, 9, 12, 9, 0, t - 1).toISOString());
+    expect(state.correctCount).toBe(1);
+
+    expect(await repos.reviews.get('u1', 'de-a1-1-w1')).toMatchObject({ step: 1 });
+    expect(await repos.reviews.get('u1', 'ghost')).toBeNull();
+
+    // not due before the interval passes
+    expect(await repos.reviews.getDue('u1', 'de', new Date(2026, 9, 12, 9))).toEqual([]);
+    expect(await repos.reviews.getDue('u1', 'de', new Date(2026, 9, 13, 9))).toHaveLength(1);
+
+    // due tomorrow only for the word's language
+    expect(await repos.reviews.getDue('u1', 'fr', new Date(2026, 9, 13, 13))).toEqual([]);
+
+    await expect(repos.reviews.recordReview('u1', 'fr', 'de-a1-1-w1', 'good')).rejects.toThrow();
+
+    const restarted = createMockRepositories({ storage, now: () => new Date(2026, 9, 13, 13) });
+    expect(await restarted.reviews.get('u1', 'de-a1-1-w1')).toMatchObject({ correctCount: 1 });
+    expect(await restarted.reviews.getDue('u1', 'de')).toHaveLength(1);
+  });
+
+  it('reviews survive partial corruption: a bad record is dropped, valid ones remain', async () => {
+    const storage = createMemoryStorage();
+    const good = validReview();
+    const bad = validReview({ wordId: 'ghost' });
+    await storage.setItem(STORAGE_KEYS.vocabReviews, JSON.stringify({ reviews: { [reviewStateKey(good)]: good, [reviewStateKey(bad)]: bad } }));
+
+    const repos = createMockRepositories({ storage });
+    expect(await repos.reviews.get('u1', 'de-a1-1-w1')).toMatchObject({ step: 2 });
+    expect(await repos.reviews.get('u1', 'ghost')).toBeNull();
+    expect(parseSavedReviews(await storage.getItem(STORAGE_KEYS.vocabReviews))).toEqual({ [reviewStateKey(good)]: good });
   });
 });
