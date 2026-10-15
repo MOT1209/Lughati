@@ -8,7 +8,6 @@ import { Button, Card, ErrorState, Icon, LoadingState, Screen, Text } from '@/co
 import { useCurrentLearning } from '@/hooks/useCurrentLearning';
 import { useTheme } from '@/hooks/useTheme';
 import { useUiLocale } from '@/hooks/useUiLocale';
-import { isolate, isolateNative } from '@/utils/bidi';
 import { localize } from '@/utils/localize';
 import { ROUTES } from '@/utils/routing';
 
@@ -40,8 +39,7 @@ export default function Home() {
   return (
     <Screen edges={['top']}>
       <Text variant="title" accessibilityRole="header">
-        {t('home.greeting', { name: isolate(learning.user?.name ?? '') })}
-      </Text>
+        {t('home.greeting', { name: learning.user?.name ?? '' })}</Text>
 
       <Card style={{ gap: spacing.md }}>
         <Text variant="small" color="textSecondary">
@@ -53,29 +51,21 @@ export default function Home() {
             <Text variant="heading">{language ? localize(language.name, locale) : ''}</Text>
             {language && language.nativeName !== localize(language.name, locale) ? (
               <Text variant="small" color="textSecondary">
-                {isolateNative(language.nativeName, language.direction)}
+                {localize(language.nativeName, locale)}
               </Text>
             ) : null}
           </View>
-          {level ? (
-            <View accessible accessibilityLabel={`${t('home.level')}: ${localize(level.title, locale)}`}>
-              <Text variant="bodyStrong" color="primary">
-                {level.id}
-              </Text>
-              <Text variant="caption" color="textSecondary">
-                {localize(level.title, locale)}
-              </Text>
-            </View>
-          ) : null}
         </View>
-        <Button title={t('home.changeLanguage')} variant="secondary" icon="swap-horizontal-outline" onPress={() => router.push(ROUTES.languageSelection)} />
+        {language ? (
+          <Button title={t('home.changeLanguage')} variant="secondary" icon="swap-horizontal-outline" onPress={() => router.push(ROUTES.languageSelection)} />
+        ) : null}
       </Card>
 
       <Card style={{ gap: spacing.sm }}>
         <Text variant="subheading">{t('home.dailyGoal')}</Text>
         <ProgressBar value={goalRatio} accessibilityLabel={t('home.dailyGoal')} />
         <Text variant="small" color="textSecondary">
-          {goalReached ? t('home.dailyGoalDone') : t('home.dailyGoalProgress', { done: plan.minutesToday, goal: plan.dailyGoalMinutes })}
+          {goalReached ? t('home.dailyGoalDone') : `${plan.minutesToday} / ${plan.dailyGoalMinutes}`}
         </Text>
       </Card>
 
@@ -84,7 +74,7 @@ export default function Home() {
           <Text variant="subheading">{t('home.continueLearning')}</Text>
           <Text variant="heading">{localize(lesson.title, locale)}</Text>
           <Text variant="small" color="textSecondary">
-            {t('home.lessonMeta', { level: lesson.levelId, count: lesson.estimatedMinutes })}
+            {t('home.lessonMeta')} {lesson.levelId} - {lesson.estimatedMinutes} min
           </Text>
           <ProgressBar value={progress.levelProgress} accessibilityLabel={t('home.overallProgress')} />
           <Button title={t('home.continueLearning')} icon="play-outline" iconDirectional onPress={() => router.push({ pathname: '/lesson/[id]', params: { id: lesson.id } })} />

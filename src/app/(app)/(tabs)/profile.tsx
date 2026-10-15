@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ProgressBar } from '@/components/ProgressBar';
 import { LanguageBadge } from '@/components/LanguageBadge';
-import { StatTile } from '@/components/StatTile';
+import { StatTile } from '@/components/ui/StatTile';
 import { Button, Card, ErrorState, Icon, LoadingState, Screen, Text } from '@/components/ui';
 import { useCurrentLearning } from '@/hooks/useCurrentLearning';
 import { useTheme } from '@/hooks/useTheme';
@@ -86,4 +86,4 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   between: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },
-});
+});
