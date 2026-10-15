@@ -17,6 +17,10 @@ const routes = {
   'lesson/[id]': LessonScreen,
 };
 
+// Integration tests through renderRouter are slow on loaded/slow machines
+// (documented in docs/PHASE_1_AUDIT.md §12); give them a generous budget.
+const SLOW_TEST_TIMEOUT = 60_000;
+
 beforeEach(async () => {
   // The quiz asks for confirmation before finishing; auto-accept it in these tests.
   jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => {
@@ -39,14 +43,14 @@ describe('Learn screen', () => {
     expect(screen.getByRole('button', { name: 'Introducing yourself, Not started' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Numbers, Not started' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Getting around, Not started' })).toBeTruthy();
-  });
+  }, SLOW_TEST_TIMEOUT);
 
   it('shows an empty state for a language without lessons', async () => {
     const repos = createMockRepositories();
     registerRepositories({ ...repos, lessons: { ...repos.lessons, getByLanguage: async () => [] } });
     renderRouter({ learn: LearnScreen }, { initialUrl: '/learn' });
     expect(await screen.findByText('There are no lessons for this language yet.')).toBeTruthy();
-  });
+  }, SLOW_TEST_TIMEOUT);
 });
 
 describe('Lesson screen', () => {
@@ -73,7 +77,7 @@ describe('Lesson screen', () => {
     const progress = await getRepositories().progress.get('', 'de');
     expect(progress?.completedLessonIds).toContain('de-a1-3');
     expect(useLearningStore.getState().progressVersion).toBe(1);
-  });
+  }, SLOW_TEST_TIMEOUT);
 
   it('keeps the quiz and offers a retry when saving fails', async () => {
     const repos = createMockRepositories();
@@ -109,7 +113,7 @@ describe('Lesson screen', () => {
     });
     await waitFor(() => expect(screen.getByText('Well done! Lesson complete')).toBeTruthy());
     expect(attempts).toBe(2);
-  });
+  }, SLOW_TEST_TIMEOUT);
 
   it("shows meanings in the learner's own language", async () => {
     useLearningStore.setState({ profile: { source: 'es', target: 'de' } });
@@ -117,10 +121,10 @@ describe('Lesson screen', () => {
     expect(await screen.findByText(isolateLtr('Hallo'))).toBeTruthy();
     expect(screen.getByText('Hola')).toBeTruthy();
     expect(screen.queryByText('مرحباً')).toBeNull();
-  });
+  }, SLOW_TEST_TIMEOUT);
 
   it('shows a not-found state for an unknown lesson', async () => {
     renderRouter(routes, { initialUrl: '/lesson/nope' });
     expect(await screen.findByText('We could not find this lesson.')).toBeTruthy();
-  });
+  }, SLOW_TEST_TIMEOUT);
 });

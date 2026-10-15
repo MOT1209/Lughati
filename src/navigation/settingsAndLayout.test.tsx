@@ -22,6 +22,10 @@ jest.mock('expo-font', () => ({ ...jest.requireActual('expo-font'), useFonts: ()
 const user = { id: 'user-sara@example.com', name: 'Sara', email: 'sara@example.com', sourceLanguage: 'ar', targetLanguage: 'de', joinedAt: '2026-01-01' } as const;
 const session = { user, issuedAt: '2026-01-01T00:00:00.000Z' } as const;
 
+// Integration tests through renderRouter are slow on loaded/slow machines
+// (documented in docs/PHASE_1_AUDIT.md §12); give them a generous budget.
+const SLOW_TEST_TIMEOUT = 60_000;
+
 describe('Settings screen', () => {
   const routes = { index: () => <Text>splash</Text>, settings: SettingsScreen };
 
@@ -54,7 +58,7 @@ describe('Settings screen', () => {
 
     expect(alert).toHaveBeenCalledWith('Sign out', expect.stringContaining('could not be removed'));
     await waitFor(() => expect(screen.getByText('splash')).toBeTruthy());
-  });
+  }, SLOW_TEST_TIMEOUT);
 
   it('keeps the screen usable (no stuck spinner, no false alert) when sign-out fails for another reason', async () => {
     const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
@@ -68,7 +72,7 @@ describe('Settings screen', () => {
     expect(alert).not.toHaveBeenCalled();
     expect(screen.queryByText('splash')).toBeNull();
     expect(screen.getByRole('button', { name: 'Sign out' })).toBeEnabled();
-  });
+  }, SLOW_TEST_TIMEOUT);
 
   it('reverts the language choice and says so when applying it fails', async () => {
     jest.spyOn(appLanguage, 'applyLanguagePreference').mockRejectedValue(new Error('i18n down'));
@@ -80,7 +84,7 @@ describe('Settings screen', () => {
 
     expect(await screen.findByText('Could not change the app language. The previous language was kept.')).toBeTruthy();
     expect(usePreferencesStore.getState().languagePreference).toBe('system');
-  });
+  }, SLOW_TEST_TIMEOUT);
 });
 
 describe('Root layout', () => {
@@ -108,14 +112,14 @@ describe('Root layout', () => {
     renderRouter(routes, { initialUrl: '/' });
     expect(await screen.findByText('app-ready')).toBeTruthy();
     await waitFor(() => expect(mockHideAsync).toHaveBeenCalled());
-  });
+  }, SLOW_TEST_TIMEOUT);
 
   it('still starts when applying the saved language fails (no permanent splash)', async () => {
     jest.spyOn(appLanguage, 'applyLanguagePreference').mockRejectedValue(new Error('i18n down'));
     registerAuthService(new MockAuthService(0, createMemoryStorage()));
     renderRouter(routes, { initialUrl: '/' });
     expect(await screen.findByText('app-ready')).toBeTruthy();
-  });
+  }, SLOW_TEST_TIMEOUT);
 
   it('still starts, signed out, when reading the saved session fails', async () => {
     const service = new MockAuthService(0, createMemoryStorage());
@@ -126,7 +130,7 @@ describe('Root layout', () => {
     renderRouter(routes, { initialUrl: '/' });
     expect(await screen.findByText('app-ready')).toBeTruthy();
     expect(useAuthStore.getState()).toMatchObject({ initialized: true, session: null });
-  });
+  }, SLOW_TEST_TIMEOUT);
 
   it('keeps the splash while preferences are still loading', async () => {
     usePreferencesStore.setState({ hasHydrated: false });
@@ -135,5 +139,5 @@ describe('Root layout', () => {
     await act(async () => {});
     expect(screen.queryByText('app-ready')).toBeNull();
     expect(mockHideAsync).not.toHaveBeenCalled();
-  });
+  }, SLOW_TEST_TIMEOUT);
 });
