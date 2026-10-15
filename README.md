@@ -109,6 +109,7 @@ registerAIProvider(...)    // مزوّد AI
 | الملف | المحتوى |
 | :--- | :--- |
 | [TESTING.md](./TESTING.md) | سيناريوهات الاختبار اليدوي على الجهاز |
+| [docs/INTEGRATION_AGENT2.md](./docs/INTEGRATION_AGENT2.md) | دليل تكامل طبقة التعلّم والتقدّم (واجهات النماذج الجديدة) |
 | [docs/PHASE_1_AUDIT.md](./docs/PHASE_1_AUDIT.md) | نتائج مراجعة المرحلة الأولى |
 | [docs/audit/DEPENDENCY_AUDIT.md](./docs/audit/DEPENDENCY_AUDIT.md) | مراجعة الاعتماديات |
 
