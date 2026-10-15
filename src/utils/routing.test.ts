@@ -1,6 +1,6 @@
 import { getDirectionAction } from '@/services/direction';
 
-import { getRouteAccess, resolveInitialRoute, ROUTES } from './routing';
+import { getInAppAccess, getRouteAccess, resolveInitialRoute, ROUTES } from './routing';
 
 describe('route guard', () => {
   it('without a session only the auth group is reachable', () => {
@@ -9,6 +9,29 @@ describe('route guard', () => {
 
   it('with a session only the app group is reachable', () => {
     expect(getRouteAccess(true)).toEqual({ canSeeAuth: false, canSeeApp: true });
+  });
+});
+
+describe('in-app access policy', () => {
+  it('blocks every screen while the profile of the signed-in account has not been read yet', () => {
+    expect(getInAppAccess({ profileLoaded: false, hasLanguageProfile: false })).toEqual({
+      canSeeLearning: false,
+      canEditLanguages: false,
+    });
+  });
+
+  it('lets only the language setup through once the profile was loaded but none was chosen', () => {
+    expect(getInAppAccess({ profileLoaded: true, hasLanguageProfile: false })).toEqual({
+      canSeeLearning: false,
+      canEditLanguages: true,
+    });
+  });
+
+  it('unlocks learning screens for a complete profile', () => {
+    expect(getInAppAccess({ profileLoaded: true, hasLanguageProfile: true })).toEqual({
+      canSeeLearning: true,
+      canEditLanguages: true,
+    });
   });
 });
 

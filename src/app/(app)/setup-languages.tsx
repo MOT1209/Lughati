@@ -19,12 +19,14 @@ type Step = 'source' | 'target';
 export default function SetupLanguages() {
   const { t } = useTranslation();
   const { spacing } = useTheme();
-  const saved = useLearningStore((s) => s.profile);
+  const profile = useLearningStore((s) => s.profile);
   const saveProfile = useLearningStore((s) => s.saveProfile);
-  const [isEdit] = useState(saved !== null);
+  // Fixed per mount on purpose: opened from a completed profile = edit; opened by a signed-in
+  // learner without one = mandatory first setup. The profile never turns null here otherwise.
+  const isEdit = profile !== null;
   const [step, setStep] = useState<Step>('source');
-  const [source, setSource] = useState<LanguageCode | null>(saved?.source ?? null);
-  const [target, setTarget] = useState<LanguageCode | null>(saved?.target ?? null);
+  const [source, setSource] = useState<LanguageCode | null>(profile?.source ?? null);
+  const [target, setTarget] = useState<LanguageCode | null>(profile?.target ?? null);
   const [saving, setSaving] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
   const languages = useAsyncData(async () => {
@@ -54,18 +56,23 @@ export default function SetupLanguages() {
 
   const isSourceStep = step === 'source';
 
-  // Android hardware back: from the target step go back to the source step,
-  // from the source step fall through to the default (close the screen).
+  // Android hardware back on the first step of the flow:
+  // - editing an existing profile (opened from Settings) falls through to the default
+  //   behaviour, which pops back to the previous screen;
+  // - the mandatory first setup swallows the press: falling through here would either exit
+  //   the app or land on the splash, which only redirects right back into this screen.
+  // On the target step the press always returns to the source step instead of leaving.
+  // Returning "true" consumes the press, so a single tap cannot trigger two transitions.
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
       if (!isSourceStep) {
         setStep('source');
         return true;
       }
-      return false;
+      return !isEdit;
     });
     return () => subscription.remove();
-  }, [isSourceStep]);
+  }, [isSourceStep, isEdit]);
 
   const list = languages.status === 'success' ? (isSourceStep ? languages.data.sources : languages.data.targets.filter((l) => l.code !== source)) : [];
 
