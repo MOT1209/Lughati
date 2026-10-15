@@ -10,38 +10,48 @@ import { useLearningStore } from '@/store/learningStore';
 
 type BackPressHandler = (event: unknown) => boolean | null | undefined;
 
-// sourceTitle of the setup flow: both steps start with the source step.
+// Source title of the setup flow: both steps start with the source step.
 const SOURCE_TITLE = 'What is your language?';
 
-// The hardware back press handlers the screen subscribes while mounted.
+// Hardware back handlers currently registered with BackHandler (live entries only:
+// a subscription is removed from this array the moment its remove() is called).
 const subscriptions: BackPressHandler[] = [];
 let removeCalls = 0;
+let registrationCalls = 0;
 
 beforeAll(() => {
-  jest
-    .spyOn(BackHandler, 'addEventListener')
-    .mockImplementation((_name, handler) => {
-      subscriptions.push(handler as BackPressHandler);
-      return { remove: () => { removeCalls += 1; } };
-    });
+  jest.spyOn(BackHandler, 'addEventListener').mockImplementation((_name, handler) => {
+    const registered = handler as BackPressHandler;
+    subscriptions.push(registered);
+    registrationCalls += 1;
+    return {
+      remove: () => {
+        const index = subscriptions.indexOf(registered);
+        if (index !== -1) subscriptions.splice(index, 1);
+        removeCalls += 1;
+      },
+    };
+  });
 });
 
 afterAll(() => {
   jest.restoreAllMocks();
 });
 
-/** Dispatches the Android hardware back press on every live handler and records consumption.
- * React StrictMode (used by the test preset) mounts/unmounts effects twice, so transient
- * duplicate entries are expected; the device stops at the first handler returning true. */
-const pressHardwareBack = (): boolean[] => {
-  const results: boolean[] = [];
-  for (const handler of [...subscriptions]) {
-    // The screen only consumes the press by its return value; cast keeps the dispatch simple.
-    const event = {} as Parameters<BackPressHandler>[0];
-    const consumed = handler(event);
-    results.push(consumed ?? false);
-  }
-  return results;
+/** Simulates one Android hardware back press exactly the way the device dispatches it:
+ * handlers are invoked newest-registration first and the press is offered to each of
+ * them only until the first one consumes it (returns true). A consuming handler may
+ * update React state (the screen's setStep), so the dispatch runs inside act(), the
+ * same guarantee react-test-renderer expects for user-driven events. */
+const pressHardwareBack = (): boolean => {
+  let consumed = false;
+  act(() => {
+    for (let i = subscriptions.length - 1; i >= 0 && !consumed; i -= 1) {
+      const event = {} as Parameters<BackPressHandler>[0];
+      consumed = subscriptions[i](event) === true;
+    }
+  });
+  return consumed;
 };
 
 const renderAtSetup = (url: string) => renderRouter({ 'setup-languages': SetupLanguagesScreen } as never, { initialUrl: url });
@@ -52,6 +62,7 @@ describe('Android hardware back on the language setup screen', () => {
     await setUiLocale('en');
     subscriptions.length = 0;
     removeCalls = 0;
+    registrationCalls = 0;
   });
 
   afterEach(() =>
@@ -60,27 +71,29 @@ describe('Android hardware back on the language setup screen', () => {
     }),
   );
 
-  it('cleans every listener up when unmounted (no leak on re-mounts)', async () => {
+  it('unsubscribes every listener on unmount (no leak on re-mounts)', async () => {
     const first = renderAtSetup('/setup-languages');
     await screen.findByText(SOURCE_TITLE);
-    const registered = new Set(subscriptions);
-    expect(registered.size).toBeGreaterThanOrEqual(1);
+    // React StrictMode (used by the test preset) mounts/unmounts effects twice, so
+    // the transient first registration was already unsubscribed on its cleanup.
+    expect(subscriptions.length).toBeGreaterThanOrEqual(1);
     first.unmount();
-    expect(removeCalls).toBe(registered.size); // 1:1 unsubscribe, nothing leaks
-    subscriptions.length = 0;
-    removeCalls = 0;
+    expect(subscriptions.length).toBe(0); // nothing is left listening
+    expect(removeCalls).toBe(registrationCalls); // 1:1 unsubscribe for every registration
+
     const second = renderAtSetup('/setup-languages');
     await screen.findByText(SOURCE_TITLE);
-    expect(new Set(subscriptions).size).toBeGreaterThanOrEqual(1);
+    expect(subscriptions.length).toBeGreaterThanOrEqual(1);
     second.unmount();
-    expect(removeCalls).toBe(subscriptions.length);
+    expect(subscriptions.length).toBe(0);
+    expect(removeCalls).toBe(registrationCalls);
   });
 
   it('swallows the press on the source step during the mandatory setup (no accidental exit)', async () => {
     useLearningStore.setState({ userId: 'u1', profile: null, profileLoaded: true });
     renderAtSetup('/setup-languages');
     await screen.findByText('Step 1 of 2');
-    expect(pressHardwareBack().every(Boolean)).toBe(true); // consumed, stays on step 1
+    expect(pressHardwareBack()).toBe(true); // consumed, stays on step 1
     expect(screen.getByText('Step 1 of 2')).toBeTruthy();
   });
 
@@ -91,34 +104,37 @@ describe('Android hardware back on the language setup screen', () => {
     fireEvent.press(screen.getByRole('radio', { name: 'Arabic' }));
     fireEvent.press(screen.getByRole('button', { name: 'Next' }));
     await screen.findByText('Step 2 of 2');
-    expect(pressHardwareBack().every(Boolean)).toBe(true); // single press, single transition
-    expect(screen.getByText('Step 1 of 2')).toBeTruthy();
+    expect(pressHardwareBack()).toBe(true); // single press, single transition
+    await screen.findByText('Step 1 of 2');
   });
 
   it('falls through on the source step during an edit so the default pop runs', async () => {
     useLearningStore.setState({ userId: 'u1', profile: { source: 'ar', target: 'de' }, profileLoaded: true });
     renderAtSetup('/setup-languages');
     await screen.findByText(SOURCE_TITLE);
-    expect(pressHardwareBack().some(Boolean)).toBe(false); // not consumed: the router pops normally
+    expect(pressHardwareBack()).toBe(false); // not consumed: the router pops normally
   });
 
-  it('a stale listener from a previous mount no longer works', async () => {
+  it('a listener whose mount has been cleaned up no longer receives presses', async () => {
     useLearningStore.setState({ userId: 'u1', profile: { source: 'ar', target: 'de' }, profileLoaded: true });
     const first = renderAtSetup('/setup-languages');
     await screen.findByText(SOURCE_TITLE);
-    const firstSubscriptions = [...subscriptions];
+    expect(subscriptions.length).toBeGreaterThanOrEqual(1);
     first.unmount();
-    // The step change is routed by the LIVE subscription of a fresh mount, not a stale one.
-    subscriptions.length = 0;
+    // The cleanup removed the handler from the registry: a later press cannot reach
+    // a listener whose screen is gone, and no live handler was leaked either.
+    expect(subscriptions.length).toBe(0);
+    expect(removeCalls).toBe(registrationCalls);
+
     const second = renderAtSetup('/setup-languages');
     await screen.findByText(SOURCE_TITLE);
-    const before = removeCalls;
+    expect(subscriptions.length).toBeGreaterThanOrEqual(1);
+    // The step change is routed by the LIVE subscription of the fresh mount.
     fireEvent.press(screen.getByRole('radio', { name: 'Arabic' }));
     fireEvent.press(screen.getByRole('button', { name: 'Next' }));
     await screen.findByText('Step 2 of 2');
     second.unmount();
-    // Every listener registered across the two mounts was unsubscribed on cleanup.
-    expect(removeCalls - before).toBe(subscriptions.length);
-    expect(firstSubscriptions.length).toBeGreaterThanOrEqual(1);
+    expect(subscriptions.length).toBe(0);
+    expect(removeCalls).toBe(registrationCalls);
   });
 });

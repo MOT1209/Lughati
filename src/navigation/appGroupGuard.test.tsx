@@ -23,6 +23,8 @@ const routes = {
   '(app)/(tabs)/_layout': () => <Slot />,
   '(app)/(tabs)/home': () => <Text>home-screen</Text>,
   '(app)/setup-languages': () => <Text>setup-screen</Text>,
+  '(app)/language-selection': () => <Text>language-selection-screen</Text>,
+  '(app)/lesson/[id]': () => <Text>lesson-screen</Text>,
   '(app)/settings': () => <Text>settings-screen</Text>,
 };
 
