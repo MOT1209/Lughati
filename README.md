@@ -1,44 +1,69 @@
 <div align="center">
 
-# لغتي — Lughati
+# لغتي · Lughati
 
-**تطبيق لتعلّم اللغات للناطقين بالعربية** · A language-learning app for Arabic speakers
+**تطبيق لتعلّم اللغات، مبنيٌّ للناطقين بالعربية**
+*Learn languages, purpose-built for Arabic speakers*
 
-<a href="#-ما-الذي-يعمل-الآن"><img alt="Expo SDK 57" src="https://img.shields.io/badge/Expo_SDK-57-blue?logo=expo"></a>
-<a href="#-ما-الذي-يعمل-الآن"><img alt="React Native" src="https://img.shields.io/badge/React_Native-0.86-skyblue?logo=react"></a>
-<a href="#-ما-الذي-يعمل-الآن"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-blue?logo=typescript"></a>
-<a href="#-أوامر-التطوير"><img alt="Tests" src="https://img.shields.io/badge/Jest-25_suites-green?logo=jest"></a>
-<a href="#-ما-الذي-يعمل-الآن"><img alt="i18n" src="https://img.shields.io/badge/i18n-ar_·_en-orange"></a>
+<br/>
+
+<a href="#-التقنيات"><img alt="Expo SDK 57" src="https://img.shields.io/badge/Expo_SDK-57-000020?logo=expo&logoColor=white"></a>
+<a href="#-التقنيات"><img alt="React Native 0.86" src="https://img.shields.io/badge/React_Native-0.86-61DAFB?logo=react&logoColor=black"></a>
+<a href="#-التقنيات"><img alt="TypeScript strict" src="https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white"></a>
+<a href="#-الجودة"><img alt="Tests" src="https://img.shields.io/badge/Jest-25_suites_·_408_tests-99425B?logo=jest&logoColor=white"></a>
+<a href="#-التقنيات"><img alt="i18n ar · en" src="https://img.shields.io/badge/i18n-ar_·_en-EA580C"></a>
+<a href="#-الميزات"><img alt="RTL" src="https://img.shields.io/badge/واجهة-RTL-0F766E"></a>
 
 </div>
 
 > [!NOTE]
-> **المرحلة الأولى (Phase 1)** — الأساس فقط: بنية، ثيم، i18n/RTL، تنقّل، مكونات، بيانات وهمية. لا شبكة ولا AI حقيقي بعد.
+> **المرحلة الحالية — الأساس (Phase 1).** بنية، ثيم، تدويل/RTL، تنقّل، مكوّنات، وبيانات وهمية.
+> لا شبكة ولا ذكاء اصطناعي حقيقي بعد — والاستبدال بالحقيقي جاهز عبر المُسجِّلات (انظر [المعمارية](#-المعمارية)).
 
-## المحتويات
+---
 
-| | القسم |
-|---|---|
-| 1️⃣ | [ما الذي يعمل الآن؟](#-ما-الذي-يعمل-الآن) |
-| 2️⃣ | [التشغيل السريع](#-التشغيل-السريع) |
-| 3️⃣ | [أوامر التطوير](#-أوامر-التطوير) |
-| 4️⃣ | [بنية المشروع](#-بنية-المشروع) |
-| 5️⃣ | [استبدال الوهمي بالحقيقي](#-استبدال-الوهمي-بالحقيقي) |
-| 6️⃣ | [التوثيق الإضافي](#-التوثيق-الإضافي) |
+## 📖 نظرة عامة
 
-## ✨ ما الذي يعمل الآن؟
+**لغتي** تطبيق تعلّم لغات مصمَّم من الأساس لمتحدّثي العربية: واجهة عربية مع دعم كامل للاتجاه من
+اليمين إلى اليسار (RTL)، وجمع عربي صحيح، وخط Cairo. المحتوى بيانات-أوّلاً: إضافة لغة أو درس لا
+تتطلّب لمس أي شاشة.
+
+- 🎯 **موجَّه للمتعلّم العربي** — الواجهة والمحتوى بالعربية، مع تبديل كامل للإنجليزية.
+- 🧩 **قابل للاستبدال** — كل بيانات وهمية خلف واجهات ثابتة (`Repositories` / `Services`).
+- ✅ **مبنيّ بمعايير الجودة** — TypeScript صارم، اختبارات، وفحص آلي في CI.
+
+## ✨ الميزات
 
 | الميزة | الوصف |
 | :--- | :--- |
-| 📚 **الدروس** | 10 دروس A1 لكل لغة (60 كلمة/عبارة)، و12 تمريناً مولَّداً تلقائياً لكل درس |
-| 🏠 **التبويبات** | الرئيسية (الهدف اليومي + «واصل التعلّم») · الدروس · التقدم · حسابي |
-| 🔐 **الجلسة** | جلسة وهمية (مستخدم + وقت، دون كلمة مرور) — محفوظة محلياً وتُستعاد عند إعادة التشغيل |
-| ✍️ **اختيار اللغات** | تُختار لغتك ولغة التعلّم بعد الدخول (خطوتان)، ويُعدَّل الاختيار من الإعدادات |
-| 💾 **التقدم** | محفوظ محلياً على الجهاز (AsyncStorage) لكل مستخدم |
-| 🌐 **i18n + RTL** | واجهة عربية/إنجليزية مع تبديل الاتجاه (يتطلب إعادة تشغيل)، وجمع عربي صحيح على Hermes عبر `@formatjs/intl-pluralrules` |
-| ♿ **إمكانية الوصول** | تسميات شاشة للقرّاء، تلميحات أزرار الضغط، تأكيد قبل إنهاء الدرس، حماية من قيم NaN في شريط التقدم، والتعامل مع زر الرجوع في Android |
+| 📚 **مناهج A1** | 10 دروس لكل لغة (تحيات، أرقام، ألوان، طعام، أماكن…) — **60 كلمة/عبارة** لكل لغة |
+| ✍️ **تمارين تفاعلية** | **12 تمريناً** يُولَّد تلقائياً لكل درس (اختيار المعنى + اختيار الكلمة) بلا عشوائية قابلة للكسر |
+| 🎮 **لعبة المطابقة** | تمرين عملي داخل الدرس يقارن الكلمة بمعناها، مع نتيجة ومراجعة وإعادة — دون التأثير على إكمال الدرس |
+| 🔁 **مراجعة بالتكرار المتباعد (SRS)** | محرّك جدولة (١، ٣، ٧، ١٤، ٣٠، ٩٠ يوماً) + شاشة مراجعة للكلمات المستحقّة |
+| 🏠 **لوحة التعلّم** | الرئيسية (الهدف اليومي + «واصل التعلّم») · الدروس · التقدّم · الحساب |
+| 📈 **التقدّم والسلاسل** | XP، الكلمات، الدقائق، السلسلة اليومية والإنجازات — محفوظة لكل مستخدم |
+| 🌐 **تدويل + RTL** | عربي/إنجليزي مع تبديل الاتجاه، وجمع عربي صحيح على Hermes عبر `@formatjs/intl-pluralrules` |
+| 🎨 **ثيم Light/Dark** | ألوان ورموز وطباعة (خط Cairo) متّسقة، مع `useTheme` موحّد |
+| 🔐 **جلسة محلية** | جلسة وهمية (مستخدم + تاريخ، بلا كلمة مرور) تُحفظ وتُستعاد عند إعادة التشغيل |
+| ♿ **إمكانية وصول** | تسميات لقارئ الشاشة، أهداف لمس ≥ 48px، تأكيد قبل إنهاء الدرس، حماية من قيم `NaN`، ومعالجة زر الرجوع في Android |
+
+## 🧱 التقنيات
+
+| الطبقة | المستخدَم |
+| :--- | :--- |
+| المنصّة | Expo SDK **57** · React Native **0.86** · React **19.2** |
+| التنقّل | expo-router **57** (مسارات مُنمَّطة + React Compiler) |
+| اللغة | TypeScript **~6.0** (إعداد `strict`) |
+| الحالة | Zustand **5** (الجلسة · التفضيلات · ملفّ التعلّم) |
+| التدويل | i18next **26** + react-i18next **17** + `@formatjs/intl-pluralrules` |
+| التخزين | `@react-native-async-storage/async-storage` |
+| الطباعة | `@expo-google-fonts/cairo` |
+| الاختبار | Jest **29** + `jest-expo` **57** + `@testing-library/react-native` **13** |
+| الجودة | ESLint (إعداد Expo) + `tsc --noEmit` + GitHub Actions |
 
 ## 🚀 التشغيل السريع
+
+**المتطلّبات:** Node.js `22+` ومدير حزم (npm). للاختبار على الجهاز: تطبيق **Expo Go**.
 
 ```bash
 # 1) تثبيت الاعتماديات
@@ -47,76 +72,104 @@ npm install
 # 2) تشغيل خادم التطوير
 npx expo start
 
-# 3) افتح تطبيق Expo Go على Android وامسح رمز QR
+# 3) امسح رمز QR بتطبيق Expo Go على Android
 ```
+
+<details>
+<summary>مستخدم Bun؟ (وجود <code>bun.lock</code>)</summary>
+
+```bash
+bunx expo start
+```
+
+</details>
 
 ## 🧪 أوامر التطوير
 
 | الأمر | الغرض |
 | :--- | :--- |
-| `npm run typecheck` | فحص الأنواع (`strict`) |
-| `npm run lint` | ESLint (إعداد Expo) |
-| `npm test` | اختبارات Jest (25 suite عبر `jest-expo`) |
-| `npx expo-doctor` | فحص الاعتماديات والإعدادات |
+| `npm run typecheck` | فحص الأنواع (`tsc --noEmit`) |
+| `npm run lint` | ESLint بإعداد Expo |
+| `npm test` | اختبارات Jest (25 suite · 408 اختبار عبر `jest-expo`) |
+| `npx expo-doctor` | فحص سليم الاعتماديات والإعدادات |
 | `npx expo export --platform android` | التأكد أن الحزمة تُبنى |
 
-```bash
-# إن كنت تستخدم Bun (وجود bun.lock)، استبدل npx بـ bunx
-bunx expo start
-```
-
-الاختبار اليدوي على الجهاز مغطى في [TESTING.md](./TESTING.md).
+> [!TIP]
+> الاختبار اليدوي على الجهاز مغطّى بالتفصيل في [TESTING.md](./TESTING.md).
 
 ## 📂 بنية المشروع
 
-```
+```text
 src/
-├── app/                      # مسارات Expo Router
-│   ├── (auth)/               # Onboarding / Login / Register
-│   └── (app)/                # تبويبات + setup-languages + language-selection
-│                             # + settings + lesson/[id]
+├── app/                       # مسارات Expo Router (كل ملف = شاشة)
+│   ├── (auth)/                # Onboarding · Login · Register
+│   └── (app)/                 # التبويبات + setup-languages · language-selection · settings · lesson/[id]
 ├── components/
-│   ├── ui/                   # مكونات التصميم الأساسية
-│   └── *.tsx                 # مكونات مركّبة (LessonQuiz، StatTile، OptionButton…)
-├── theme/                    # ألوان Light/Dark و tokens وطباعة (Cairo)
-├── i18n/                     # ترجمة ar/en وتحديد اللغة والاتجاه
+│   ├── ui/                    # الأساسيات: Button · Card · Text · Icon · Screen · States · StatTile · Input
+│   └── *.tsx                  # مركّبة: LessonQuiz · VocabularyMatchGame · OptionButton · ProgressBar · …
+├── theme/                     # ألوان Light/Dark · tokens · طباعة Cairo · resolveScheme
+├── i18n/                      # ترجمة ar/en · resolveLocale · أنواع الترجمة
 ├── services/
-│   ├── auth/                 # واجهة + Mock للمصادقة
-│   ├── ai/                   # واجهة + Mock + سجل
-│   ├── repositories/         # واجهات + Mock للبيانات
-│   ├── direction.ts          # ربط التفضيل المحفوظ بالاتجاه
-│   ├── appLanguage.ts        # ربط التفضيل المحفوظ بـ i18n
-│   └── storage.ts            # غلاف AsyncStorage
-├── navigation/               # RootNavigator — حارس المسارات حسب الجلسة
-├── store/                    # Zustand: التفضيلات + الجلسة + بروفيل اللغات
-├── mocks/                    # بيانات وهمية بالعربية
-├── types/                    # نموذج البيانات
-└── utils/ + hooks/           # أدوات مساعدة و hooks
+│   ├── auth/                  # واجهة + Mock للمصادقة
+│   ├── ai/                    # واجهة + Mock + سجلّ
+│   ├── repositories/          # واجهات + Mock + طبقة الحفظ (savedData)
+│   ├── vocabulary.ts          # فهرسة المفردات حسب المعرّف
+│   ├── direction.ts           # ربط التفضيل المحفوظ بالاتجاه
+│   └── appLanguage.ts         # ربط التفضيل المحفوظ بـ i18n
+├── navigation/                # RootNavigator — حراسة المسارات حسب الجلسة وملفّ اللغة
+├── store/                     # Zustand: authStore · learningStore · preferencesStore
+├── mocks/                     # بيانات وهمية (لغات · دروس · مفردات · مستويات · تقدّم · مستخدمون)
+├── hooks/                     # useAsyncData · useCurrentLearning · useLessonList · useTheme · useUiLocale
+├── utils/                     # srs · recommendations · streaks · progression · exercises · bidi · meaning · routing …
+└── types/                     # نموذج البيانات
 ```
 
-## 🔁 استبدال الوهمي بالحقيقي
+## 🏗️ المعمارية
 
-الشاشات لا تعرف شيئاً عن تنفيذ الخدمات — الاستبدال يتم عبر المُسجِّلات فقط:
+الشاشات **لا تعرف شيئاً** عن تنفيذ الخدمات؛ الاستبدال يتم عبر المُسجِّلات فقط — ما يجعل الانتقال من
+الوهمي إلى الحقيقي تغييراً في مكان واحد:
 
 ```ts
-registerAuthService(...)   // مصادقة حقيقية
-registerRepositories(...)  // قاعدة بيانات / API
-registerAIProvider(...)    // مزوّد AI
+registerAuthService(service)     // مصادقة حقيقية
+registerRepositories(repos)      // قاعدة بيانات / API
+registerAIProvider(provider)     // مزوّد ذكاء اصطناعي
 ```
+
+**مسار البيانات:** `Screen → Hook (useAsyncData) → Repository → Storage`.
+المفاتيح محفوظة في `src/constants/app.ts` (مثل `lughati.session.v1`, `lughati.learning-progress.v1`).
+
+## ✅ الجودة
+
+| الفحص | الحالة |
+| :--- | :--- |
+| الأنواع (`tsc --noEmit`) | نظيف |
+| ESLint | 0 أخطاء |
+| الاختبارات | 25 ملف · 408 اختبار ناجح |
+| CI | typecheck + lint + test + `expo export` على `main` وعند كل PR |
+
+سُلاسل الاختبار تغطّي: التنقّل والحراسة، شاشات التعلّم، الاختبارات واللعبة، التدويل (تكافؤ المفاتيح
+وعدم الفراغ)، المواعيد (SRS/السلاسل)، والمخازن.
+
+## 🗺️ خارطة الطريق
+
+- [x] **المرحلة 1 — الأساس:** بنية · ثيم · i18n/RTL · تنقّل · مكوّنات · بيانات وهمية
+- [ ] **المرحلة 2 — الشبكة:** ربط مصادقة وتخزين وبيانات حقيقية عبر المُسجِّلات
+- [ ] **المرحلة 3 — الذكاء الاصطناعي:** مزوّد AI للتوليد والتقييم والتصحيح
+- [ ] **المرحلة 4 — أصوات ومحتوى:** نطق، استماع، ومحتوى أوسع (A2 وما بعدها)
 
 ## 📝 التوثيق الإضافي
 
 | الملف | المحتوى |
 | :--- | :--- |
 | [TESTING.md](./TESTING.md) | سيناريوهات الاختبار اليدوي على الجهاز |
-| [docs/INTEGRATION_AGENT2.md](./docs/INTEGRATION_AGENT2.md) | دليل تكامل طبقة التعلّم والتقدّم (واجهات النماذج الجديدة) |
+| [docs/INTEGRATION_AGENT2.md](./docs/INTEGRATION_AGENT2.md) | دليل تكامل طبقة التعلّم والتقدّم (واجهات النماذج) |
 | [docs/PHASE_1_AUDIT.md](./docs/PHASE_1_AUDIT.md) | نتائج مراجعة المرحلة الأولى |
-| [docs/audit/DEPENDENCY_AUDIT.md](./docs/audit/DEPENDENCY_AUDIT.md) | مراجعة الاعتماديات |
+| [docs/audit/DEPENDENCY_AUDIT.md](./docs/audit/DEPENDENCY_AUDIT.md) | مراجعة الاعتماديات وسجلّ `npm audit` |
 
 ---
 
 <div align="center">
 
-صُنع بـ ❤️ — **لغتي**
+صُنع بـ ❤️ — **لغتي · Lughati**
 
 </div>
