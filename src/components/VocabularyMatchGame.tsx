@@ -1,128 +1,211 @@
-import { useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { OptionButton, type OptionState } from '@/components/OptionButton';
-import { Text, Button } from '@/components/ui';
+import { ProgressBar } from '@/components/ProgressBar';
+import { Button, Text } from '@/components/ui';
 import { useTheme } from '@/hooks/useTheme';
-import type { LanguageCode, Vocabulary } from '@/types';
+import type { LanguageCode, LessonResult, Vocabulary } from '@/types';
 import { isolateTerm, meaningOf } from '@/utils/meaning';
 
-interface VocabularyMatchProps {
-  words: Vocabulary[];
-  source: LanguageCode | null;
+/** A match round needs at least this many words to build meaningful options. */
+export const MIN_MATCH_WORDS = 4;
+
+/** Options per question: the answer plus distractors. */
+const OPTION_COUNT = 4;
+
+interface MatchQuestion {
+  /** The word to translate; its meaning is the correct option. */
+  wordId: string;
+  /** Vocabulary ids offered as answers, in display order. Always contains `wordId`. */
+  optionIds: string[];
 }
 
-export function VocabularyMatchGame({ words, source }: VocabularyMatchProps) {
+interface VocabularyMatchGameProps {
+  words: Vocabulary[];
+  source?: LanguageCode | null;
+  /** Called once, when the learner answers the last question. Persist the attempt here. */
+  onFinish?: (result: LessonResult) => Promise<void> | void;
+  /** Called when the learner leaves the summary. */
+  onExit?: () => void;
+  /** Injectable RNG so shuffles are deterministic under test. */
+  random?: () => number;
+}
+
+function shuffle<T>(items: T[], random: () => number): T[] {
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+/**
+ * One question per playable word: show the word, pick its meaning from `OPTION_COUNT` options.
+ * Words without a meaning in the learner's language are skipped rather than shown blank.
+ *
+ * Exported for tests: the shuffle is driven entirely by `random`, so a fixed RNG is deterministic.
+ */
+export function buildMatchSession(
+  words: Vocabulary[],
+  source: LanguageCode | null,
+  random: () => number = Math.random,
+): MatchQuestion[] {
+  const playable = words.filter((word) => meaningOf(word, source).trim() !== '');
+  if (playable.length < 2) return [];
+  return shuffle(playable, random).map((word) => {
+    const distractors = shuffle(
+      playable.filter((other) => other.id !== word.id),
+      random,
+    ).slice(0, OPTION_COUNT - 1);
+    return { wordId: word.id, optionIds: shuffle([word.id, ...distractors.map((d) => d.id)], random) };
+  });
+}
+
+export function VocabularyMatchGame({ words, source = null, onFinish, onExit, random = Math.random }: VocabularyMatchGameProps) {
   const { t } = useTranslation();
   const { spacing } = useTheme();
-  const byId = new Map(words.map((word) => [word.id, word]));
+  // Built once per session (a replay rebuilds it) so options never reshuffle mid-question.
+  const [questions, setQuestions] = useState(() => buildMatchSession(words, source, random));
+  const [index, setIndex] = useState(0);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [correct, setCorrect] = useState(0);
+  const [phase, setPhase] = useState<'playing' | 'finished'>('playing');
+  const [savedResult, setSavedResult] = useState<LessonResult | null>(null);
+  const [saveFailed, setSaveFailed] = useState(false);
+  const saving = useRef(false); // a double tap must not record the attempt twice
 
-  const [pairs, setPairs] = useState<{ word: Vocabulary; matched: boolean }[]>(() => {
-    const shuffled = [...words];
-    return shuffled.map((w) => ({ word: w, matched: false }));
-  });
-  const [session, setSession] = useState<{
-    index: number;
-    selectedWordId: string | null;
-    correct: number;
-    total: number;
-  }>({ index: 0, selectedWordId: null, correct: 0, total: words.length });
+  const byId = useMemo(() => new Map(words.map((word) => [word.id, word])), [words]);
 
-  const word = pairs[session.index]?.word;
-  if (!word) return null;
+  const total = questions.length;
+  const result = savedResult ?? { correct, total };
+  const currentWord = index < total ? byId.get(questions[index].wordId) : undefined;
 
-  const meaning = meaningOf(word, source);
-  const otherWords = pairs
-    .filter((p) => p.word.id !== word.id && !p.matched)
-    .map((p) => p.word.id);
+  if (total === 0) {
+    return <Text color="textSecondary">{t('practice.needWords')}</Text>;
+  }
 
-  const options = [
-    ...otherWords,
-    word.id,
-  ].sort(() => Math.random() - 0.5);
+  const playAgain = () => {
+    setIndex(0);
+    setSelectedId(null);
+    setCorrect(0);
+    setSavedResult(null);
+    setSaveFailed(false);
+    setPhase('playing');
+    setQuestions(buildMatchSession(words, source, random));
+  };
 
-  const exercise = options.map((id) => ({
-    id,
-    type: 'match' as const,
-    subjectId: word.id,
-    options,
-    answer: word.id,
-  }))[session.index];
+  if (phase === 'finished') {
+    return (
+      <View style={{ gap: spacing.md }}>
+        <Text variant="title" accessibilityRole="header" style={{ textAlign: 'center' }}>
+          {t('practice.summaryTitle')}
+        </Text>
+        <Text style={{ textAlign: 'center' }}>
+          {t('practice.summaryScore', { correct: result.correct, total: result.total })}
+        </Text>
+        <Button title={t('common.retry')} variant="secondary" onPress={playAgain} />
+        {onExit ? <Button title={t('common.continue')} icon="arrow-forward-outline" iconDirectional onPress={onExit} /> : null}
+      </View>
+    );
+  }
 
-  if (!exercise) return null;
+  if (!currentWord) return null;
 
-  const selected = session.selectedWordId;
-  const wasCorrect = selected === exercise.answer;
-  const isLast = session.index === words.length - 1;
+  const question = questions[index];
+  const answered = selectedId !== null;
+  const wasCorrect = selectedId === question.wordId;
+  const isLast = index === total - 1;
+
+  const label = (id: string) => {
+    const word = byId.get(id);
+    return word ? meaningOf(word, source) : '';
+  };
 
   const stateOf = (id: string): OptionState => {
-    if (id === exercise.answer && wasCorrect) return 'correct';
-    if (id === selected) return 'wrong';
-    return 'idle';
+    if (!answered) return 'idle';
+    if (id === question.wordId) return 'correct';
+    return id === selectedId ? 'wrong' : 'dimmed';
   };
 
   const onSelect = (id: string) => {
-    setSession({
-      ...session,
-      selectedWordId: id,
-      correct:
-        session.correct + (id === exercise.answer ? 1 : 0),
-    });
+    if (answered) return;
+    setSelectedId(id);
+    if (id === question.wordId) setCorrect((n) => n + 1);
+  };
+
+  const finalize = async (final: LessonResult) => {
+    if (saving.current) return;
+    saving.current = true;
+    setSaveFailed(false);
+    setSavedResult(final);
+    try {
+      if (onFinish) await onFinish(final);
+      setPhase('finished');
+    } catch {
+      setSaveFailed(true);
+    } finally {
+      saving.current = false;
+    }
   };
 
   const onNext = () => {
-    setSession({
-      ...session,
-      index: session.index + 1,
-      selectedWordId: null,
-    });
+    if (isLast) {
+      void finalize({ correct, total });
+      return;
+    }
+    setSelectedId(null);
+    setIndex((i) => i + 1);
   };
 
   return (
     <View style={{ gap: spacing.lg }}>
       <View style={{ gap: spacing.xs }}>
+        <ProgressBar
+          value={index / total}
+          accessibilityLabel={t('lesson.questionOf', { current: index + 1, total })}
+        />
         <Text variant="caption" color="textSecondary">
-          {t('lesson.questionOf')} {session.index + 1} {t('lesson.of')} {words.length}
+          {t('lesson.questionOf', { current: index + 1, total })}
         </Text>
       </View>
 
       <View style={{ gap: spacing.sm }}>
-        <Text color="textSecondary">{t('lesson.matchWord')}</Text>
+        <Text color="textSecondary">{t('lesson.questionMeaning')}</Text>
         <Text variant="display" accessibilityRole="header">
-          {isolateTerm(word)}
+          {isolateTerm(currentWord)}
         </Text>
       </View>
 
       <View style={{ gap: spacing.sm }}>
-        {options.map((id) => (
+        {question.optionIds.map((id) => (
           <OptionButton
             key={id}
-            text={byId.get(id) ? isolateTerm(byId.get(id)!) : ''}
-            accessibilityLabel={t('lesson.option')}
+            text={label(id)}
+            accessibilityLabel={t('lesson.option', { text: label(id) })}
             state={stateOf(id)}
-            disabled={session.selectedWordId !== null}
+            disabled={answered}
             onPress={() => onSelect(id)}
           />
         ))}
       </View>
 
-      {session.selectedWordId !== null ? (
+      {answered ? (
         <View style={{ gap: spacing.sm }} accessibilityLiveRegion="polite">
           <Text variant="bodyStrong" color={wasCorrect ? 'success' : 'error'}>
             {t(wasCorrect ? 'lesson.correct' : 'lesson.incorrect')}
           </Text>
-          {!wasCorrect && (
-            <Text color="textSecondary">{t('lesson.correctAnswerWas')} {isolateTerm(word)}</Text>
-          )}
-          {isLast ? null : (
-            <Button title={t('lesson.next')} onPress={onNext} />
-          )}
-          {isLast ? (
-            <Button title={t('lesson.finish')} onPress={() => {
-              // TODO: finish and save progress
-            }} />
+          {!wasCorrect ? (
+            <Text color="textSecondary">{t('lesson.correctAnswerWas', { answer: meaningOf(currentWord, source) })}</Text>
           ) : null}
+          {saveFailed ? <Text color="error">{t('lesson.saveFailed')}</Text> : null}
+          {saveFailed ? (
+            <Button title={t('common.retry')} onPress={() => void finalize(result)} />
+          ) : (
+            <Button title={t(isLast ? 'lesson.finish' : 'lesson.next')} onPress={onNext} />
+          )}
         </View>
       ) : null}
     </View>

@@ -13,7 +13,6 @@ export const ROUTES = {
   // Keep the string form for legacy usage, but prefer this helper for navigation.
   lessonRoute: (id: string) => ({ pathname: '/lesson/[id]' as const, params: { id } } as const),
   review: '/review',
-  reviewRoute: (wordId: string) => ({ pathname: '/review/[wordId]' as const, params: { wordId } } as const),
 } as const;
 
 export type InitialRoute = typeof ROUTES.onboarding | typeof ROUTES.login | typeof ROUTES.setupLanguages | typeof ROUTES.home;

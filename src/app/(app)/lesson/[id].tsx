@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { LessonQuiz } from '@/components/LessonQuiz';
+import { MIN_MATCH_WORDS, VocabularyMatchGame } from '@/components/VocabularyMatchGame';
 import { Button, Card, EmptyState, ErrorState, LoadingState, Screen, Text } from '@/components/ui';
 import { useAsyncData } from '@/hooks/useAsyncData';
 import { useTheme } from '@/hooks/useTheme';
@@ -16,7 +17,7 @@ import { localize } from '@/utils/localize';
 import { isolateTerm, meaningOf } from '@/utils/meaning';
 import { XP_LESSON_BONUS, XP_PER_CORRECT_ANSWER } from '@/utils/progression';
 
-type Step = 'intro' | 'quiz' | 'summary';
+type Step = 'intro' | 'quiz' | 'practice' | 'summary';
 
 export default function LessonScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -81,6 +82,25 @@ export default function LessonScreen() {
     }
   };
 
+  // Practice records an attempt (not a completion): the lesson's progression stays untouched.
+  const persistPractice = async (practice: LessonResult) => {
+    await getRepositories().progress.recordAttempt(userId, lesson.id, practice, { completed: false });
+    notifyProgressChanged();
+  };
+
+  if (step === 'practice') {
+    return (
+      <Screen edges={['bottom']}>
+        <VocabularyMatchGame
+          words={words}
+          source={source}
+          onFinish={persistPractice}
+          onExit={() => setStep('intro')}
+        />
+      </Screen>
+    );
+  }
+
   if (step === 'quiz') {
     return (
       <Screen edges={['bottom']}>
@@ -137,6 +157,15 @@ export default function LessonScreen() {
       ) : (
         <Button title={t('lesson.start')} icon="play-outline" iconDirectional onPress={() => setStep('quiz')} />
       )}
+
+      {words.length >= MIN_MATCH_WORDS ? (
+        <Button
+          title={t('practice.play')}
+          variant="secondary"
+          icon="game-controller-outline"
+          onPress={() => setStep('practice')}
+        />
+      ) : null}
     </Screen>
   );
 }

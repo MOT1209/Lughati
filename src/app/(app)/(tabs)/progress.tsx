@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { ProgressBar } from '@/components/ProgressBar';
-import { Card, EmptyState, ErrorState, StatTile, Button, Screen, Text } from '@/components/ui';
+import { Card, ErrorState, LoadingState, StatTile, Button, Screen, Text } from '@/components/ui';
 import { useCurrentLearning } from '@/hooks/useCurrentLearning';
 import { useTheme } from '@/hooks/useTheme';
 import { useUiLocale } from '@/hooks/useUiLocale';
@@ -12,58 +12,57 @@ import { ROUTES } from '@/utils/routing';
 
 export default function Progress() {
   const { t } = useTranslation();
-  const { colors } = useTheme();
+  const { spacing } = useTheme();
   const { locale } = useUiLocale();
   const learning = useCurrentLearning();
 
   if (learning.status === 'loading') {
     return (
       <Screen edges={['top']}>
-        <ProgressBar value={0} accessibilityLabel={t('progress.loading')} />
+        <LoadingState message={t('progress.loading')} />
       </Screen>
     );
   }
   if (learning.status === 'error') {
     return (
       <Screen edges={['top']}>
-        <Text variant="heading" style={{ textAlign: 'center' }}>
-          {t('progress.error')}
-        </Text>
+        <ErrorState message={t('progress.error')} onRetry={learning.reload} />
       </Screen>
     );
   }
 
-  const { progress, streak } = learning.data;
+  const { progress, streak, level, lesson } = learning.data;
   const completedLessons = progress?.completedLessonIds?.length ?? 0;
 
   const xp = progress?.totalXp ?? 0;
   const words = progress?.wordsLearned ?? 0;
   const minutes = progress?.minutesLearned ?? 0;
 
+  // The level label comes from the loaded level; the raw id is only a fallback when it is missing.
+  const levelLabel = level ? localize(level.title, locale) : progress?.levelId ?? null;
+
   return (
     <Screen edges={['top']}>
-      <Text variant="title" style={{ textAlign: 'center' }}>
+      <Text variant="title" style={styles.centerText} accessibilityRole="header">
         {t('progress.title')}
       </Text>
 
-      <Card style={{ gap: 'md' }}>
-        <Text style={{ textAlign: 'center' }}>
-          Level {progress?.levelId ?? 'A1'}
-        </Text>
+      <Card style={{ gap: spacing.md }}>
+        {levelLabel ? (
+          <Text style={styles.centerText}>{t('progress.level', { level: levelLabel })}</Text>
+        ) : null}
 
-        <View style={styles.summary} accessible accessibilityLabel={t('progress.summaryAria') + ' ' + String(xp) + ' ' + String(words) + ' ' + String(minutes)}>
-          <Text style={{ textAlign: 'center' }}>
-            {t('progress.xp')} {xp}
-          </Text>
-          <Text style={{ textAlign: 'center' }}>
-            {t('progress.words')} {words}
-          </Text>
-          <Text style={{ textAlign: 'center' }}>
-            {t('progress.minutes')} {minutes}
-          </Text>
+        <View
+          accessible
+          accessibilityLabel={t('progress.summaryAria', { xp, words, minutes })}
+          style={{ gap: spacing.sm }}
+        >
+          <Text style={styles.centerText}>{t('progress.xp', { xp })}</Text>
+          <Text style={styles.centerText}>{t('progress.words', { words })}</Text>
+          <Text style={styles.centerText}>{t('progress.minutes', { minutes })}</Text>
         </View>
 
-        <View style={styles.grid}>
+        <View style={[styles.grid, { gap: spacing.md }]}>
           <StatTile icon="flash-outline" value={String(xp)} label={t('progress.statXp')} />
           <StatTile icon="text-outline" value={String(words)} label={t('progress.statWords')} />
           <StatTile icon="time-outline" value={String(minutes)} label={t('progress.statMinutes')} />
@@ -72,18 +71,25 @@ export default function Progress() {
         </View>
       </Card>
 
-      {progress?.currentLessonId ? (
-        <Card style={{ gap: 'sm', marginTop: 12 }}>
-          <Text variant="subtitle" color="textSecondary">
+      {lesson ? (
+        <Card style={{ gap: spacing.sm }}>
+          <Text variant="small" color="textSecondary">
             {t('progress.currentLesson')}
           </Text>
-          <Text variant="bodyStrong">
-            {localize(progress.currentLessonId, locale)}
-          </Text>
+          <Text variant="bodyStrong">{localize(lesson.title, locale)}</Text>
+          <ProgressBar
+            value={progress?.levelProgress ?? 0}
+            accessibilityLabel={t('home.overallProgress')}
+          />
+          <Button
+            title={t('progress.continueLearning')}
+            variant="secondary"
+            onPress={() => router.push(ROUTES.lesson(lesson.id))}
+          />
         </Card>
       ) : null}
 
-      <View style={{ marginTop: 24, alignItems: 'center' }}>
+      <View style={[styles.footer, { marginTop: spacing.xl }]}>
         <Button title={t('progress.continueLearning')} variant="secondary" onPress={() => router.push(ROUTES.learn)} />
       </View>
     </Screen>
@@ -91,7 +97,7 @@ export default function Progress() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: 24, padding: 24 },
-  summary: { gap: 8, marginBottom: 8, borderRadius: 12, borderWidth: 1, padding: 16, textAlign: 'center' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  centerText: { textAlign: 'center' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap' },
+  footer: { alignItems: 'center' },
 });

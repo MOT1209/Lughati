@@ -8,6 +8,7 @@ import { Button, Card, ErrorState, Icon, LoadingState, Screen, Text } from '@/co
 import { useCurrentLearning } from '@/hooks/useCurrentLearning';
 import { useTheme } from '@/hooks/useTheme';
 import { useUiLocale } from '@/hooks/useUiLocale';
+import { isolateNative } from '@/utils/bidi';
 import { localize } from '@/utils/localize';
 import { ROUTES } from '@/utils/routing';
 
@@ -32,7 +33,7 @@ export default function Home() {
     );
   }
 
-  const { language, level, progress, plan, lesson, streak } = learning.data;
+  const { language, progress, plan, lesson, streak } = learning.data;
   const goalRatio = plan.dailyGoalMinutes > 0 ? plan.minutesToday / plan.dailyGoalMinutes : 0;
   const goalReached = plan.minutesToday >= plan.dailyGoalMinutes;
 
@@ -51,7 +52,7 @@ export default function Home() {
             <Text variant="heading">{language ? localize(language.name, locale) : ''}</Text>
             {language && language.nativeName !== localize(language.name, locale) ? (
               <Text variant="small" color="textSecondary">
-                {localize(language.nativeName, locale)}
+                {isolateNative(language.nativeName, language.direction)}
               </Text>
             ) : null}
           </View>
@@ -65,7 +66,7 @@ export default function Home() {
         <Text variant="subheading">{t('home.dailyGoal')}</Text>
         <ProgressBar value={goalRatio} accessibilityLabel={t('home.dailyGoal')} />
         <Text variant="small" color="textSecondary">
-          {goalReached ? t('home.dailyGoalDone') : plan.minutesToday + ' / ' + plan.dailyGoalMinutes}
+          {goalReached ? t('home.dailyGoalDone') : t('home.dailyGoalProgress', { done: plan.minutesToday, goal: plan.dailyGoalMinutes })}
         </Text>
       </Card>
 
@@ -74,7 +75,7 @@ export default function Home() {
           <Text variant="subheading">{t('home.continueLearning')}</Text>
           <Text variant="heading">{localize(lesson.title, locale)}</Text>
           <Text variant="small" color="textSecondary">
-            t('home.lessonMeta') + ' ' + lesson.levelId + ' - ' + lesson.estimatedMinutes + ' min'
+            {t('home.lessonMeta', { level: lesson.levelId, count: lesson.estimatedMinutes })}
           </Text>
           <ProgressBar value={progress.levelProgress} accessibilityLabel={t('home.overallProgress')} />
           <Button title={t('home.continueLearning')} icon="play-outline" iconDirectional onPress={() => router.push({ pathname: '/lesson/[id]', params: { id: lesson.id } })} />
