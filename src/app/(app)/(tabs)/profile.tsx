@@ -29,7 +29,7 @@ export default function Profile() {
   if (learning.status === 'error') {
     return (
       <Screen edges={['top']}>
-        <ErrorState onRetry={learning.reload} />
+        <ErrorState error={learning.error} onRetry={learning.reload} />
       </Screen>
     );
   }
@@ -60,7 +60,7 @@ export default function Profile() {
         </View>
         <View style={styles.between}>
           <Text color="textSecondary">{t('profile.level')}</Text>
-          <Text variant="bodyStrong">{level ? `${level.id} · ${localize(level.title, locale)}` : ''}</Text>
+          <Text variant="bodyStrong">{level ? t('profile.levelValue', { level: level.id, title: localize(level.title, locale) }) : ''}</Text>
         </View>
         <View style={{ gap: spacing.xs }}>
           <Text color="textSecondary">{t('profile.progress')}</Text>

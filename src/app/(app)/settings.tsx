@@ -178,7 +178,7 @@ export default function Settings() {
         <Text variant="subheading">{t('settings.about')}</Text>
         <Text>{t('app.name')}</Text>
         <Text variant="small" color="textSecondary">
-          {t('settings.version')}: {isolateLtr(Constants.expoConfig?.version ?? '1.0.0')}
+          {t('settings.version', { version: isolateLtr(Constants.expoConfig?.version ?? '1.0.0') })}
         </Text>
         <Text variant="small" color="textSecondary">
           {t('settings.aboutText')}

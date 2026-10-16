@@ -25,7 +25,7 @@ export default function Learn() {
   if (list.status === 'error') {
     return (
       <Screen edges={['top']}>
-        <ErrorState onRetry={list.reload} />
+        <ErrorState error={list.error} onRetry={list.reload} />
       </Screen>
     );
   }
@@ -53,6 +53,7 @@ export default function Learn() {
                 onPress={() => router.push({ pathname: '/lesson/[id]', params: { id: lesson.id } })}
                 accessibilityRole="button"
                 accessibilityLabel={t('learn.lessonLabel', { title, status })}
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
               >
                 <Card style={[styles.row, { gap: spacing.md, minHeight: MIN_TOUCH_TARGET, borderColor: current ? colors.primary : colors.border }]}>
                   <Icon name={done ? 'checkmark-circle' : current ? 'play-circle-outline' : 'ellipse-outline'} size={28} color={done ? 'success' : 'primary'} />
@@ -62,7 +63,7 @@ export default function Learn() {
                       {localize(lesson.summary, locale)}
                     </Text>
                     <Text variant="caption" color="textSecondary">
-                      {t('learn.lessonMeta', { level: lesson.levelId, count: lesson.estimatedMinutes })} · {status}
+                      {t('learn.lessonMeta', { level: lesson.levelId, count: lesson.estimatedMinutes, status })}
                     </Text>
                   </View>
                   <Icon name="chevron-forward" directional color="textSecondary" />

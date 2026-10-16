@@ -36,6 +36,7 @@ export default function RootLayout() {
     applyLanguagePreference(languagePreference)
       .catch(() => undefined)
       .finally(() => setLocaleApplied(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- languagePreference is read once on purpose; re-running would fight Settings
   }, [hasHydrated]);
 
   // A font failure must not hold the splash forever: fall back to the system font instead.

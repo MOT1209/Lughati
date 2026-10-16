@@ -52,7 +52,7 @@ export default function LessonScreen() {
   if (data.status === 'error') {
     return (
       <Screen edges={['bottom']}>
-        <ErrorState onRetry={data.reload} />
+        <ErrorState error={data.error} onRetry={data.reload} />
       </Screen>
     );
   }

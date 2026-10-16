@@ -216,6 +216,11 @@ export interface Recommendation {
   lessonId?: string;
   /** Deterministic ordering weight; callers sort by this descending. */
   score: number;
+  /**
+   * Numbers behind the rule, so a UI can write its own localized copy instead of parsing `reason`.
+   * `minutes` (daily-goal), `count` (review-due), `percent` (retry-lesson).
+   */
+  params?: Record<string, number>;
   /** Plain-English why, for debugging or as an accessible fallback. UIs may render their own copy. */
   reason: string;
 }

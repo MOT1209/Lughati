@@ -32,6 +32,7 @@ export default function Review() {
   const { spacing } = useTheme();
   const learning = useCurrentLearning();
   const source = useLearningStore((s) => s.profile?.source ?? null);
+  const notifyProgressChanged = useLearningStore((s) => s.notifyProgressChanged);
   const userId = learning.user?.id ?? '';
   const code = learning.code;
   const [index, setIndex] = useState(0);
@@ -62,9 +63,10 @@ export default function Review() {
     );
   }
   if (learning.status === 'error' || data.status === 'error') {
+    const failure = data.status === 'error' ? data.error : learning.status === 'error' ? learning.error : undefined;
     return (
       <Screen edges={['top']}>
-        <ErrorState onRetry={data.status === 'error' ? data.reload : learning.reload} />
+        <ErrorState error={failure} onRetry={data.status === 'error' ? data.reload : learning.reload} />
       </Screen>
     );
   }
@@ -94,6 +96,9 @@ export default function Review() {
     try {
       const state = await getRepositories().reviews.recordReview(userId, code, current.word.id, outcome);
       setSaved(state);
+      // A review changes what the app should recommend next (words due, daily plan), so the
+      // screens that derive from recorded data re-read it.
+      notifyProgressChanged();
     } catch {
       setSaveFailed(true);
     } finally {

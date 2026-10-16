@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View, type AccessibilityState } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { Icon, Text } from '@/components/ui';
 import { MIN_TOUCH_TARGET } from '@/constants/app';
@@ -17,21 +18,24 @@ interface OptionButtonProps {
 /** Answer choice. Result is shown by icon and border together, never by colour alone. */
 export function OptionButton({ text, accessibilityLabel, state, disabled, onPress }: OptionButtonProps) {
   const { colors, radius, spacing } = useTheme();
+  const { t } = useTranslation();
   const border = state === 'correct' ? colors.success : state === 'wrong' ? colors.error : colors.borderStrong;
 
-  // Provide distinct screen reader feedback for each state
-  const accessibilityState: Record<string, unknown> = {
-    disabled,
-    selected: state === 'correct' || state === 'wrong',
-    activated: state === 'correct' || state === 'wrong',
-  };
+  // Colour and icon carry the verdict visually; screen readers only hear it if it is in the label.
+  const label =
+    state === 'correct'
+      ? t('lesson.optionCorrect', { text: accessibilityLabel })
+      : state === 'wrong'
+        ? t('lesson.optionWrong', { text: accessibilityLabel })
+        : accessibilityLabel;
+  const accessibilityState: AccessibilityState = { disabled };
 
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
+      accessibilityLabel={label}
       accessibilityState={accessibilityState}
       style={[
         styles.base,

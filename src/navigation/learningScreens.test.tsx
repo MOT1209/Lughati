@@ -57,6 +57,16 @@ describe('Home screen', () => {
     expect(screen.getByText('0 of 15 minutes')).toBeTruthy();
     expect(screen.queryByText('home.lessonMeta')).toBeNull();
   }, SLOW_TEST_TIMEOUT);
+
+  it('surfaces the top recommendation with localized copy and a way to act on it', async () => {
+    const repos = createMockRepositories();
+    registerRepositories({ ...repos, reviews: { ...repos.reviews, getDue: async () => [] } });
+    renderRouter({ home: HomeScreen }, { initialUrl: '/home' });
+
+    expect(await screen.findByText('Recommended for you')).toBeTruthy();
+    expect(screen.getByText('You have 15 minutes left to reach today’s goal.')).toBeTruthy();
+    expect(screen.queryByText('home.recDailyGoal')).toBeNull();
+  }, SLOW_TEST_TIMEOUT);
 });
 
 describe('Progress screen', () => {

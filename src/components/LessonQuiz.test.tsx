@@ -36,6 +36,15 @@ describe('LessonQuiz', () => {
     expect(screen.getByRole('button', { name: optionName(first.type, wrongId) })).toBeDisabled();
   });
 
+  it('announces the verdict to screen readers, not only by colour', () => {
+    render(<LessonQuiz exercises={exercises} words={words} onFinish={() => {}} />);
+    const first = exercises[0]!;
+    const wrongId = first.options.find((id) => id !== first.answer)!;
+    fireEvent.press(screen.getByRole('button', { name: optionName(first.type, wrongId) }));
+    expect(screen.getByRole('button', { name: `${optionName(first.type, first.answer)}. Correct answer` })).toBeTruthy();
+    expect(screen.getByRole('button', { name: `${optionName(first.type, wrongId)}. Wrong answer` })).toBeTruthy();
+  });
+
   it('shows the right answer after a wrong one', () => {
     render(<LessonQuiz exercises={exercises} words={words} onFinish={() => {}} />);
     const first = exercises[0]!;

@@ -2,7 +2,7 @@ import { useAsyncData } from '@/hooks/useAsyncData';
 import { getRepositories } from '@/services/repositories';
 import { useAuthStore } from '@/store/authStore';
 import { useLearningStore } from '@/store/learningStore';
-import type { Language, LanguageCode, LearningPlan, Lesson, Level, Progress, Streak } from '@/types';
+import type { Language, LanguageCode, LearningPlan, Lesson, LessonAttempt, Level, Progress, Streak } from '@/types';
 
 export interface CurrentLearning {
   language: Language | null;
@@ -12,6 +12,12 @@ export interface CurrentLearning {
   /** Null when the learner has no lesson in progress. */
   lesson: Lesson | null;
   streak: Streak;
+  /** Recorded runs for the language, oldest first — the input the recommendation rules read. */
+  attempts: LessonAttempt[];
+  /** Vocabulary items due for review right now. */
+  dueVocabulary: number;
+  /** Lessons of the language, so the unit rule can fire only when real units exist. */
+  lessons: Lesson[];
 }
 
 /** The learner's current target language plus everything Home and Profile show about it. */
@@ -34,7 +40,14 @@ export function useCurrentLearning() {
       progress ? repos.levels.getById(progress.levelId) : null,
       progress?.currentLessonId ? repos.lessons.getById(progress.currentLessonId) : null,
     ]);
-    return { language, level, progress, plan, lesson, streak };
+    const [lessons, attempts, due] = userId
+      ? await Promise.all([
+          repos.lessons.getByLanguage(code),
+          repos.progress.getAttempts(userId, code),
+          repos.reviews.getDue(userId, code),
+        ])
+      : [[], [], []];
+    return { language, level, progress, plan, lesson, streak, attempts, dueVocabulary: due.length, lessons };
   }, [userId, code, progressVersion]);
 
   return { user, code, ...result };

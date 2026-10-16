@@ -26,7 +26,7 @@ export default function Progress() {
   if (learning.status === 'error') {
     return (
       <Screen edges={['top']}>
-        <ErrorState message={t('progress.error')} onRetry={learning.reload} />
+        <ErrorState error={learning.error} message={t('progress.error')} onRetry={learning.reload} />
       </Screen>
     );
   }

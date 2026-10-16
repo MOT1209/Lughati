@@ -2,6 +2,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/hooks/useTheme';
+import type { AsyncError } from '@/hooks/useAsyncData';
 
 import { Button } from './Button';
 import { Icon, type IconName } from './Icon';
@@ -47,13 +48,15 @@ export function EmptyState(props: Omit<MessageStateProps, 'icon'> & { icon?: Ico
   return <MessageState icon="file-tray-outline" {...props} />;
 }
 
-export function ErrorState({ title, message, onRetry }: { title?: string; message?: string; onRetry?: () => void }) {
+export function ErrorState({ title, message, error, onRetry }: { title?: string; message?: string; error?: AsyncError; onRetry?: () => void }) {
   const { t } = useTranslation();
+  // A connection failure is not a bug: say so instead of the generic "something went wrong".
+  const offline = error !== null && error !== undefined && 'code' in error && error.code === 'network';
   return (
     <MessageState
-      icon="alert-circle-outline"
+      icon={offline ? 'cloud-offline-outline' : 'alert-circle-outline'}
       title={title ?? t('common.errorTitle')}
-      message={message ?? t('common.errorMessage')}
+      message={offline ? t('common.offlineMessage') : (message ?? t('common.errorMessage'))}
       actionLabel={onRetry ? t('common.retry') : undefined}
       onAction={onRetry}
     />

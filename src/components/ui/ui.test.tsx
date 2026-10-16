@@ -140,6 +140,16 @@ describe('state components', () => {
     expect(screen.queryByRole('button')).toBeNull();
   });
 
+  it('ErrorState shows offline copy for a connection failure', () => {
+    render(<ErrorState error={{ message: 'no link', code: 'network' }} />);
+    expect(screen.getByText('You seem to be offline. Check your connection and try again.')).toBeTruthy();
+  });
+
+  it('ErrorState shows the generic copy for other failures', () => {
+    render(<ErrorState error={new Error('storage broke')} />);
+    expect(screen.getByText('We could not complete that. Please try again.')).toBeTruthy();
+  });
+
   it('EmptyState renders its title, message and optional action', () => {
     const onAction = jest.fn();
     render(<EmptyState title="Nothing" message="Come back later" actionLabel="Refresh" onAction={onAction} />);

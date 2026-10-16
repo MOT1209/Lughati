@@ -5,9 +5,12 @@ import { Icon, type IconName } from '@/components/ui';
 import { useTheme } from '@/hooks/useTheme';
 import { fontFamilies } from '@/theme/typography';
 
-const tabs: { name: string; titleKey: 'tabs.home' | 'tabs.learn' | 'tabs.progress' | 'tabs.profile'; icon: IconName }[] = [
+const tabs: { name: string; titleKey: 'tabs.home' | 'tabs.learn' | 'tabs.review' | 'tabs.progress' | 'tabs.profile'; icon: IconName }[] = [
   { name: 'home', titleKey: 'tabs.home', icon: 'home-outline' },
   { name: 'learn', titleKey: 'tabs.learn', icon: 'book-outline' },
+  // Every file in this directory becomes a tab screen, so review is declared here on
+  // purpose: otherwise it renders with the raw route name and no icon.
+  { name: 'review', titleKey: 'tabs.review', icon: 'repeat-outline' },
   { name: 'progress', titleKey: 'tabs.progress', icon: 'stats-chart-outline' },
   { name: 'profile', titleKey: 'tabs.profile', icon: 'person-outline' },
 ];

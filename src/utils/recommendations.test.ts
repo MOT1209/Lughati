@@ -56,6 +56,17 @@ it('the daily-goal rule fires first when the goal is unfinished', () => {
   expect(result[0]!.reason).toContain('10 minutes');
 });
 
+it('carries the numbers behind each rule so the UI can write its own copy', () => {
+  const goal = getRecommendations({ progress: progressWith(), attempts: [], dueVocabulary: 0, plan: planWith({ minutesToday: 4, dailyGoalMinutes: 15 }) });
+  expect(goal[0]!.params).toEqual({ minutes: 11 });
+
+  const due = getRecommendations({ progress: progressWith(), attempts: [], dueVocabulary: 7, plan: planWith({ minutesToday: 15 }) });
+  expect(due[0]!.params).toEqual({ count: 7 });
+
+  const retry = getRecommendations({ progress: progressWith(), attempts: [attempt({ result: { correct: 5, total: 12 } })], dueVocabulary: 0, plan: planWith({ minutesToday: 15 }) });
+  expect(retry.find((r) => r.kind === 'retry-lesson')!.params).toEqual({ percent: 42 });
+});
+
 it('no daily-goal recommendation once today\u2019s goal is met', () => {
   const input = { progress: progressWith(), attempts: [], dueVocabulary: 0, plan: planWith({ minutesToday: 15, dailyGoalMinutes: 15 }) };
   expect(kinds(input)).not.toContain('daily-goal');

@@ -29,7 +29,7 @@ export default function LanguageSelection() {
     <Screen>
       <Text color="textSecondary">{t('languageSelection.subtitle')}</Text>
       {languages.status === 'loading' ? <LoadingState /> : null}
-      {languages.status === 'error' ? <ErrorState onRetry={languages.reload} /> : null}
+      {languages.status === 'error' ? <ErrorState error={languages.error} onRetry={languages.reload} /> : null}
       {languages.status === 'success' ? (
         <View style={{ gap: spacing.sm }} accessibilityRole="radiogroup">
           {languages.data

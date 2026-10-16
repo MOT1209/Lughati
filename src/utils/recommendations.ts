@@ -41,6 +41,7 @@ export function getRecommendations(input: RecommendationInput): Recommendation[]
     out.push({
       kind: 'daily-goal',
       score: 60,
+      params: { minutes: remainingToday },
       reason: `${remainingToday} minutes of today's ${plan.dailyGoalMinutes}-minute goal remain.`,
     });
   }
@@ -49,6 +50,7 @@ export function getRecommendations(input: RecommendationInput): Recommendation[]
     out.push({
       kind: 'review-due',
       score: 50 + Math.min(dueVocabulary, 20),
+      params: { count: dueVocabulary },
       reason: `${dueVocabulary} vocabulary item(s) are due for review.`,
     });
   }
@@ -62,6 +64,7 @@ export function getRecommendations(input: RecommendationInput): Recommendation[]
       kind: 'retry-lesson',
       lessonId: currentLessonId,
       score: 45,
+      params: { percent: Math.round(scoreRatio(lastAttempt.result) * 100) },
       reason: `The last run of this lesson scored ${Math.round(scoreRatio(lastAttempt.result) * 100)}%.`,
     });
   }
