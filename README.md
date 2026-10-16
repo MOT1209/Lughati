@@ -7,7 +7,7 @@
 <a href="#-ما-الذي-يعمل-الآن"><img alt="Expo SDK 57" src="https://img.shields.io/badge/Expo_SDK-57-blue?logo=expo"></a>
 <a href="#-ما-الذي-يعمل-الآن"><img alt="React Native" src="https://img.shields.io/badge/React_Native-0.86-skyblue?logo=react"></a>
 <a href="#-ما-الذي-يعمل-الآن"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-blue?logo=typescript"></a>
-<a href="#-أوامر-التطوير"><img alt="Tests" src="https://img.shields.io/badge/Jest-18_suites-green?logo=jest"></a>
+<a href="#-أوامر-التطوير"><img alt="Tests" src="https://img.shields.io/badge/Jest-25_suites-green?logo=jest"></a>
 <a href="#-ما-الذي-يعمل-الآن"><img alt="i18n" src="https://img.shields.io/badge/i18n-ar_·_en-orange"></a>
 
 </div>
@@ -56,7 +56,7 @@ npx expo start
 | :--- | :--- |
 | `npm run typecheck` | فحص الأنواع (`strict`) |
 | `npm run lint` | ESLint (إعداد Expo) |
-| `npm test` | اختبارات Jest (16 suite عبر `jest-expo`) |
+| `npm test` | اختبارات Jest (25 suite عبر `jest-expo`) |
 | `npx expo-doctor` | فحص الاعتماديات والإعدادات |
 | `npx expo export --platform android` | التأكد أن الحزمة تُبنى |
 
