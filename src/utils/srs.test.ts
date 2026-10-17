@@ -1,6 +1,6 @@
 import type { VocabularyReviewState } from '@/types';
 
-import { intervalForStep, scheduleReview, SRS_INTERVAL_DAYS } from './srs';
+import { initialReviewState, intervalForStep, scheduleReview, SRS_INTERVAL_DAYS } from './srs';
 
 const NOW = new Date('2026-10-15T12:00:00.000Z');
 const DAY = 24 * 60 * 60 * 1000;
@@ -14,6 +14,12 @@ describe('SRS interval ladder', () => {
     expect(intervalForStep(5)).toBe(90 * DAY);
     expect(intervalForStep(-3)).toBe(1 * DAY); // clamped low
     expect(intervalForStep(99)).toBe(90 * DAY); // clamped high
+  });
+});
+
+describe('initialReviewState', () => {
+  it('starts a newly learned word at step 0, due one day later', () => {
+    expect(initialReviewState(NOW)).toEqual({ step: 0, nextReviewAt: '2026-10-16T12:00:00.000Z' });
   });
 });
 

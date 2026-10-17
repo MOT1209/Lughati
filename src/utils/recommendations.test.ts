@@ -2,6 +2,7 @@ import { lessons } from '@/mocks/lessons';
 import { getMockPlan, getMockProgress } from '@/mocks/progress';
 import type { LessonAttempt, Progress } from '@/types';
 
+import { PASS_RATIO } from './progression';
 import { getRecommendations, hasUnits, RETRY_SCORE_THRESHOLD } from './recommendations';
 
 const progressWith = (overrides: Partial<Progress> = {}): Progress => ({
@@ -89,7 +90,7 @@ it('a low-scoring last attempt produces a retry recommendation', () => {
     plan: planWith({ minutesToday: 15 }),
   };
   expect(kinds(input)).toContain('retry-lesson');
-  expect(RETRY_SCORE_THRESHOLD).toBe(0.6);
+  expect(RETRY_SCORE_THRESHOLD).toBe(PASS_RATIO); // one threshold: a failed run is exactly a retry
 });
 
 it('a completed, high-scoring attempt does not demand a retry but still suggests continuing', () => {

@@ -8,7 +8,7 @@ import { isolate, isolateLtr } from './bidi';
 import { isolateTerm, meaningLanguage, meaningOf } from './meaning';
 import { buildExercises, OPTIONS_PER_EXERCISE } from './exercises';
 import { answer, initialSession, isFinished, next } from './lessonSession';
-import { applyLessonCompletion, XP_LESSON_BONUS, XP_PER_CORRECT_ANSWER } from './progression';
+import { applyLessonCompletion, isPassed, lessonXp, PASS_RATIO, XP_LESSON_BONUS, XP_PER_CORRECT_ANSWER } from './progression';
 
 const wordsOf = (lessonId: string) => vocabulary.filter((w) => w.lessonId === lessonId);
 const targets = languages.filter((l) => l.roles.includes('target')).map((l) => l.code);
@@ -108,6 +108,31 @@ describe('buildExercises', () => {
     expect(new Set(exercises.map((e) => e.options.indexOf(e.answer))).size).toBeGreaterThan(1);
   });
 
+  it('does not give the answer away by its position or by fixed neighbours', () => {
+    const all = lessons.flatMap((lesson) => buildExercises(lesson.id, wordsOf(lesson.id)));
+    const positions = all.map((e) => e.options.indexOf(e.answer));
+    // Not the old cyclic pattern (index % 4) …
+    const cyclic = all.every((e) => {
+      const index = Number(e.id.split('-').pop()) - 1;
+      return e.options.indexOf(e.answer) === (index + (e.type === 'translate' ? 2 : 0)) % OPTIONS_PER_EXERCISE;
+    });
+    expect(cyclic).toBe(false);
+    // … and every position is used often enough that guessing one is no strategy.
+    for (let position = 0; position < OPTIONS_PER_EXERCISE; position += 1) {
+      const share = positions.filter((p) => p === position).length / all.length;
+      expect(share).toBeGreaterThan(0.15);
+      expect(share).toBeLessThan(0.35);
+    }
+    // Distractors are not always the next words in the list.
+    const neighbours = all.filter((e) => {
+      const ids = wordsOf(e.lessonId).map((w) => w.id);
+      const at = ids.indexOf(e.answer);
+      const next = Array.from({ length: OPTIONS_PER_EXERCISE - 1 }, (_, step) => ids[(at + step + 1) % ids.length]);
+      return e.options.filter((id) => id !== e.answer).every((id) => next.includes(id));
+    });
+    expect(neighbours.length).toBeLessThan(all.length / 2);
+  });
+
   it('has unique ids and returns nothing when there are too few words', () => {
     expect(new Set(exercises.map((e) => e.id)).size).toBe(exercises.length);
     expect(buildExercises('x', words.slice(0, 3))).toEqual([]);
@@ -174,10 +199,51 @@ describe('applyLessonCompletion', () => {
 
   it('is structurally idempotent on replay: no new words, XP still counts', () => {
     const once = complete(base, 'de-a1-1');
-    const twice = complete(once, 'de-a1-1', { correct: 4, total: 10 });
+    const twice = complete(once, 'de-a1-1', { correct: 9, total: 10 });
     expect(twice.completedLessonIds).toEqual(once.completedLessonIds);
     expect(twice.currentLessonId).toBe(once.currentLessonId);
     expect(twice.wordsLearned).toBe(once.wordsLearned);
-    expect(twice.totalXp).toBe(once.totalXp + 4 * XP_PER_CORRECT_ANSWER + XP_LESSON_BONUS);
+    expect(twice.totalXp).toBe(once.totalXp + 9 * XP_PER_CORRECT_ANSWER + XP_LESSON_BONUS);
+  });
+
+  it('does not complete the lesson below the pass mark, but still counts XP (no bonus) and minutes', () => {
+    const after = complete(base, 'de-a1-1', { correct: 0, total: 12 });
+    expect(after.completedLessonIds).toEqual([]);
+    expect(after.currentLessonId).toBe('de-a1-1');
+    expect(after.levelProgress).toBe(0);
+    expect(after.wordsLearned).toBe(base.wordsLearned);
+    expect(after.totalXp).toBe(base.totalXp);
+    expect(after.minutesLearned).toBe(20 + german[0]!.estimatedMinutes);
+
+    const close = complete(base, 'de-a1-1', { correct: 8, total: 12 }); // 67%
+    expect(close.completedLessonIds).toEqual([]);
+    expect(close.totalXp).toBe(base.totalXp + 8 * XP_PER_CORRECT_ANSWER);
+  });
+
+  it('a failed run never raises the level, even on the last lesson of the level', () => {
+    const almost = { ...base, completedLessonIds: german.slice(0, 9).map((l) => l.id), currentLessonId: 'de-a1-10' };
+    const after = complete(almost, 'de-a1-10', { correct: 3, total: 12 });
+    expect(after.levelId).toBe('A1');
+    expect(after.currentLessonId).toBe('de-a1-10');
+  });
+
+  it('a failed replay keeps an already completed lesson completed', () => {
+    const once = complete(base, 'de-a1-1');
+    const failed = complete(once, 'de-a1-1', { correct: 1, total: 12 });
+    expect(failed.completedLessonIds).toEqual(['de-a1-1']);
+    expect(failed.currentLessonId).toBe('de-a1-2');
+    expect(failed.totalXp).toBe(once.totalXp + XP_PER_CORRECT_ANSWER);
+  });
+});
+
+describe('pass mark', () => {
+  it('passes at exactly PASS_RATIO and gives the bonus only on a pass', () => {
+    expect(PASS_RATIO).toBe(0.7);
+    expect(isPassed({ correct: 7, total: 10 })).toBe(true);
+    expect(isPassed({ correct: 8, total: 12 })).toBe(false);
+    expect(isPassed({ correct: 9, total: 12 })).toBe(true);
+    expect(isPassed({ correct: 0, total: 0 })).toBe(false);
+    expect(lessonXp({ correct: 9, total: 12 })).toBe(9 * XP_PER_CORRECT_ANSWER + XP_LESSON_BONUS);
+    expect(lessonXp({ correct: 8, total: 12 })).toBe(8 * XP_PER_CORRECT_ANSWER);
   });
 });

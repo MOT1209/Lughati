@@ -13,9 +13,9 @@ import type {
   VocabularyReviewState,
 } from '@/types';
 import { buildExercises } from '@/utils/exercises';
-import { addStudyMinutes, applyLessonCompletion, XP_LESSON_BONUS, XP_PER_CORRECT_ANSWER } from '@/utils/progression';
+import { addStudyMinutes, applyLessonCompletion, isPassed, lessonXp } from '@/utils/progression';
 import { computeStreakStats } from '@/utils/streaks';
-import { scheduleReview } from '@/utils/srs';
+import { initialReviewState, scheduleReview } from '@/utils/srs';
 
 import { createMemoryStorage, type KeyValueStorage } from '../storage';
 import {
@@ -179,8 +179,9 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
           const own = lessons.filter((l) => l.targetLanguage === lesson.targetLanguage);
           const wordCount = vocabulary.filter((w) => w.lessonId === lessonId).length;
           const updated = applyLessonCompletion(current, lesson, own, levels, result, wordCount);
-          const countedAsCompletion = !current.completedLessonIds.includes(lessonId);
-          const xpDelta = result.correct * XP_PER_CORRECT_ANSWER + XP_LESSON_BONUS;
+          const passed = isPassed(result);
+          const countedAsCompletion = passed && !current.completedLessonIds.includes(lessonId);
+          const xpDelta = lessonXp(result);
           const plan = addStudyMinutes(await readPlan(userId, lesson.targetLanguage), lesson.estimatedMinutes);
 
           const attempt: LessonAttempt = {
@@ -190,10 +191,36 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
             targetLanguage: lesson.targetLanguage,
             attemptedAt: now().toISOString(),
             result: { correct: result.correct, total: result.total },
-            completed: true,
+            completed: passed,
           };
           const prior = await attemptsFor(userId, lesson.targetLanguage);
           const attempts = [...prior, attempt].slice(-MAX_ATTEMPTS_PER_RECORD);
+
+          // A pass puts the lesson's words on the review schedule. Words that already have a state
+          // keep it (a replay must not reset their progress). Written before the progress blob:
+          // if that second write fails, the retry finds the words scheduled and adds nothing twice.
+          if (passed) {
+            const reviews = await readReviews(storage);
+            const start = initialReviewState(now());
+            const added: Record<string, VocabularyReviewState> = {};
+            for (const word of vocabulary.filter((w) => w.lessonId === lessonId)) {
+              const storageKey = reviewKeyOf(userId, word.id);
+              if (reviews[storageKey]) continue;
+              added[storageKey] = {
+                userId,
+                targetLanguage: lesson.targetLanguage,
+                wordId: word.id,
+                step: start.step,
+                correctCount: 0,
+                wrongCount: 0,
+                lastReviewedAt: null,
+                nextReviewAt: start.nextReviewAt,
+              };
+            }
+            if (Object.keys(added).length > 0) {
+              await storage.setItem(STORAGE_KEYS.vocabReviews, JSON.stringify({ reviews: { ...reviews, ...added } }));
+            }
+          }
 
           const { saved, next: withActivity } = await recordActivity(userId, result, lesson, countedAsCompletion, xpDelta);
           const next: SavedLearning = {
@@ -282,7 +309,7 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
         const reviews = await readReviews(storage);
         return reviews[reviewKeyOf(userId, wordId)] ?? null;
       },
-      getDue: async (userId, language, dueUpTo = new Date()) => {
+      getDue: async (userId, language, dueUpTo = now()) => {
         const reviews = await readReviews(storage);
         const limit = dueUpTo.toISOString();
         return Object.entries(reviews)
