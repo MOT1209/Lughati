@@ -518,3 +518,39 @@ describe('a passed lesson feeds the vocabulary review', () => {
     expect(await repos.reviews.getDue('u1', 'de', tomorrow())).toHaveLength(6);
   });
 });
+
+describe('streak activity from reviews', () => {
+  const day = () => new Date(2026, 9, 18, 10, 0);
+
+  it('a review on a day without a lesson keeps the streak, without inventing minutes, XP or a completion', async () => {
+    const repos = createMockRepositories({ now: day });
+    await repos.reviews.recordReview('u1', 'de', 'de-a1-1-w1', 'good');
+
+    expect((await repos.progress.getStreak('u1')).days).toBe(1);
+    expect(await repos.activity.getDay('u1', '2026-10-18')).toMatchObject({ minutes: 0, xp: 0, lessonsCompleted: 0, correctAnswers: 1 });
+  });
+
+  it('a forgotten word still counts as a study day but not as a correct answer', async () => {
+    const repos = createMockRepositories({ now: day });
+    await repos.reviews.recordReview('u1', 'de', 'de-a1-1-w1', 'again');
+    expect(await repos.activity.getDay('u1', '2026-10-18')).toMatchObject({ correctAnswers: 0 });
+    expect((await repos.progress.getStreak('u1')).days).toBe(1);
+  });
+
+  it('the review activity survives a restart and adds to the same day as a lesson', async () => {
+    const storage = createMemoryStorage();
+    const repos = createMockRepositories({ storage, now: day });
+    await repos.progress.completeLesson('u1', 'de-a1-1', { correct: 12, total: 12 });
+    await repos.reviews.recordReview('u1', 'de', 'de-a1-1-w1', 'easy');
+
+    const restarted = createMockRepositories({ storage, now: day });
+    expect(await restarted.activity.getDay('u1', '2026-10-18')).toMatchObject({ lessonsCompleted: 1, correctAnswers: 13 });
+    expect((await restarted.progress.get('u1', 'de'))?.completedLessonIds).toEqual(['de-a1-1']);
+  });
+
+  it('a practice game run is not a study day for the streak', async () => {
+    const repos = createMockRepositories({ now: day });
+    await repos.progress.recordAttempt('u1', 'de-a1-1', { correct: 6, total: 6 });
+    expect((await repos.progress.getStreak('u1')).days).toBe(0);
+  });
+});
