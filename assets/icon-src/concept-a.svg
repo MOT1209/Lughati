@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#19B3A0"/>
+      <stop offset="0.55" stop-color="#0F766E"/>
+      <stop offset="1" stop-color="#073F3B"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.28" cy="0.2" r="0.7">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bubble" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E3F6F2"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFE29A"/>
+      <stop offset="1" stop-color="#F2A93B"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="22" stdDeviation="26" flood-color="#022B28" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <rect width="1024" height="1024" fill="url(#glow)"/>
+  <!-- speech bubble, tail on the reading-start (right) side for Arabic -->
+  <g filter="url(#shadow)">
+    <path d="M300 236 H724 a110 110 0 0 1 110 110 V626 a110 110 0 0 1 -110 110 H664 L720 840 L566 736 H300 a110 110 0 0 1 -110 -110 V346 a110 110 0 0 1 110 -110 Z" fill="url(#bubble)"/>
+  </g>
+  <text x="512" y="575" text-anchor="middle" font-family="Cairo" font-weight="900" font-size="400" fill="#0F766E">ل</text>
+  <!-- sparkle -->
+  <path d="M760 168 L776 216 L824 232 L776 248 L760 296 L744 248 L696 232 L744 216 Z" fill="url(#gold)"/>
+</svg>

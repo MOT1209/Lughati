@@ -18,6 +18,20 @@ export interface ColorPalette {
   errorMuted: string;
   onErrorMuted: string;
   overlay: string;
+  /** Brand hero gradient (Home header): always the dark teal of the app icon, in both schemes. */
+  heroStart: string;
+  heroMid: string;
+  heroEnd: string;
+  onHero: string;
+  onHeroMuted: string;
+  /** Gold accent text/strokes on the hero (streak, daily-goal ring). */
+  heroGold: string;
+  /** Light chip on the hero (e.g. "Change"). */
+  heroChip: string;
+  onHeroChip: string;
+  /** Gold call-to-action fill. */
+  gold: string;
+  onGold: string;
 }
 
 // Every text/background pair below is verified >= 4.5:1 (WCAG AA) by theme.test.ts.
@@ -39,6 +53,16 @@ const light: ColorPalette = {
   errorMuted: '#FDE8E6',
   onErrorMuted: '#7A1710',
   overlay: 'rgba(18, 23, 30, 0.5)',
+  heroStart: '#0E6A62',
+  heroMid: '#0A4E49',
+  heroEnd: '#04201E',
+  onHero: '#FFFFFF',
+  onHeroMuted: '#BFE9E1',
+  heroGold: '#FFD978',
+  heroChip: '#C9F3EA',
+  onHeroChip: '#04201E',
+  gold: '#F2B33D',
+  onGold: '#2A1A00',
 };
 
 const dark: ColorPalette = {
@@ -59,6 +83,16 @@ const dark: ColorPalette = {
   errorMuted: '#4A1D18',
   onErrorMuted: '#FFD9D4',
   overlay: 'rgba(0, 0, 0, 0.6)',
+  heroStart: '#0E6A62',
+  heroMid: '#0A4E49',
+  heroEnd: '#04201E',
+  onHero: '#FFFFFF',
+  onHeroMuted: '#BFE9E1',
+  heroGold: '#FFD978',
+  heroChip: '#C9F3EA',
+  onHeroChip: '#04201E',
+  gold: '#FFC857',
+  onGold: '#2A1A00',
 };
 
 export const palettes = { light, dark } as const;

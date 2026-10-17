@@ -1,19 +1,22 @@
 import { router } from 'expo-router';
 import type { TFunction } from 'i18next';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { LanguageBadge } from '@/components/LanguageBadge';
-import { ProgressBar } from '@/components/ProgressBar';
-import { Button, Card, ErrorState, Icon, LoadingState, Screen, Text } from '@/components/ui';
+import { ContinueCard } from '@/components/home/ContinueCard';
+import { HomeHero } from '@/components/home/HomeHero';
+import { RecommendationRow } from '@/components/home/RecommendationRow';
+import { ErrorState, LoadingState, Screen } from '@/components/ui';
 import { useCurrentLearning } from '@/hooks/useCurrentLearning';
 import { useTheme } from '@/hooks/useTheme';
 import { useUiLocale } from '@/hooks/useUiLocale';
 import type { Recommendation } from '@/types';
-import { isolateNative } from '@/utils/bidi';
 import { localize } from '@/utils/localize';
 import { getRecommendations } from '@/utils/recommendations';
 import { ROUTES } from '@/utils/routing';
+
+/** How far the continue card overlaps the hero. */
+const HERO_OVERLAP = 48;
 
 /**
  * The engine returns plain numbers, so every rule can be read in the learner's own language and
@@ -57,8 +60,6 @@ export default function Home() {
   }
 
   const { language, progress, plan, lesson, streak, attempts, dueVocabulary, lessons } = learning.data;
-  const goalRatio = plan.dailyGoalMinutes > 0 ? plan.minutesToday / plan.dailyGoalMinutes : 0;
-  const goalReached = plan.minutesToday >= plan.dailyGoalMinutes;
 
   // The top rule wins; it is always derived from recorded data, never guessed.
   const recommendation = progress
@@ -79,86 +80,42 @@ export default function Home() {
     router.push(ROUTES.learn);
   };
 
+  const lessonIndex = lesson ? lessons.findIndex((l) => l.id === lesson.id) : -1;
+  const continueLesson =
+    lesson && progress
+      ? {
+          title: localize(lesson.title, locale),
+          meta: t('home.lessonMeta', { level: lesson.levelId, count: lesson.estimatedMinutes }),
+          position: lessonIndex >= 0 ? t('home.lessonPosition', { current: lessonIndex + 1, total: lessons.length }) : null,
+          levelProgress: progress.levelProgress,
+        }
+      : null;
+
   return (
-    <Screen edges={['top']}>
-      <Text variant="title" accessibilityRole="header">
-        {t('home.greeting', { name: learning.user?.name ?? '' })}</Text>
-
-      <Card style={{ gap: spacing.md }}>
-        <Text variant="small" color="textSecondary">
-          {t('home.currentLanguage')}
-        </Text>
-        <View style={[styles.row, { gap: spacing.md }]}>
-          {language ? <LanguageBadge language={language} /> : null}
-          <View style={styles.flex}>
-            <Text variant="heading">{language ? localize(language.name, locale) : ''}</Text>
-            {language && language.nativeName !== localize(language.name, locale) ? (
-              <Text variant="small" color="textSecondary">
-                {isolateNative(language.nativeName, language.direction)}
-              </Text>
-            ) : null}
-          </View>
-        </View>
-        {language ? (
-          <Button title={t('home.changeLanguage')} variant="secondary" icon="swap-horizontal-outline" onPress={() => router.push(ROUTES.languageSelection)} />
-        ) : null}
-      </Card>
-
-      <Card style={{ gap: spacing.sm }}>
-        <Text variant="subheading">{t('home.dailyGoal')}</Text>
-        <ProgressBar value={goalRatio} accessibilityLabel={t('home.dailyGoal')} />
-        <Text variant="small" color="textSecondary">
-          {goalReached ? t('home.dailyGoalDone') : t('home.dailyGoalProgress', { done: plan.minutesToday, goal: plan.dailyGoalMinutes })}
-        </Text>
-      </Card>
-
-      {recommendation ? (
-        <Card style={{ gap: spacing.sm }}>
-          <Text variant="subheading">{t('home.recommended')}</Text>
-          <Text>{recommendationText(t, recommendation)}</Text>
-          <Button
-            title={recommendationToReview ? t('tabs.review') : t('home.continueLearning')}
-            icon={recommendationToReview ? 'repeat-outline' : 'play-outline'}
-            iconDirectional
+    <Screen edges={[]} contentStyle={{ padding: 0, gap: 0 }}>
+      <HomeHero
+        name={learning.user?.name ?? ''}
+        streakDays={streak.days}
+        language={language}
+        languageName={language ? localize(language.name, locale) : ''}
+        minutesToday={plan.minutesToday}
+        goalMinutes={plan.dailyGoalMinutes}
+        onChangeLanguage={() => router.push(ROUTES.languageSelection)}
+        overlap={HERO_OVERLAP}
+      />
+      <View style={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xl, gap: spacing.md, marginTop: -HERO_OVERLAP }}>
+        <ContinueCard
+          lesson={continueLesson}
+          onContinue={() => lesson && router.push({ pathname: '/lesson/[id]', params: { id: lesson.id } })}
+        />
+        {recommendation ? (
+          <RecommendationRow
+            text={recommendationText(t, recommendation)}
+            icon={recommendationToReview ? 'repeat' : 'sparkles'}
             onPress={openRecommendation}
           />
-        </Card>
-      ) : null}
-
-      {lesson && progress ? (
-        <Card style={{ gap: spacing.sm }}>
-          <Text variant="subheading">{t('home.continueLearning')}</Text>
-          <Text variant="heading">{localize(lesson.title, locale)}</Text>
-          <Text variant="small" color="textSecondary">
-            {t('home.lessonMeta', { level: lesson.levelId, count: lesson.estimatedMinutes })}
-          </Text>
-          <ProgressBar value={progress.levelProgress} accessibilityLabel={t('home.overallProgress')} />
-          <Button title={t('home.continueLearning')} icon="play-outline" iconDirectional onPress={() => router.push({ pathname: '/lesson/[id]', params: { id: lesson.id } })} />
-        </Card>
-      ) : (
-        // currentLessonId === null means "no current lesson", not an error.
-        <Card style={{ gap: spacing.sm }}>
-          <Text variant="subheading">{t('home.noCurrentLesson')}</Text>
-          <Text variant="small" color="textSecondary">
-            {t('home.noCurrentLessonBody')}
-          </Text>
-        </Card>
-      )}
-
-      <Card style={[styles.row, { gap: spacing.md }]}>
-        <Icon name="flame" size={32} color="accent" />
-        <View style={styles.flex} accessible accessibilityLabel={t('home.streakAria', { count: streak.days })}>
-          <Text variant="small" color="textSecondary">
-            {t('home.streak')}
-          </Text>
-          <Text variant="heading">{t('home.streakDays', { count: streak.days })}</Text>
-        </View>
-      </Card>
+        ) : null}
+      </View>
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center' },
-  flex: { flex: 1 },
-});

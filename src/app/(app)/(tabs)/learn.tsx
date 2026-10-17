@@ -1,9 +1,11 @@
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { Card, EmptyState, ErrorState, Icon, LoadingState, Screen, Text } from '@/components/ui';
-import { MIN_TOUCH_TARGET } from '@/constants/app';
+import { HeroProgress } from '@/components/HeroProgress';
+import { LessonRow } from '@/components/LessonRow';
+import { ScreenHero } from '@/components/ScreenHero';
+import { EmptyState, ErrorState, LoadingState, Screen, Text } from '@/components/ui';
 import { useLessonList } from '@/hooks/useLessonList';
 import { useTheme } from '@/hooks/useTheme';
 import { useUiLocale } from '@/hooks/useUiLocale';
@@ -11,7 +13,7 @@ import { localize } from '@/utils/localize';
 
 export default function Learn() {
   const { t } = useTranslation();
-  const { colors, spacing } = useTheme();
+  const { spacing } = useTheme();
   const { locale } = useUiLocale();
   const list = useLessonList();
 
@@ -31,53 +33,47 @@ export default function Learn() {
   }
 
   const { language, lessons, progress } = list.data;
+  const completed = progress?.completedLessonIds ?? [];
+  const levelProgress = progress?.levelProgress ?? 0;
+  const percent = Math.round(Math.min(1, Math.max(0, Number.isFinite(levelProgress) ? levelProgress : 0)) * 100);
 
   return (
-    <Screen edges={['top']}>
-      <Text variant="title" accessibilityRole="header">
-        {t('learn.subtitle', { language: language ? localize(language.name, locale) : '' })}
-      </Text>
+    <Screen edges={[]} contentStyle={{ padding: 0, gap: 0 }}>
+      <ScreenHero
+        eyebrow={t('tabs.learn')}
+        title={t('learn.subtitle', { language: language ? localize(language.name, locale) : '' })}
+        trailing={
+          <View accessible accessibilityLabel={t('learn.progressCount', { done: completed.length, total: lessons.length })}>
+            <Text variant="title" color="heroGold">
+              {t('learn.progressCount', { done: completed.length, total: lessons.length })}
+            </Text>
+          </View>
+        }
+      >
+        <HeroProgress value={levelProgress} accessibilityLabel={t('home.overallProgress')} />
+        <Text variant="caption" color="onHeroMuted">
+          {t('learn.levelProgress', { percent, level: progress?.levelId ?? '' })}
+        </Text>
+      </ScreenHero>
 
       {lessons.length === 0 ? (
         <EmptyState icon="book-outline" title={t('learn.title')} message={t('learn.noLessons')} />
       ) : (
-        <View style={{ gap: spacing.md }}>
-          {lessons.map((lesson) => {
-            const done = progress?.completedLessonIds.includes(lesson.id) ?? false;
-            const current = progress?.currentLessonId === lesson.id;
-            const status = t(done ? 'learn.statusDone' : current ? 'learn.statusCurrent' : 'learn.statusTodo');
-            const title = localize(lesson.title, locale);
-            return (
-              <Pressable
-                key={lesson.id}
-                onPress={() => router.push({ pathname: '/lesson/[id]', params: { id: lesson.id } })}
-                accessibilityRole="button"
-                accessibilityLabel={t('learn.lessonLabel', { title, status })}
-                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-              >
-                <Card style={[styles.row, { gap: spacing.md, minHeight: MIN_TOUCH_TARGET, borderColor: current ? colors.primary : colors.border }]}>
-                  <Icon name={done ? 'checkmark-circle' : current ? 'play-circle-outline' : 'ellipse-outline'} size={28} color={done ? 'success' : 'primary'} />
-                  <View style={styles.flex}>
-                    <Text variant="bodyStrong">{title}</Text>
-                    <Text variant="small" color="textSecondary">
-                      {localize(lesson.summary, locale)}
-                    </Text>
-                    <Text variant="caption" color="textSecondary">
-                      {t('learn.lessonMeta', { level: lesson.levelId, count: lesson.estimatedMinutes, status })}
-                    </Text>
-                  </View>
-                  <Icon name="chevron-forward" directional color="textSecondary" />
-                </Card>
-              </Pressable>
-            );
-          })}
+        <View style={{ padding: spacing.lg, gap: spacing.sm }}>
+          {lessons.map((lesson, index) => (
+            <LessonRow
+              key={lesson.id}
+              index={index + 1}
+              title={localize(lesson.title, locale)}
+              summary={localize(lesson.summary, locale)}
+              level={lesson.levelId}
+              minutes={lesson.estimatedMinutes}
+              state={completed.includes(lesson.id) ? 'done' : progress?.currentLessonId === lesson.id ? 'current' : 'todo'}
+              onPress={() => router.push({ pathname: '/lesson/[id]', params: { id: lesson.id } })}
+            />
+          ))}
         </View>
       )}
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center' },
-  flex: { flex: 1 },
-});

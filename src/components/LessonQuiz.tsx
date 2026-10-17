@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { OptionButton, type OptionState } from '@/components/OptionButton';
 import { ProgressBar } from '@/components/ProgressBar';
-import { Button, Text } from '@/components/ui';
+import { Button, Card, Text } from '@/components/ui';
 import { useTheme } from '@/hooks/useTheme';
 import type { Exercise, LanguageCode, LessonResult, Vocabulary } from '@/types';
 import { answer, initialSession, isFinished, next } from '@/utils/lessonSession';
@@ -72,12 +72,14 @@ export function LessonQuiz({ exercises, words, source, onFinish }: LessonQuizPro
         </Text>
       </View>
 
-      <View style={{ gap: spacing.sm }}>
-        <Text color="textSecondary">{t(askMeaning ? 'lesson.questionMeaning' : 'lesson.questionWord')}</Text>
-        <Text variant="display" accessibilityRole="header">
+      <Card style={{ gap: spacing.sm, alignItems: 'center', padding: spacing.xl }}>
+        <Text variant="small" color="textSecondary" style={{ textAlign: 'center' }}>
+          {t(askMeaning ? 'lesson.questionMeaning' : 'lesson.questionWord')}
+        </Text>
+        <Text variant="display" accessibilityRole="header" style={{ textAlign: 'center' }}>
           {prompt}
         </Text>
-      </View>
+      </Card>
 
       <View style={{ gap: spacing.sm }}>
         {exercise.options.map((id) => (
@@ -98,7 +100,7 @@ export function LessonQuiz({ exercises, words, source, onFinish }: LessonQuizPro
             {t(wasCorrect ? 'lesson.correct' : 'lesson.incorrect')}
           </Text>
           {!wasCorrect ? <Text color="textSecondary">{t('lesson.correctAnswerWas', { answer: label(exercise.answer) })}</Text> : null}
-          <Button title={t(isLast ? 'lesson.finish' : 'lesson.next')} onPress={onNext} />
+          <Button title={t(isLast ? 'lesson.finish' : 'lesson.next')} variant="gold" onPress={onNext} />
         </View>
       ) : null}
     </View>

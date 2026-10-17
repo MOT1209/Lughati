@@ -20,6 +20,9 @@ export function OptionButton({ text, accessibilityLabel, state, disabled, onPres
   const { colors, radius, spacing } = useTheme();
   const { t } = useTranslation();
   const border = state === 'correct' ? colors.success : state === 'wrong' ? colors.error : colors.borderStrong;
+  // Verdicts also tint the card (text on those tints is a contrast-tested pair).
+  const background = state === 'correct' ? colors.primaryMuted : state === 'wrong' ? colors.errorMuted : colors.surface;
+  const textColor = state === 'correct' ? 'onPrimaryMuted' : state === 'wrong' ? 'onErrorMuted' : 'text';
 
   // Colour and icon carry the verdict visually; screen readers only hear it if it is in the label.
   const label =
@@ -46,13 +49,15 @@ export function OptionButton({ text, accessibilityLabel, state, disabled, onPres
           borderRadius: radius.lg,
           borderWidth: state === 'correct' || state === 'wrong' ? 2 : 1,
           borderColor: border,
-          backgroundColor: colors.surface,
+          backgroundColor: background,
           opacity: state === 'dimmed' ? 0.6 : 1,
         },
       ]}
     >
       <View style={styles.flex}>
-        <Text variant="bodyStrong">{text}</Text>
+        <Text variant="bodyStrong" color={textColor}>
+          {text}
+        </Text>
       </View>
       {state === 'correct' ? <Icon name="checkmark-circle" color="success" /> : null}
       {state === 'wrong' ? <Icon name="close-circle" color="error" /> : null}

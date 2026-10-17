@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { LanguageOption } from '@/components/LanguageOption';
+import { ScreenHero } from '@/components/ScreenHero';
 import { ErrorState, LoadingState, Screen, Text } from '@/components/ui';
 import { useAsyncData } from '@/hooks/useAsyncData';
 import { useTheme } from '@/hooks/useTheme';
@@ -26,24 +27,28 @@ export default function LanguageSelection() {
   };
 
   return (
-    <Screen>
-      <Text color="textSecondary">{t('languageSelection.subtitle')}</Text>
-      {languages.status === 'loading' ? <LoadingState /> : null}
-      {languages.status === 'error' ? <ErrorState error={languages.error} onRetry={languages.reload} /> : null}
-      {languages.status === 'success' ? (
-        <View style={{ gap: spacing.sm }} accessibilityRole="radiogroup">
-          {languages.data
-            .filter((language) => language.code !== profile?.source)
-            .map((language) => (
-              <LanguageOption
-                key={language.code}
-                language={language}
-                checked={language.code === profile?.target}
-                onPress={() => void choose(language.code)}
-              />
-            ))}
-        </View>
-      ) : null}
+    <Screen edges={['bottom']} contentStyle={{ padding: 0, gap: 0 }}>
+      <ScreenHero topInset={false} eyebrow={t('home.changeLanguage')} title={t('languageSelection.title')}>
+        <Text color="onHeroMuted">{t('languageSelection.subtitle')}</Text>
+      </ScreenHero>
+      <View style={{ padding: spacing.lg, gap: spacing.lg }}>
+        {languages.status === 'loading' ? <LoadingState /> : null}
+        {languages.status === 'error' ? <ErrorState error={languages.error} onRetry={languages.reload} /> : null}
+        {languages.status === 'success' ? (
+          <View style={{ gap: spacing.sm }} accessibilityRole="radiogroup">
+            {languages.data
+              .filter((language) => language.code !== profile?.source)
+              .map((language) => (
+                <LanguageOption
+                  key={language.code}
+                  language={language}
+                  checked={language.code === profile?.target}
+                  onPress={() => void choose(language.code)}
+                />
+              ))}
+          </View>
+        ) : null}
+      </View>
     </Screen>
   );
 }

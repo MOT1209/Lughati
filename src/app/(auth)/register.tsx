@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { BrandHero } from '@/components/BrandHero';
 import { Button, Input, Screen, Text } from '@/components/ui';
 import { useTheme } from '@/hooks/useTheme';
 import { AuthError } from '@/services/auth';
@@ -44,48 +45,46 @@ export default function Register() {
   };
 
   return (
-    <Screen contentStyle={{ justifyContent: 'center' }}>
-      <View style={{ gap: spacing.xs }}>
-        <Text variant="display">{t('auth.register.title')}</Text>
-        <Text color="textSecondary">{t('auth.register.subtitle')}</Text>
-      </View>
+    <Screen edges={[]} contentStyle={{ padding: 0, gap: 0 }}>
+      <BrandHero title={t('auth.register.title')} subtitle={t('auth.register.subtitle')} />
+      <View style={{ padding: spacing.lg, gap: spacing.lg }}>
+        <View style={{ gap: spacing.md }}>
+          <Input label={t('auth.fields.name')} value={values.name} onChangeText={set('name')} error={fieldText('name')} autoComplete="name" textContentType="name" />
+          <Input
+            label={t('auth.fields.email')}
+            value={values.email}
+            onChangeText={set('email')}
+            error={fieldText('email')}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoComplete="email"
+            autoCorrect={false}
+            textContentType="emailAddress"
+          />
+          <Input label={t('auth.fields.password')} value={values.password} onChangeText={set('password')} error={fieldText('password')} password autoCapitalize="none" autoComplete="new-password" textContentType="newPassword" />
+          <Input label={t('auth.fields.confirmPassword')} value={values.confirmPassword} onChangeText={set('confirmPassword')} error={fieldText('confirmPassword')} password autoCapitalize="none" autoComplete="new-password" textContentType="newPassword" returnKeyType="done" onSubmitEditing={onSubmit} />
+        </View>
 
-      <View style={{ gap: spacing.md }}>
-        <Input label={t('auth.fields.name')} value={values.name} onChangeText={set('name')} error={fieldText('name')} autoComplete="name" textContentType="name" />
-        <Input
-          label={t('auth.fields.email')}
-          value={values.email}
-          onChangeText={set('email')}
-          error={fieldText('email')}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoComplete="email"
-          autoCorrect={false}
-          textContentType="emailAddress"
-        />
-        <Input label={t('auth.fields.password')} value={values.password} onChangeText={set('password')} error={fieldText('password')} password autoCapitalize="none" autoComplete="new-password" textContentType="newPassword" />
-        <Input label={t('auth.fields.confirmPassword')} value={values.confirmPassword} onChangeText={set('confirmPassword')} error={fieldText('confirmPassword')} password autoCapitalize="none" autoComplete="new-password" textContentType="newPassword" returnKeyType="done" onSubmitEditing={onSubmit} />
-      </View>
-
-      {submitError ? (
-        <Text color="error" accessibilityLiveRegion="polite">
-          {submitError}
-        </Text>
-      ) : null}
-
-      <Text variant="caption" color="textSecondary">
-        {t('auth.demoNotice')}
-      </Text>
-
-      <Button title={t('auth.register.submit')} onPress={onSubmit} loading={loading} />
-
-      <View style={{ alignItems: 'center', gap: spacing.xs }}>
-        <Text color="textSecondary">{t('auth.register.haveAccount')}</Text>
-        <Link href={ROUTES.login} accessibilityRole="link" style={{ minHeight: 48, paddingVertical: 10 }}>
-          <Text color="primary" variant="bodyStrong">
-            {t('auth.register.signIn')}
+        {submitError ? (
+          <Text color="error" accessibilityLiveRegion="polite">
+            {submitError}
           </Text>
-        </Link>
+        ) : null}
+
+        <Text variant="caption" color="textSecondary">
+          {t('auth.demoNotice')}
+        </Text>
+
+        <Button title={t('auth.register.submit')} onPress={onSubmit} loading={loading} />
+
+        <View style={{ alignItems: 'center', gap: spacing.xs }}>
+          <Text color="textSecondary">{t('auth.register.haveAccount')}</Text>
+          <Link href={ROUTES.login} accessibilityRole="link" style={{ minHeight: 48, paddingVertical: 10 }}>
+            <Text color="primary" variant="bodyStrong">
+              {t('auth.register.signIn')}
+            </Text>
+          </Link>
+        </View>
       </View>
     </Screen>
   );

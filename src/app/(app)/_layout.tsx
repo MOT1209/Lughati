@@ -23,9 +23,10 @@ export default function AppLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: colors.surface },
-        headerTintColor: colors.text,
-        headerTitleStyle: { fontFamily: fontFamilies.semibold },
+        headerStyle: { backgroundColor: colors.heroStart },
+        headerTintColor: colors.onHero,
+        headerTitleStyle: { fontFamily: fontFamilies.semibold, color: colors.onHero },
+        headerShadowVisible: false,
         contentStyle: { backgroundColor: colors.background },
       }}
     >

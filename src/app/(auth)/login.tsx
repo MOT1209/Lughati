@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { BrandHero } from '@/components/BrandHero';
 import { Button, Input, Screen, Text } from '@/components/ui';
 import { useTheme } from '@/hooks/useTheme';
 import { AuthError } from '@/services/auth';
@@ -39,57 +40,55 @@ export default function Login() {
   };
 
   return (
-    <Screen contentStyle={{ justifyContent: 'center' }}>
-      <View style={{ gap: spacing.xs }}>
-        <Text variant="display">{t('auth.login.title')}</Text>
-        <Text color="textSecondary">{t('auth.login.subtitle')}</Text>
-      </View>
+    <Screen edges={[]} contentStyle={{ padding: 0, gap: 0 }}>
+      <BrandHero title={t('auth.login.title')} subtitle={t('auth.login.subtitle')} />
+      <View style={{ padding: spacing.lg, gap: spacing.lg }}>
+        <View style={{ gap: spacing.md }}>
+          <Input
+            label={t('auth.fields.email')}
+            value={email}
+            onChangeText={setEmail}
+            error={fieldText(errors.email)}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoComplete="email"
+            autoCorrect={false}
+            textContentType="emailAddress"
+          />
+          <Input
+            label={t('auth.fields.password')}
+            value={password}
+            onChangeText={setPassword}
+            error={fieldText(errors.password)}
+            password
+            autoCapitalize="none"
+            autoComplete="current-password"
+            textContentType="password"
+            returnKeyType="done"
+            onSubmitEditing={onSubmit}
+          />
+        </View>
 
-      <View style={{ gap: spacing.md }}>
-        <Input
-          label={t('auth.fields.email')}
-          value={email}
-          onChangeText={setEmail}
-          error={fieldText(errors.email)}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoComplete="email"
-          autoCorrect={false}
-          textContentType="emailAddress"
-        />
-        <Input
-          label={t('auth.fields.password')}
-          value={password}
-          onChangeText={setPassword}
-          error={fieldText(errors.password)}
-          password
-          autoCapitalize="none"
-          autoComplete="current-password"
-          textContentType="password"
-          returnKeyType="done"
-          onSubmitEditing={onSubmit}
-        />
-      </View>
-
-      {submitError ? (
-        <Text color="error" accessibilityLiveRegion="polite">
-          {submitError}
-        </Text>
-      ) : null}
-
-      <Text variant="caption" color="textSecondary">
-        {t('auth.demoNotice')}
-      </Text>
-
-      <Button title={t('auth.login.submit')} onPress={onSubmit} loading={loading} />
-
-      <View style={{ alignItems: 'center', gap: spacing.xs }}>
-        <Text color="textSecondary">{t('auth.login.noAccount')}</Text>
-        <Link href={ROUTES.register} accessibilityRole="link" style={{ minHeight: 48, paddingVertical: 10 }}>
-          <Text color="primary" variant="bodyStrong">
-            {t('auth.login.createAccount')}
+        {submitError ? (
+          <Text color="error" accessibilityLiveRegion="polite">
+            {submitError}
           </Text>
-        </Link>
+        ) : null}
+
+        <Text variant="caption" color="textSecondary">
+          {t('auth.demoNotice')}
+        </Text>
+
+        <Button title={t('auth.login.submit')} onPress={onSubmit} loading={loading} />
+
+        <View style={{ alignItems: 'center', gap: spacing.xs }}>
+          <Text color="textSecondary">{t('auth.login.noAccount')}</Text>
+          <Link href={ROUTES.register} accessibilityRole="link" style={{ minHeight: 48, paddingVertical: 10 }}>
+            <Text color="primary" variant="bodyStrong">
+              {t('auth.login.createAccount')}
+            </Text>
+          </Link>
+        </View>
       </View>
     </Screen>
   );
