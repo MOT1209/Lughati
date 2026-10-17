@@ -165,11 +165,11 @@ Found during the device run and fixed:
 | M16 | Medium | No screen tests for Home, Profile, Settings, Login/Register, Onboarding, setup-languages, root layout | `src/app` — **FIXED** (Profile, Login/Register, Onboarding tests added; Home, Settings, setup-languages already covered) |
 | L17 | Low | Leaving a quiz loses all answers without confirmation | `lesson/[id].tsx` — **FIXED (beforeRemove confirmation + test)** |
 | L19 | Low | A few strings are concatenated in code instead of one interpolated key | `settings.tsx:128`, `learn.tsx:65`, `profile.tsx:63` — **MOSTLY FIXED** |
-| L20 | Low | Unused i18n keys (`app.tagline`, `common.continue`, `common.back`, `common.comingSoon`, `common.minutesShort`, `languageSelection.selected`, `profile.title`, `progress.title`) | locales |
-| L21 | Low | Dead code: `APP_NAME`; `services/ai` only used in tests | `constants/app.ts:3` |
-| L22 | Low | `supportsRTL` not set for `expo-localization`; launcher name not localised | `app.json` |
-| L23 | Low | `ProgressBar` has no NaN guard | `components/ProgressBar.tsx:13` |
-| L24 | Low | Streak card not grouped for TalkBack; foreign words spoken with the UI voice | `home.tsx`, `lesson/[id].tsx` |
+| L20 | Low | Unused i18n keys (`app.tagline`, `common.continue`, `common.back`, `common.comingSoon`, `common.minutesShort`, `languageSelection.selected`, `profile.title`, `progress.title`) | locales — **FIXED (6 unused keys removed; `progress.title`/`common.continue` are used)** |
+| L21 | Low | Dead code: `APP_NAME`; `services/ai` only used in tests | `constants/app.ts:3` — **PARTLY FIXED (`APP_NAME` removed; `services/ai` kept as the seam)** |
+| L22 | Low | `supportsRTL` not set for `expo-localization`; launcher name not localised | `app.json` — **PARTLY FIXED (`supportsRTL` set; launcher name not localised)** |
+| L23 | Low | `ProgressBar` has no NaN guard | `components/ProgressBar.tsx:13` — **ALREADY FIXED (NaN guard present)** |
+| L24 | Low | Streak card not grouped for TalkBack; foreign words spoken with the UI voice | `home.tsx`, `lesson/[id].tsx` — **PARTLY FIXED (streak tile has its own aria label; foreign-word voice not addressed)** |
 | – | Low | First-time setup: Android back can leave `setup-languages` for Home before a choice (Home then uses the account default) | `setup-languages.tsx` |
 
 **Readiness:** stable at code/test level; **partially device-verified** on OPPO CPH2069 / Android 11: app start, language setup after login, flags, meanings in the own language, session + choice after a restart. Plural fix and the remaining TESTING.md items are not yet device-verified.

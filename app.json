@@ -29,7 +29,7 @@
           "imageWidth": 76
         }
       ],
-      "expo-localization"
+      ["expo-localization", { "supportsRTL": true }]
     ],
     "experiments": {
       "typedRoutes": true,

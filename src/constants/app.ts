@@ -1,7 +1,3 @@
-// The product name lives in exactly three places: app.json ("name"), this constant, and the
-// `app.name` key in each locale file. Screens must render t('app.name'), never a literal.
-export const APP_NAME = 'Lughati';
-
 export const STORAGE_KEYS = {
   preferences: 'lughati.preferences.v1',
   session: 'lughati.session.v1',
