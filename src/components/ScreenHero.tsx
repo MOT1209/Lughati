@@ -15,10 +15,12 @@ interface ScreenHeroProps {
   children?: ReactNode;
   /** Extra room at the bottom for a card that overlaps the hero. */
   overlap?: number;
+  /** Pad for the status bar. Turn off under a native header, which already covers it. */
+  topInset?: boolean;
 }
 
 /** The brand header shared by the tab screens: the icon's dark teal gradient with a title row. */
-export function ScreenHero({ eyebrow, title, trailing, children, overlap = 0 }: ScreenHeroProps) {
+export function ScreenHero({ eyebrow, title, trailing, children, overlap = 0, topInset = true }: ScreenHeroProps) {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -29,7 +31,7 @@ export function ScreenHero({ eyebrow, title, trailing, children, overlap = 0 }: 
       start={{ x: 1, y: 0 }}
       end={{ x: 0.2, y: 1 }}
       style={{
-        paddingTop: insets.top + spacing.lg,
+        paddingTop: (topInset ? insets.top : 0) + spacing.lg,
         paddingHorizontal: spacing.lg,
         paddingBottom: spacing.lg + overlap,
         borderBottomLeftRadius: radius.xl,

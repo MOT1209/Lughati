@@ -4,6 +4,7 @@ import { BackHandler, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { LanguageOption } from '@/components/LanguageOption';
+import { ScreenHero } from '@/components/ScreenHero';
 import { Button, ErrorState, LoadingState, Screen, Text } from '@/components/ui';
 import { useAsyncData } from '@/hooks/useAsyncData';
 import { useTheme } from '@/hooks/useTheme';
@@ -77,47 +78,47 @@ export default function SetupLanguages() {
   const list = languages.status === 'success' ? (isSourceStep ? languages.data.sources : languages.data.targets.filter((l) => l.code !== source)) : [];
 
   return (
-    <Screen edges={['bottom']}>
+    <Screen edges={['bottom']} contentStyle={{ padding: 0, gap: 0 }}>
       <Stack.Screen options={{ headerBackVisible: isEdit, gestureEnabled: isEdit }} />
-      <View style={{ gap: spacing.xs }}>
-        <Text variant="caption" color="textSecondary">
-          {t('setupLanguages.step', { step: isSourceStep ? 1 : 2, total: 2 })}
-        </Text>
-        <Text variant="title" accessibilityRole="header">
-          {isSourceStep ? t('setupLanguages.sourceTitle') : t('setupLanguages.targetTitle')}
-        </Text>
-        <Text color="textSecondary">{isSourceStep ? t('setupLanguages.sourceSubtitle') : t('setupLanguages.targetSubtitle')}</Text>
+      <ScreenHero
+        topInset={false}
+        eyebrow={t('setupLanguages.step', { step: isSourceStep ? 1 : 2, total: 2 })}
+        title={isSourceStep ? t('setupLanguages.sourceTitle') : t('setupLanguages.targetTitle')}
+      >
+        <Text color="onHeroMuted">{isSourceStep ? t('setupLanguages.sourceSubtitle') : t('setupLanguages.targetSubtitle')}</Text>
+      </ScreenHero>
+
+      <View style={{ padding: spacing.lg, gap: spacing.lg }}>
+        {languages.status === 'loading' ? <LoadingState /> : null}
+        {languages.status === 'error' ? <ErrorState error={languages.error} onRetry={languages.reload} /> : null}
+        {languages.status === 'success' ? (
+          <View style={{ gap: spacing.sm }} accessibilityRole="radiogroup">
+            {list.map((language) => (
+              <LanguageOption
+                key={language.code}
+                language={language}
+                checked={language.code === (isSourceStep ? source : target)}
+                onPress={() => (isSourceStep ? chooseSource(language.code) : setTarget(language.code))}
+              />
+            ))}
+          </View>
+        ) : null}
+
+        {saveFailed ? (
+          <Text color="error" accessibilityLiveRegion="polite">
+            {t('setupLanguages.saveFailed')}
+          </Text>
+        ) : null}
+
+        {isSourceStep ? (
+          <Button title={t('setupLanguages.next')} variant="gold" icon="arrow-forward-outline" iconDirectional disabled={!source} onPress={() => setStep('target')} />
+        ) : (
+          <View style={{ gap: spacing.sm }}>
+            <Button title={t('setupLanguages.save')} variant="gold" icon="checkmark-outline" disabled={!target} loading={saving} onPress={() => void save()} />
+            <Button title={t('setupLanguages.back')} variant="secondary" icon="arrow-back-outline" iconDirectional onPress={() => setStep('source')} />
+          </View>
+        )}
       </View>
-
-      {languages.status === 'loading' ? <LoadingState /> : null}
-      {languages.status === 'error' ? <ErrorState error={languages.error} onRetry={languages.reload} /> : null}
-      {languages.status === 'success' ? (
-        <View style={{ gap: spacing.sm }} accessibilityRole="radiogroup">
-          {list.map((language) => (
-            <LanguageOption
-              key={language.code}
-              language={language}
-              checked={language.code === (isSourceStep ? source : target)}
-              onPress={() => (isSourceStep ? chooseSource(language.code) : setTarget(language.code))}
-            />
-          ))}
-        </View>
-      ) : null}
-
-      {saveFailed ? (
-        <Text color="error" accessibilityLiveRegion="polite">
-          {t('setupLanguages.saveFailed')}
-        </Text>
-      ) : null}
-
-      {isSourceStep ? (
-        <Button title={t('setupLanguages.next')} icon="arrow-forward-outline" iconDirectional disabled={!source} onPress={() => setStep('target')} />
-      ) : (
-        <View style={{ gap: spacing.sm }}>
-          <Button title={t('setupLanguages.save')} icon="checkmark-outline" disabled={!target} loading={saving} onPress={() => void save()} />
-          <Button title={t('setupLanguages.back')} variant="secondary" icon="arrow-back-outline" iconDirectional onPress={() => setStep('source')} />
-        </View>
-      )}
     </Screen>
   );
 }

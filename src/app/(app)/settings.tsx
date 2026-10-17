@@ -5,7 +5,8 @@ import { Alert, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { SegmentedControl } from '@/components/SegmentedControl';
-import { Button, Card, Screen, Text } from '@/components/ui';
+import { SettingsSection } from '@/components/SettingsSection';
+import { Button, Screen, Text } from '@/components/ui';
 import { useTheme } from '@/hooks/useTheme';
 import { applyLanguagePreference } from '@/services/appLanguage';
 import { AuthError } from '@/services/auth';
@@ -69,8 +70,7 @@ export default function Settings() {
 
   return (
     <Screen edges={['bottom']}>
-      <Card style={{ gap: spacing.md }}>
-        <Text variant="subheading">{t('settings.appearance')}</Text>
+      <SettingsSection icon="color-palette-outline" title={t('settings.appearance')}>
         <Text variant="small" color="textSecondary">
           {t('settings.theme')}
         </Text>
@@ -116,22 +116,18 @@ export default function Settings() {
             ) : null}
           </View>
         ) : null}
-      </Card>
+      </SettingsSection>
 
-      <Card style={{ gap: spacing.sm }}>
-        <Text variant="subheading">{t('settings.learningLanguages')}</Text>
-        <Button title={t('settings.learningLanguages')} variant="secondary" icon="language-outline" onPress={() => router.push(ROUTES.setupLanguages)} />
-      </Card>
+      <SettingsSection icon="language-outline" title={t('settings.learningLanguages')}>
+        <Button title={t('settings.learningLanguages')} variant="secondary" icon="swap-horizontal-outline" onPress={() => router.push(ROUTES.setupLanguages)} />
+      </SettingsSection>
 
-
-      <Card style={{ gap: spacing.md }}>
-        <Text variant="subheading">{t('settings.account')}</Text>
+      <SettingsSection icon="person-circle-outline" title={t('settings.account')}>
         <Text color="textSecondary">{isolateLtr(user?.email ?? '')}</Text>
         <Button title={t('settings.signOut')} icon="log-out-outline" variant="danger" onPress={onSignOut} loading={signingOut} />
-      </Card>
+      </SettingsSection>
 
-      <Card style={{ gap: spacing.xs }}>
-        <Text variant="subheading">{t('settings.about')}</Text>
+      <SettingsSection icon="information-circle-outline" title={t('settings.about')}>
         <Text>{t('app.name')}</Text>
         <Text variant="small" color="textSecondary">
           {t('settings.version', { version: isolateLtr(Constants.expoConfig?.version ?? '1.0.0') })}
@@ -139,7 +135,7 @@ export default function Settings() {
         <Text variant="small" color="textSecondary">
           {t('settings.aboutText')}
         </Text>
-      </Card>
+      </SettingsSection>
     </Screen>
   );
 }

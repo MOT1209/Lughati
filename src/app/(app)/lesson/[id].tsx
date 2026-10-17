@@ -1,10 +1,12 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { LessonQuiz } from '@/components/LessonQuiz';
 import { MIN_MATCH_WORDS, VocabularyMatchGame } from '@/components/VocabularyMatchGame';
+import { ScreenHero } from '@/components/ScreenHero';
 import { Button, Card, EmptyState, ErrorState, LoadingState, Screen, Text } from '@/components/ui';
 import { useAsyncData } from '@/hooks/useAsyncData';
 import { useTheme } from '@/hooks/useTheme';
@@ -22,7 +24,7 @@ type Step = 'intro' | 'quiz' | 'practice' | 'summary';
 export default function LessonScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
-  const { spacing } = useTheme();
+  const { colors, spacing, radius } = useTheme();
   const { locale } = useUiLocale();
   const userId = useAuthStore((s) => s.session?.user.id ?? '');
   const notifyProgressChanged = useLearningStore((s) => s.notifyProgressChanged);
@@ -139,22 +141,30 @@ export default function LessonScreen() {
     };
     return (
       <Screen edges={['bottom']} contentStyle={{ justifyContent: 'center' }}>
-        <Card style={{ gap: spacing.md, alignItems: 'center' }}>
-          <Text variant="title" accessibilityRole="header" style={{ textAlign: 'center' }}>
+        <LinearGradient
+          colors={[colors.heroStart, colors.heroMid, colors.heroEnd]}
+          locations={[0, 0.5, 1]}
+          start={{ x: 1, y: 0 }}
+          end={{ x: 0.2, y: 1 }}
+          style={{ borderRadius: radius.xl, padding: spacing.xl, gap: spacing.sm, alignItems: 'center' }}
+        >
+          <Text variant="title" color="onHero" accessibilityRole="header" style={{ textAlign: 'center' }}>
             {t(passed ? 'lesson.summaryTitle' : 'lesson.notPassedTitle')}
           </Text>
-          <Text>{t('lesson.summaryScore', { correct: result.correct, total: result.total })}</Text>
+          <Text variant="display" color="heroGold">
+            {t('lesson.summaryScore', { correct: result.correct, total: result.total })}
+          </Text>
           {passed ? null : (
-            <Text color="textSecondary" style={{ textAlign: 'center' }}>
+            <Text color="onHeroMuted" style={{ textAlign: 'center' }}>
               {t('lesson.notPassedMessage', { percent: Math.round(PASS_RATIO * 100) })}
             </Text>
           )}
-          <Text color="textSecondary">{t('lesson.summaryXp', { xp: lessonXp(result) })}</Text>
-        </Card>
-        {passed ? null : <Button title={t('lesson.retryLesson')} icon="refresh-outline" onPress={retryLesson} />}
+          <Text color="onHeroMuted">{t('lesson.summaryXp', { xp: lessonXp(result) })}</Text>
+        </LinearGradient>
+        {passed ? null : <Button title={t('lesson.retryLesson')} variant="gold" icon="refresh-outline" onPress={retryLesson} />}
         <Button
           title={t('lesson.backToLessons')}
-          variant={passed ? 'primary' : 'secondary'}
+          variant={passed ? 'gold' : 'secondary'}
           icon="arrow-back-outline"
           iconDirectional
           onPress={() => router.back()}
@@ -164,40 +174,58 @@ export default function LessonScreen() {
   }
 
   return (
-    <Screen edges={['bottom']}>
-      <View style={{ gap: spacing.xs }}>
-        <Text variant="title" accessibilityRole="header">
-          {localize(lesson.title, locale)}
-        </Text>
-        <Text color="textSecondary">{localize(lesson.summary, locale)}</Text>
+    <Screen edges={['bottom']} contentStyle={{ padding: 0, gap: 0 }}>
+      <ScreenHero
+        topInset={false}
+        eyebrow={t('home.lessonMeta', { level: lesson.levelId, count: lesson.estimatedMinutes })}
+        title={localize(lesson.title, locale)}
+      >
+        <Text color="onHeroMuted">{localize(lesson.summary, locale)}</Text>
+      </ScreenHero>
+
+      <View style={{ padding: spacing.lg, gap: spacing.md }}>
+        <Card style={{ gap: spacing.md }}>
+          <Text variant="subheading">{t('lesson.vocabulary')}</Text>
+          {words.map((word, i) => (
+            <View
+              key={word.id}
+              style={[
+                styles.word,
+                { gap: spacing.md, paddingTop: i === 0 ? 0 : spacing.sm, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: colors.border },
+              ]}
+              accessible
+              accessibilityLabel={`${word.term}: ${meaningOf(word, source)}`}
+            >
+              <Text variant="bodyStrong" style={styles.flex}>
+                {isolateTerm(word)}
+              </Text>
+              <Text variant="small" color="textSecondary" style={styles.flex}>
+                {meaningOf(word, source)}
+              </Text>
+            </View>
+          ))}
+        </Card>
+
+        {exercises.length === 0 ? (
+          <Text color="textSecondary">{t('lesson.noExercises')}</Text>
+        ) : (
+          <Button title={t('lesson.start')} variant="gold" icon="play-outline" iconDirectional onPress={() => setStep('quiz')} />
+        )}
+
+        {words.length >= MIN_MATCH_WORDS ? (
+          <Button
+            title={t('practice.play')}
+            variant="secondary"
+            icon="game-controller-outline"
+            onPress={() => setStep('practice')}
+          />
+        ) : null}
       </View>
-
-      <Card style={{ gap: spacing.md }}>
-        <Text variant="subheading">{t('lesson.vocabulary')}</Text>
-        {words.map((word) => (
-          <View key={word.id} style={{ gap: 2 }} accessible accessibilityLabel={`${word.term}: ${meaningOf(word, source)}`}>
-            <Text variant="bodyStrong">{isolateTerm(word)}</Text>
-            <Text variant="small" color="textSecondary">
-              {meaningOf(word, source)}
-            </Text>
-          </View>
-        ))}
-      </Card>
-
-      {exercises.length === 0 ? (
-        <Text color="textSecondary">{t('lesson.noExercises')}</Text>
-      ) : (
-        <Button title={t('lesson.start')} icon="play-outline" iconDirectional onPress={() => setStep('quiz')} />
-      )}
-
-      {words.length >= MIN_MATCH_WORDS ? (
-        <Button
-          title={t('practice.play')}
-          variant="secondary"
-          icon="game-controller-outline"
-          onPress={() => setStep('practice')}
-        />
-      ) : null}
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  word: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  flex: { flex: 1 },
+});

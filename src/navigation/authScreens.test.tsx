@@ -37,6 +37,14 @@ afterEach(() => {
 
 const type = (label: string, text: string) => fireEvent.changeText(screen.getByLabelText(label), text);
 
+describe('Brand header', () => {
+  it('shows the app name as a wordmark above the sign-in and sign-up titles', async () => {
+    renderRouter(routes, { initialUrl: '/login' });
+    expect(await screen.findByLabelText('Lughati')).toBeTruthy();
+    expect(screen.getByRole('header', { name: 'Sign in' })).toBeTruthy();
+  }, SLOW_TEST_TIMEOUT);
+});
+
 describe('Login screen', () => {
   it('shows field errors and does not submit an invalid form', async () => {
     renderRouter(routes, { initialUrl: '/login' });

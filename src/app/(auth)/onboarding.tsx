@@ -1,9 +1,12 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { Button, Icon, Screen, Text, type IconName } from '@/components/ui';
+import { Button, Icon, Text, type IconName } from '@/components/ui';
+import { MIN_TOUCH_TARGET } from '@/constants/app';
 import { useTheme } from '@/hooks/useTheme';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import { ROUTES } from '@/utils/routing';
@@ -17,6 +20,7 @@ const slides: { icon: IconName; title: 'onboarding.slide1Title' | 'onboarding.sl
 export default function Onboarding() {
   const { t } = useTranslation();
   const { colors, spacing, radius } = useTheme();
+  const insets = useSafeAreaInsets();
   const completeOnboarding = usePreferencesStore((s) => s.completeOnboarding);
   const [index, setIndex] = useState(0);
   const slide = slides[index]!;
@@ -28,29 +32,37 @@ export default function Onboarding() {
   };
 
   return (
-    <Screen contentStyle={styles.content}>
+    <LinearGradient
+      colors={[colors.heroStart, colors.heroMid, colors.heroEnd]}
+      locations={[0, 0.45, 1]}
+      start={{ x: 1, y: 0 }}
+      end={{ x: 0.2, y: 1 }}
+      style={[styles.fill, { paddingTop: insets.top + spacing.lg, paddingBottom: insets.bottom + spacing.lg, paddingHorizontal: spacing.lg }]}
+    >
       <View style={styles.skipRow}>
-        {!isLast ? <Button title={t('common.skip')} variant="ghost" onPress={finish} /> : null}
+        {!isLast ? (
+          <Pressable onPress={finish} accessibilityRole="button" accessibilityLabel={t('common.skip')} style={styles.skip}>
+            <Text variant="button" color="onHeroMuted">
+              {t('common.skip')}
+            </Text>
+          </Pressable>
+        ) : null}
       </View>
 
       <View style={[styles.center, { gap: spacing.lg }]}>
-        <View style={[styles.iconWrap, { backgroundColor: colors.primaryMuted, borderRadius: radius.xl }]}>
-          <Icon name={slide.icon} size={72} color="onPrimaryMuted" />
+        <View style={[styles.iconWrap, { backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: colors.heroGold, borderRadius: radius.xl }]}>
+          <Icon name={slide.icon} size={72} color="heroGold" />
         </View>
-        <Text variant="display" style={styles.text}>
+        <Text variant="display" color="onHero" style={styles.text} accessibilityRole="header">
           {t(slide.title)}
         </Text>
-        <Text color="textSecondary" style={styles.text}>
+        <Text color="onHeroMuted" style={styles.text}>
           {t(slide.body)}
         </Text>
       </View>
 
       <View style={{ gap: spacing.lg }}>
-        <View
-          style={styles.dots}
-          accessible
-          accessibilityLabel={t('onboarding.pageOf', { current: index + 1, total: slides.length })}
-        >
+        <View style={styles.dots} accessible accessibilityLabel={t('onboarding.pageOf', { current: index + 1, total: slides.length })}>
           {slides.map((_, dot) => (
             <View
               key={dot}
@@ -58,22 +70,27 @@ export default function Onboarding() {
                 width: dot === index ? 24 : 8,
                 height: 8,
                 borderRadius: radius.pill,
-                backgroundColor: dot === index ? colors.primary : colors.border,
+                backgroundColor: dot === index ? colors.heroGold : 'rgba(255, 255, 255, 0.3)',
               }}
             />
           ))}
         </View>
-        <Button title={isLast ? t('onboarding.start') : t('common.next')} onPress={isLast ? finish : () => setIndex(index + 1)} />
+        <Button
+          title={isLast ? t('onboarding.start') : t('common.next')}
+          variant="gold"
+          onPress={isLast ? finish : () => setIndex(index + 1)}
+        />
       </View>
-    </Screen>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { flexGrow: 1, justifyContent: 'space-between' },
-  skipRow: { minHeight: 48, alignItems: 'flex-end' },
+  fill: { flex: 1, justifyContent: 'space-between' },
+  skipRow: { minHeight: MIN_TOUCH_TARGET, alignItems: 'flex-end' },
+  skip: { minHeight: MIN_TOUCH_TARGET, minWidth: MIN_TOUCH_TARGET, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 12 },
   center: { alignItems: 'center' },
-  iconWrap: { width: 144, height: 144, alignItems: 'center', justifyContent: 'center' },
+  iconWrap: { width: 144, height: 144, alignItems: 'center', justifyContent: 'center', borderWidth: 2 },
   text: { textAlign: 'center' },
   dots: { flexDirection: 'row', justifyContent: 'center', gap: 8 },
 });

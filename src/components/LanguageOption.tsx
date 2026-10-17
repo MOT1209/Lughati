@@ -38,14 +38,16 @@ export function LanguageOption({ language, checked, onPress }: LanguageOptionPro
           borderRadius: radius.lg,
           borderWidth: checked ? 2 : 1,
           borderColor: checked ? colors.primary : colors.borderStrong,
-          backgroundColor: colors.surface,
+          backgroundColor: checked ? colors.primaryMuted : colors.surface,
           opacity: pressed ? 0.7 : 1,
         },
       ]}
     >
       <LanguageBadge language={language} />
       <View style={styles.flex}>
-        <Text variant="bodyStrong">{name}</Text>
+        <Text variant="bodyStrong" color={checked ? 'onPrimaryMuted' : 'text'}>
+          {name}
+        </Text>
         {language.nativeName !== name ? (
           <Text variant="small" color="textSecondary">
             {isolateNative(language.nativeName, language.direction)}
