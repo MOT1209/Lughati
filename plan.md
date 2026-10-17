@@ -25,7 +25,7 @@
 - [ ] اختبارات **Login/Register** و**Onboarding** (غير مغطّاة حاليًا؛ `RootNavigator.test.tsx` يغطّي الحماية لا النماذج).
 
 ### 2. M6 — مفتاح التذكير اليومي بلا وظيفة
-- [ ] إما حفظ التفضيل فعليًا (في `preferencesStore` + AsyncStorage) وإزالة `notificationsNote` (نص المطوّر)، أو حذف المفتاح من `settings.tsx` واللغتين.
+- [x] حُذف المفتاح من `settings.tsx` واللغتين ومن `STORAGE_KEYS` (لم يكن يُرسل شيئاً). تذكير حقيقي لاحقاً يحتاج التحقق من `expo-notifications` على الجهاز.
   - ملاحظة: `expo-notifications` غير متاح في Expo Go — لا تضف حزمة إشعارات.
 
 ### 3. L17 — فقدان إجابات الاختبار عند المغادرة
