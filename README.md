@@ -1,9 +1,13 @@
 <div align="center">
 
+<img src="assets/images/icon.png" alt="أيقونة لغتي" width="128" height="128">
+
 # لغتي · Lughati
 
 **تطبيق لتعلّم اللغات، مبنيٌّ للناطقين بالعربية**
 *Learn languages, purpose-built for Arabic speakers*
+
+🌐 **[الموقع · Website](https://lughati-sigma.vercel.app)** · [الخصوصية](https://lughati-sigma.vercel.app/privacy)
 
 <br/>
 
@@ -17,7 +21,7 @@
 </div>
 
 > [!NOTE]
-> **المرحلة الحالية — الأساس (Phase 1).** بنية، ثيم، تدويل/RTL، تنقّل، مكوّنات، وبيانات وهمية.
+> **المرحلة الحالية — الأساس (Phase 1) مع هوية بصرية جديدة.** بنية، ثيم، تدويل/RTL، تنقّل، مكوّنات، بيانات وهمية، وتصميم موحّد لكل الشاشات.
 > لا شبكة ولا ذكاء اصطناعي حقيقي بعد — والاستبدال بالحقيقي جاهز عبر المُسجِّلات (انظر [المعمارية](#-المعمارية)).
 > **حدود معروفة:** لا يوجد تذكير يومي بعد (أُزيل المفتاح لأنه لم يكن يُرسل شيئاً؛ التذكير الحقيقي يحتاج `expo-notifications` وتحققاً على الجهاز)،
 > ولا توجد إنجازات (Achievements) بعد؛ التقدّم يشمل XP والكلمات والدقائق والسلسلة.
@@ -47,7 +51,25 @@
 | 🌐 **تدويل + RTL** | عربي/إنجليزي مع تبديل الاتجاه، وجمع عربي صحيح على Hermes عبر `@formatjs/intl-pluralrules` |
 | 🎨 **ثيم Light/Dark** | ألوان ورموز وطباعة (خط Cairo) متّسقة، مع `useTheme` موحّد |
 | 🔐 **جلسة محلية** | جلسة وهمية (مستخدم + تاريخ، بلا كلمة مرور) تُحفظ وتُستعاد عند إعادة التشغيل |
+| 📱 **جاهز للنشر على Android** | `eas.json` وصور المتجر ونصوصه وسياسة الخصوصية — انظر [docs/store/RELEASE_ANDROID.md](./docs/store/RELEASE_ANDROID.md) |
 | ♿ **إمكانية وصول** | تسميات لقارئ الشاشة، أهداف لمس ≥ 48px، تأكيد قبل إنهاء الدرس، حماية من قيم `NaN`، ومعالجة زر الرجوع في Android |
+
+## 🎨 التصميم
+
+هوية واحدة مستوحاة من الأيقونة: **تدرّج أخضر داكن** (`#0E6A62 → #0A4E49 → #04201E`)، **ذهبي** للإجراء الأهم وللتقدّم، وخط **Cairo**.
+
+| الشاشة | ما تغيّر |
+| :--- | :--- |
+| 🏠 **الرئيسية** | رأس بتدرّج الهوية: التحية، سلسلة الأيام، اللغة الحالية، وحلقة الهدف اليومي؛ ثم بطاقة «تابع التعلّم» بزر ذهبي وسطر «مقترح لك» |
+| 📚 **تعلّم** | رأس بتقدّم المستوى، ثم مسار دروس: ✓ للمكتمل، تشغيل ذهبي للحالي، ورقم لما لم يبدأ |
+| 🔁 **المراجعة** | بطاقة كبيرة للكلمة وأزرار تقييم بألوان تدل على الصعوبة، وتحت كل زر **موعد عودة الكلمة** من محرّك `srs` |
+| 📈 **التقدّم / 👤 حسابي** | بلا تكرار للأرقام، بطاقات إحصاء بأيقونات، وصورة رمزية وحبّة اللغة والمستوى |
+| ⚙️ **الإعدادات · الدرس · اختيار اللغة** | شريط علوي بلون الرأس، أقسام بأيقونات، وبطاقة سؤال وإجابات مظلَّلة (صحيح/خاطئ) في الاختبار |
+| 🚪 **الدخول · البداية** | `BrandHero` (كلمة «Lughati» وخط ذهبي) وشاشة بداية بتدرّج كامل |
+
+- المكوّنات المشتركة: `ScreenHero` · `BrandHero` · `HeroProgress` · `StreakChip` · `LessonRow` · `ReviewOutcomeButton` · `StatTile` (مع `highlight`) · `Button variant="gold"`.
+- ألوان الرأس والذهبي رموز في `src/theme/colors.ts`، وكل أزواج النص/الخلفية فيها **تباينها ≥ 4.5:1** بفحص آلي (`theme.test.ts`).
+- الأيقونة وصورة المتجر مصدرهما SVG في `assets/icon-src/`؛ تُولَّد PNG بـ `node scripts/render-icons.js`.
 
 ## 🧱 التقنيات
 
@@ -59,7 +81,7 @@
 | الحالة | Zustand **5** (الجلسة · التفضيلات · ملفّ التعلّم) |
 | التدويل | i18next **26** + react-i18next **17** + `@formatjs/intl-pluralrules` |
 | التخزين | `@react-native-async-storage/async-storage` |
-| الطباعة | `@expo-google-fonts/cairo` |
+| الطباعة والتدرّج | `@expo-google-fonts/cairo` · `expo-linear-gradient` · `react-native-svg` |
 | الاختبار | Jest **29** + `jest-expo` **57** + `@testing-library/react-native` **13** |
 | الجودة | ESLint (إعداد Expo) + `tsc --noEmit` + GitHub Actions |
 
@@ -95,6 +117,8 @@ bunx expo start
 | `npm test` | اختبارات Jest (28 suite · 485 اختبار عبر `jest-expo`) |
 | `npx expo-doctor` | فحص سليم الاعتماديات والإعدادات |
 | `npx expo export --platform android` | التأكد أن الحزمة تُبنى |
+| `node scripts/render-icons.js` | توليد الأيقونة وصور المتجر من `assets/icon-src` |
+| `python3 scripts/build-site.py` | توليد الموقع في `site/` |
 
 > [!TIP]
 > الاختبار اليدوي على الجهاز مغطّى بالتفصيل في [TESTING.md](./TESTING.md).
@@ -108,7 +132,8 @@ src/
 │   └── (app)/                 # التبويبات + setup-languages · language-selection · settings · lesson/[id]
 ├── components/
 │   ├── ui/                    # الأساسيات: Button · Card · Text · Icon · Screen · States · StatTile · Input
-│   └── *.tsx                  # مركّبة: LessonQuiz · VocabularyMatchGame · OptionButton · ProgressBar · …
+│   ├── home/                  # HomeHero · GoalRing · ContinueCard · RecommendationRow
+│   └── *.tsx                  # مركّبة: ScreenHero · BrandHero · LessonRow · LessonQuiz · ReviewOutcomeButton · …
 ├── theme/                     # ألوان Light/Dark · tokens · طباعة Cairo · resolveScheme
 ├── i18n/                      # ترجمة ar/en · resolveLocale · أنواع الترجمة
 ├── services/
@@ -124,6 +149,10 @@ src/
 ├── hooks/                     # useAsyncData · useCurrentLearning · useLessonList · useTheme · useUiLocale
 ├── utils/                     # srs · recommendations · streaks · progression · exercises · bidi · meaning · routing …
 └── types/                     # نموذج البيانات
+assets/                        # icon-src (SVG) · images (الأيقونة) · store (صورة Google Play)
+docs/store/                    # نص المتجر · الخصوصية · Data safety · دليل النشر
+scripts/                       # render-icons.js · build-site.py
+site/                          # الموقع الثابت (عربي/إنجليزي) — يُنشر على Vercel
 ```
 
 ## 🏗️ المعمارية
@@ -146,7 +175,7 @@ registerAIProvider(provider)     // مزوّد ذكاء اصطناعي
 | :--- | :--- |
 | الأنواع (`tsc --noEmit`) | نظيف |
 | ESLint | 0 أخطاء |
-| الاختبارات | 25 ملف · 408 اختبار ناجح |
+| الاختبارات | 28 ملف · 485 اختبار ناجح |
 | CI | typecheck + lint + test + `expo export` على `main` وعند كل PR |
 
 سُلاسل الاختبار تغطّي: التنقّل والحراسة، شاشات التعلّم، الاختبارات واللعبة، التدويل (تكافؤ المفاتيح
@@ -155,6 +184,7 @@ registerAIProvider(provider)     // مزوّد ذكاء اصطناعي
 ## 🗺️ خارطة الطريق
 
 - [x] **المرحلة 1 — الأساس:** بنية · ثيم · i18n/RTL · تنقّل · مكوّنات · بيانات وهمية
+- [x] **الهوية والنشر:** أيقونة وتصميم موحّد لكل الشاشات · موقع · ملفات المتجر (البناء والرفع على Google Play بيدك)
 - [ ] **المرحلة 2 — الشبكة:** ربط مصادقة وتخزين وبيانات حقيقية عبر المُسجِّلات
 - [ ] **المرحلة 3 — الذكاء الاصطناعي:** مزوّد AI للتوليد والتقييم والتصحيح
 - [ ] **المرحلة 4 — أصوات ومحتوى:** نطق، استماع، ومحتوى أوسع (A2 وما بعدها)
@@ -168,6 +198,12 @@ registerAIProvider(provider)     // مزوّد ذكاء اصطناعي
 | [docs/PHASE_1_AUDIT.md](./docs/PHASE_1_AUDIT.md) | نتائج مراجعة المرحلة الأولى |
 | [docs/audit/DEPENDENCY_AUDIT.md](./docs/audit/DEPENDENCY_AUDIT.md) | مراجعة الاعتماديات وسجلّ `npm audit` |
 
+## 🌐 الموقع
+
+موقع ثابت بالعربية والإنجليزية (صفحة تعريفية + سياسة الخصوصية) في `site/`، يُولَّد بـ `python3 scripts/build-site.py` ويقرأ نص الخصوصية من `docs/store/privacy-policy.md` (مصدر واحد).
+خط Cairo مستضاف ذاتياً فلا طلبات لجهات خارجية ولا تتبّع. منشور على Vercel من مجلد `site/` ويتحدّث تلقائياً عند الدمج في `main`:
+**https://lughati-sigma.vercel.app** · [الخصوصية](https://lughati-sigma.vercel.app/privacy)
+
 ---
 
 <div align="center">
@@ -175,6 +211,3 @@ registerAIProvider(provider)     // مزوّد ذكاء اصطناعي
 صُنع بـ ❤️ — **لغتي · Lughati**
 
 </div>
-
-## الموقع
-موقع ثابت (عربي وإنجليزي: صفحة تعريفية وسياسة الخصوصية) في `site/`، يُولَّد بالأمر `python3 scripts/build-site.py` (نص الخصوصية يُقرأ من `docs/store/privacy-policy.md`). خط Cairo مستضاف ذاتياً فلا طلبات لجهات خارجية. النشر على Vercel بنشر مجلد `site/`.
