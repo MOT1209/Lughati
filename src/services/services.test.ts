@@ -446,3 +446,75 @@ describe('pass mark in the repositories', () => {
     expect(await repos.activity.getDay('u1', '2026-10-15')).toMatchObject({ lessonsCompleted: 1, xp: 30 + 120 });
   });
 });
+
+describe('a passed lesson feeds the vocabulary review', () => {
+  let clock = new Date(2026, 9, 15, 12, 0);
+  const now = () => clock;
+  const tomorrow = () => new Date(2026, 9, 16, 12, 0);
+  beforeEach(() => {
+    clock = new Date(2026, 9, 15, 12, 0);
+  });
+
+  it("schedules the lesson's words for review one day later", async () => {
+    const repos = createMockRepositories({ now });
+    await repos.progress.completeLesson('u1', 'de-a1-1', { correct: 12, total: 12 });
+
+    expect(await repos.reviews.getDue('u1', 'de')).toEqual([]); // nothing due on the same day
+    const due = await repos.reviews.getDue('u1', 'de', tomorrow());
+    expect(due).toHaveLength(6);
+    expect(due[0]).toMatchObject({ userId: 'u1', targetLanguage: 'de', step: 0, lastReviewedAt: null, correctCount: 0, wrongCount: 0 });
+    expect(due.every((state) => state.wordId.startsWith('de-a1-1'))).toBe(true);
+    expect(await repos.reviews.getDue('u2', 'de', tomorrow())).toEqual([]); // per user
+  });
+
+  it('getDue follows the injected clock by default', async () => {
+    const repos = createMockRepositories({ now });
+    await repos.progress.completeLesson('u1', 'de-a1-1', { correct: 12, total: 12 });
+    clock = tomorrow();
+    expect(await repos.reviews.getDue('u1', 'de')).toHaveLength(6);
+  });
+
+  it('a failed run schedules nothing', async () => {
+    const repos = createMockRepositories({ now });
+    await repos.progress.completeLesson('u1', 'de-a1-1', { correct: 2, total: 12 });
+    expect(await repos.reviews.getDue('u1', 'de', tomorrow())).toEqual([]);
+  });
+
+  it('a replay keeps the review progress of words already scheduled', async () => {
+    const repos = createMockRepositories({ now });
+    await repos.progress.completeLesson('u1', 'de-a1-1', { correct: 12, total: 12 });
+    clock = tomorrow();
+    const [first] = await repos.reviews.getDue('u1', 'de');
+    const reviewed = await repos.reviews.recordReview('u1', 'de', first!.wordId, 'good');
+
+    await repos.progress.completeLesson('u1', 'de-a1-1', { correct: 12, total: 12 });
+    expect(await repos.reviews.get('u1', first!.wordId)).toEqual(reviewed);
+  });
+
+  it('the scheduled words survive a restart and validate on read', async () => {
+    const storage = createMemoryStorage();
+    await createMockRepositories({ storage, now }).progress.completeLesson('u1', 'de-a1-1', { correct: 12, total: 12 });
+    expect(await createMockRepositories({ storage, now }).reviews.getDue('u1', 'de', tomorrow())).toHaveLength(6);
+  });
+
+  it('a retry after a failed progress write completes the lesson without duplicating reviews', async () => {
+    const storage = createMemoryStorage();
+    let failProgress = true;
+    const flaky = {
+      getItem: storage.getItem,
+      removeItem: storage.removeItem,
+      setItem: async (k: string, v: string) => {
+        if (failProgress && k === STORAGE_KEYS.learningProgress) throw new Error('disk full');
+        return storage.setItem(k, v);
+      },
+    };
+    const repos = createMockRepositories({ storage: flaky, now });
+
+    await expect(repos.progress.completeLesson('u1', 'de-a1-1', { correct: 12, total: 12 })).rejects.toThrow('disk full');
+    failProgress = false;
+    await repos.progress.completeLesson('u1', 'de-a1-1', { correct: 12, total: 12 });
+
+    expect((await repos.progress.get('u1', 'de'))!.completedLessonIds).toEqual(['de-a1-1']);
+    expect(await repos.reviews.getDue('u1', 'de', tomorrow())).toHaveLength(6);
+  });
+});
