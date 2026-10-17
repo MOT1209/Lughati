@@ -54,7 +54,7 @@ export function buildMatchSession(
   random: () => number = Math.random,
 ): MatchQuestion[] {
   const playable = words.filter((word) => meaningOf(word, source).trim() !== '');
-  if (playable.length < 2) return [];
+  if (playable.length < MIN_MATCH_WORDS) return []; // fewer would mean fewer than OPTION_COUNT options
   return shuffle(playable, random).map((word) => {
     const distractors = shuffle(
       playable.filter((other) => other.id !== word.id),

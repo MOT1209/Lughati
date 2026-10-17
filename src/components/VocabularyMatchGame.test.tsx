@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 
-import { buildMatchSession, VocabularyMatchGame } from '@/components/VocabularyMatchGame';
+import { buildMatchSession, MIN_MATCH_WORDS, VocabularyMatchGame } from '@/components/VocabularyMatchGame';
 import { setUiLocale } from '@/i18n'; // also initialises i18n for the translated strings
 import { vocabulary } from '@/mocks/vocabulary';
 import type { Vocabulary } from '@/types';
@@ -36,9 +36,16 @@ describe('buildMatchSession', () => {
     expect(questions.map((q) => q.wordId)).not.toContain(words[0].id);
   });
 
-  it('returns no questions when fewer than two words are playable', () => {
+  it('returns no questions when fewer than MIN_MATCH_WORDS words are playable', () => {
     const one: Vocabulary[] = [{ ...words[0] }, { ...words[1], translations: {} }];
     expect(buildMatchSession(one, 'ar', rng)).toEqual([]);
+    expect(buildMatchSession(words.slice(0, MIN_MATCH_WORDS - 1), 'ar', rng)).toEqual([]);
+  });
+
+  it('always offers a full set of options once enough words are playable', () => {
+    const questions = buildMatchSession(words.slice(0, MIN_MATCH_WORDS), 'ar', rng);
+    expect(questions).toHaveLength(MIN_MATCH_WORDS);
+    for (const question of questions) expect(question.optionIds).toHaveLength(MIN_MATCH_WORDS);
   });
 });
 

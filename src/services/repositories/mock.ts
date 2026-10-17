@@ -101,33 +101,31 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
   const attemptsFor = async (userId: string, language: LanguageCode): Promise<LessonAttempt[]> =>
     (await load()).attempts?.[key(userId, language)] ?? [];
 
-  /** Merges this lesson run into today's ActivityDay (created only from observed events). */
+  /**
+   * Adds observed study (a lesson run or a review) to today's ActivityDay, creating it on the
+   * first event of the day. Any recorded day counts toward the streak.
+   */
   const recordActivity = async (
     userId: string,
-    result: { correct: number },
-    lesson: { estimatedMinutes: number },
-    countedAsCompletion: boolean,
-    xpDelta: number,
+    delta: Partial<Pick<ActivityDay, 'minutes' | 'xp' | 'lessonsCompleted' | 'correctAnswers'>>,
+    at: Date = now(),
   ): Promise<{ saved: SavedLearning; next: SavedLearning }> => {
     const saved = await load();
-    const day = todayOf();
-    const existing = saved.activity?.[activityKey(userId, day)];
-    const currentDay =
-      existing ??
-      ({
-        userId,
-        day,
-        minutes: 0,
-        xp: 0,
-        lessonsCompleted: 0,
-        correctAnswers: 0,
-      } satisfies ActivityDay);
+    const day = dayOf(at);
+    const currentDay: ActivityDay = saved.activity?.[activityKey(userId, day)] ?? {
+      userId,
+      day,
+      minutes: 0,
+      xp: 0,
+      lessonsCompleted: 0,
+      correctAnswers: 0,
+    };
     const nextDay: ActivityDay = {
       ...currentDay,
-      minutes: currentDay.minutes + lesson.estimatedMinutes,
-      xp: currentDay.xp + xpDelta,
-      lessonsCompleted: currentDay.lessonsCompleted + (countedAsCompletion ? 1 : 0),
-      correctAnswers: currentDay.correctAnswers + result.correct,
+      minutes: currentDay.minutes + (delta.minutes ?? 0),
+      xp: currentDay.xp + (delta.xp ?? 0),
+      lessonsCompleted: currentDay.lessonsCompleted + (delta.lessonsCompleted ?? 0),
+      correctAnswers: currentDay.correctAnswers + (delta.correctAnswers ?? 0),
     };
     return {
       saved,
@@ -222,7 +220,12 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
             }
           }
 
-          const { saved, next: withActivity } = await recordActivity(userId, result, lesson, countedAsCompletion, xpDelta);
+          const { saved, next: withActivity } = await recordActivity(userId, {
+            minutes: lesson.estimatedMinutes,
+            xp: xpDelta,
+            lessonsCompleted: countedAsCompletion ? 1 : 0,
+            correctAnswers: result.correct,
+          });
           const next: SavedLearning = {
             ...withActivity,
             progress: { ...(saved.progress ?? {}), [key(userId, lesson.targetLanguage)]: updated },
@@ -340,6 +343,11 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
             nextReviewAt: scheduled.nextReviewAt,
           };
           await storage.setItem(STORAGE_KEYS.vocabReviews, JSON.stringify({ reviews: { ...reviews, [storageKey]: state } }));
+          // A review is study too: it keeps the streak (no minutes, XP or completion are invented).
+          // Saved after the review state, so a failed write here only loses the day, not the review.
+          const { next } = await recordActivity(userId, { correctAnswers: outcome === 'good' || outcome === 'easy' ? 1 : 0 }, time);
+          await storage.setItem(STORAGE_KEYS.learningProgress, JSON.stringify(next));
+          loading = Promise.resolve(next);
           return state;
         }),
     },

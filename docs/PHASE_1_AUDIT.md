@@ -173,3 +173,20 @@ Found during the device run and fixed:
 | – | Low | First-time setup: Android back can leave `setup-languages` for Home before a choice (Home then uses the account default) | `setup-languages.tsx` |
 
 **Readiness:** stable at code/test level; **partially device-verified** on OPPO CPH2069 / Android 11: app start, language setup after login, flags, meanings in the own language, session + choice after a restart. Plural fix and the remaining TESTING.md items are not yet device-verified.
+
+## 13. Status of the §12 findings (2026-10-17)
+| # | Status |
+|---|---|
+| M6 | Closed: the reminder switch was removed (it scheduled nothing). |
+| M7, M10, M11, M13, M14, M15 | Closed earlier (see `plan.md`). |
+| M16 | Closed: `authScreens.test.tsx` (login, register, onboarding) and `profileScreen.test.tsx` were added. Home, Settings, setup-languages and the root layout were already covered. |
+| L17 | Closed: leaving an unfinished quiz asks "Leave the quiz?" (`beforeRemove`). |
+| L19 | Mostly closed; the remaining `accessibilityLabel` in `lesson/[id].tsx` joins vocabulary data, not UI text. |
+| L20 | Closed: the unused keys were removed. `common.continue` and `progress.title` are in use again and stay. |
+| L21 | `APP_NAME` was removed. `services/ai` stays as the seam for a real provider. |
+| L23 | Closed earlier: `ProgressBar` guards NaN/Infinity. |
+| L24 | Half closed: the streak card is grouped with a pluralised label; foreign words are still read with the UI voice. |
+| L22 | Still open: `supportsRTL` for `expo-localization` and a localised launcher name. |
+| Setup back (–) | Closed earlier: hardware back is handled in `setup-languages.tsx`. |
+
+Also fixed after §12 (from the 2026-10-17 review): any score completed a lesson (70% pass mark added); the Review tab never received words (a passed lesson now schedules them); the quiz answer position was guessable; review dates were in UTC; reviews now count toward the streak; the match game needs 4 playable words. Tests run in `Asia/Riyadh`.
