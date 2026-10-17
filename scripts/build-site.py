@@ -10,6 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "site"
+CONTACT_EMAIL = "zwnt45602@gmail.com"  # also written in docs/store/privacy-policy.md
 SITE_URL = ""  # no custom domain yet; canonical/hreflang use relative paths until there is one
 
 ICONS = {
@@ -56,7 +57,7 @@ T = {
         "steps": [("اختر لغاتك", "لغتك الأم ثم اللغة التي تريد تعلّمها."), ("ابدأ درساً", "كلمات وعبارات مع معانيها بلغتك، ثم تمارين قصيرة."), ("راجع كلماتك", "تعود إليك الكلمات في الوقت المناسب، وتتابع تقدّمك وسلسلة أيامك.")],
         "status_h": "حالة المشروع",
         "status": "هذه نسخة مبكرة: مستوى A1 فقط حالياً، وتسجيل الدخول تجريبي والبيانات محفوظة على جهازك فقط. مستويات أخرى وميزات إضافية في الخطة، دون وعد بموعد محدد.",
-        "footer_priv": "سياسة الخصوصية", "contact": "التواصل", "contact_val": "قريباً",
+        "footer_priv": "سياسة الخصوصية", "contact": "التواصل",
         "rights": "© 2026 لغتي",
         "skip": "تخطَّ إلى المحتوى",
         # mockups
@@ -66,7 +67,7 @@ T = {
               "review": "المراجعة", "due": "6 كلمات مستحقة", "word": "الكلمة", "meaning": "المعنى", "apfel": "التفاحة",
               "o": [("أعِد", "الآن"), ("صعبة", "بعد يوم"), ("جيدة", "بعد يوم"), ("سهلة", "بعد 3 أيام")],
               "tabs": ["الرئيسية", "تعلّم", "المراجعة", "التقدم", "حسابي"]},
-        "priv_title": "سياسة الخصوصية", "priv_back": "العودة إلى الصفحة الرئيسية", "priv_marker": "## العربية", "pending": "البريد قيد الإعداد",
+        "priv_title": "سياسة الخصوصية", "priv_back": "العودة إلى الصفحة الرئيسية", "priv_marker": "## العربية",
     },
     "en": {
         "lang": "en", "dir": "ltr", "base": "/en", "other": "/", "other_label": "العربية", "other_code": "ar",
@@ -94,7 +95,7 @@ T = {
         "steps": [("Choose your languages", "Your own language, then the one you want to learn."), ("Start a lesson", "Words and phrases with meanings in your language, then short exercises."), ("Review your words", "Words return at the right time, and you follow your progress and streak.")],
         "status_h": "Project status",
         "status": "This is an early version: A1 only for now, sign-in is a demo and your data is stored only on your device. More levels and features are planned, without a promised date.",
-        "footer_priv": "Privacy policy", "contact": "Contact", "contact_val": "coming soon",
+        "footer_priv": "Privacy policy", "contact": "Contact",
         "rights": "© 2026 Lughati",
         "skip": "Skip to content",
         "m": {"hi": "Hello, Sara", "tag": "A good day for new words", "streak": "3 days", "lang": "German", "change": "Change", "cont": "Continue learning",
@@ -103,7 +104,7 @@ T = {
               "review": "Review", "due": "6 words due", "word": "Word", "meaning": "Meaning", "apfel": "the apple",
               "o": [("Again", "Now"), ("Difficult", "in 1 day"), ("Good", "in 1 day"), ("Easy", "in 3 days")],
               "tabs": ["Home", "Learn", "Review", "Progress", "Profile"]},
-        "priv_title": "Privacy policy", "priv_back": "Back to home", "priv_marker": "## English", "pending": "e-mail being set up",
+        "priv_title": "Privacy policy", "priv_back": "Back to home", "priv_marker": "## English",
     },
 }
 
@@ -162,7 +163,7 @@ def header(c, home_path):
 
 def footer(c, home_path, priv):
     return f'''<footer><div class="wrap"><div class="cols"><div>{c["rights"]}</div>
-<ul><li><a href="{priv}">{c["footer_priv"]}</a></li><li><span>{c["contact"]}: {c["contact_val"]}</span></li><li><a href="{c["other"]}" hreflang="{c["other_code"]}" lang="{c["other_code"]}">{c["other_label"]}</a></li></ul></div></div></footer></body></html>
+<ul><li><a href="{priv}">{c["footer_priv"]}</a></li><li><span>{c["contact"]}: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a></span></li><li><a href="{c["other"]}" hreflang="{c["other_code"]}" lang="{c["other_code"]}">{c["other_label"]}</a></li></ul></div></div></footer></body></html>
 '''
 
 
@@ -216,7 +217,7 @@ def privacy(k):
             in_list = False
         if not line:
             continue
-        piece = inline(line).replace("[CONTACT_EMAIL]", f'<span class="pending">{c["pending"]}</span>')
+        piece = inline(line).replace(CONTACT_EMAIL, f'<a href="mailto:{CONTACT_EMAIL}" dir="ltr">{CONTACT_EMAIL}</a>')
         m = re.match(r"<strong>(.+?)</strong>:?\s*(.*)", piece)
         if m and m.group(1).rstrip(":").strip() and not piece.startswith("<strong>") is False and len(m.group(1)) < 40:
             out.append(f"<h2>{m.group(1).rstrip(':')}</h2><p>{m.group(2)}</p>" if m.group(2) else f"<h2>{m.group(1).rstrip(':')}</h2>")
