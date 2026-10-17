@@ -11,7 +11,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "site"
 CONTACT_EMAIL = "zwnt45602@gmail.com"  # also written in docs/store/privacy-policy.md
-SITE_URL = ""  # no custom domain yet; canonical/hreflang use relative paths until there is one
+SITE_URL = "https://lughati-sigma.vercel.app"  # change when a custom domain is connected, then rebuild
+PATH_AR_HOME, PATH_EN_HOME = "/", "/en"  # no trailing slash except the root (vercel.json: trailingSlash=false)
 
 ICONS = {
     "globe": '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
@@ -32,7 +33,7 @@ def icon(name, size=24):
 
 T = {
     "ar": {
-        "lang": "ar", "dir": "rtl", "base": "", "other": "/en/", "other_label": "English", "other_code": "en",
+        "lang": "ar", "dir": "rtl", "base": "", "other": "/en", "other_label": "English", "other_code": "en",
         "title": "لغتي: تعلّم اللغات بلغتك",
         "desc": "لغتي تطبيق لتعلّم الألمانية والإنجليزية والإسبانية والفرنسية والتركية للناطقين بالعربية: دروس قصيرة ومراجعة ذكية، يعمل دون إنترنت وبلا إعلانات.",
         "nav": [("#features", "المزايا"), ("#how", "كيف يعمل"), ("/privacy", "الخصوصية")],
@@ -67,7 +68,7 @@ T = {
               "review": "المراجعة", "due": "6 كلمات مستحقة", "word": "الكلمة", "meaning": "المعنى", "apfel": "التفاحة",
               "o": [("أعِد", "الآن"), ("صعبة", "بعد يوم"), ("جيدة", "بعد يوم"), ("سهلة", "بعد 3 أيام")],
               "tabs": ["الرئيسية", "تعلّم", "المراجعة", "التقدم", "حسابي"]},
-        "priv_title": "سياسة الخصوصية", "priv_back": "العودة إلى الصفحة الرئيسية", "priv_marker": "## العربية",
+        "priv_title": "سياسة الخصوصية", "priv_desc": "ما يحفظه تطبيق لغتي، وأين، وما لا يفعله: يعمل دون إنترنت وتبقى بياناتك على جهازك، بلا إعلانات ولا تتبّع.", "priv_back": "العودة إلى الصفحة الرئيسية", "priv_marker": "## العربية",
     },
     "en": {
         "lang": "en", "dir": "ltr", "base": "/en", "other": "/", "other_label": "العربية", "other_code": "ar",
@@ -104,7 +105,7 @@ T = {
               "review": "Review", "due": "6 words due", "word": "Word", "meaning": "Meaning", "apfel": "the apple",
               "o": [("Again", "Now"), ("Difficult", "in 1 day"), ("Good", "in 1 day"), ("Easy", "in 3 days")],
               "tabs": ["Home", "Learn", "Review", "Progress", "Profile"]},
-        "priv_title": "Privacy policy", "priv_back": "Back to home", "priv_marker": "## English",
+        "priv_title": "Privacy policy", "priv_desc": "What the Lughati app stores, where, and what it never does: it works offline, your data stays on your device, with no ads and no tracking.", "priv_back": "Back to home", "priv_marker": "## English",
     },
 }
 
@@ -145,7 +146,11 @@ def page_head(c, title, desc, path_ar, path_en, self_path):
 <meta property="og:type" content="website">
 <meta property="og:title" content="{html.escape(title)}">
 <meta property="og:description" content="{html.escape(desc)}">
-<meta property="og:image" content="/assets/og-image.png">
+<meta property="og:url" content="{SITE_URL}{self_path}">
+<meta property="og:locale" content="{"ar_AR" if c["lang"] == "ar" else "en_US"}">
+<meta property="og:site_name" content="{"لغتي · Lughati"}">
+<meta property="og:image" content="{SITE_URL}/assets/og-image.png">
+<meta name="twitter:image" content="{SITE_URL}/assets/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="/assets/favicon.png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -169,9 +174,9 @@ def footer(c, home_path, priv):
 
 def landing(k):
     c = T[k]
-    home = (c["base"] or "") + "/"
+    home = c["base"] or "/"
     priv = (c["base"] or "") + "/privacy"
-    ar_path, en_path = "/", "/en/"
+    ar_path, en_path = PATH_AR_HOME, PATH_EN_HOME
     feats = "".join(f'<div class="feat{" g" if g else ""}"><span class="ic">{icon(i)}</span><h3>{t}</h3><p>{d}</p></div>' for i, t, d, g in c["features"])
     steps = "".join(f"<li><h3>{t}</h3><p>{d}</p></li>" for t, d in c["steps"])
     ld = '{"@context":"https://schema.org","@type":"MobileApplication","name":"%s","operatingSystem":"Android","applicationCategory":"EducationalApplication","description":"%s","inLanguage":["ar","en"]}' % ("لغتي (Lughati)", c["desc"].replace('"', "'"))
@@ -220,15 +225,18 @@ def privacy(k):
         piece = inline(line).replace(CONTACT_EMAIL, f'<a href="mailto:{CONTACT_EMAIL}" dir="ltr">{CONTACT_EMAIL}</a>')
         m = re.match(r"<strong>(.+?)</strong>:?\s*(.*)", piece)
         if m and m.group(1).rstrip(":").strip() and not piece.startswith("<strong>") is False and len(m.group(1)) < 40:
-            out.append(f"<h2>{m.group(1).rstrip(':')}</h2><p>{m.group(2)}</p>" if m.group(2) else f"<h2>{m.group(1).rstrip(':')}</h2>")
+            rest = m.group(2)
+            if rest[:1].isalpha() and rest[:1].isascii():
+                rest = rest[:1].upper() + rest[1:]  # "Label: only on…" becomes a sentence of its own
+            out.append(f"<h2>{m.group(1).rstrip(':')}</h2><p>{rest}</p>" if rest else f"<h2>{m.group(1).rstrip(':')}</h2>")
         else:
             out.append(f"<p>{piece}</p>")
     if in_list:
         out.append("</ul>")
-    home = (c["base"] or "") + "/"
+    home = c["base"] or "/"
     priv = (c["base"] or "") + "/privacy"
     last = "آخر تحديث" if k == "ar" else "Last updated"
-    return page_head(c, c["priv_title"] + (" · لغتي" if k == "ar" else " · Lughati"), c["priv_title"], "/privacy", "/en/privacy", priv) + f'''
+    return page_head(c, c["priv_title"] + (" · لغتي" if k == "ar" else " · Lughati"), c["priv_desc"], "/privacy", "/en/privacy", priv) + f'''
 <body>
 <a class="skip" href="#main">{c["skip"]}</a>
 {header(c, home)}</div></header>
@@ -238,12 +246,51 @@ def privacy(k):
 ''' + footer(c, home, priv)
 
 
+def not_found():
+    c = T["ar"]
+    return page_head(c, "الصفحة غير موجودة · Page not found", "الصفحة غير موجودة", "/", "/en", "/404") + '''
+<body>
+<main id="main" class="prose" style="text-align:center;padding-block:96px">
+<h1>الصفحة غير موجودة</h1><p>تأكد من الرابط أو عد إلى <a href="/">الصفحة الرئيسية</a>.</p>
+<h1 lang="en" dir="ltr" style="font-size:28px;margin-top:40px">Page not found</h1><p lang="en" dir="ltr">Check the link or go back to the <a href="/en">home page</a>.</p>
+</main></body></html>
+'''
+
+
+def sitemap():
+    pages = [("/", "/en"), ("/en", "/"), ("/privacy", "/en/privacy"), ("/en/privacy", "/privacy")]
+    alt = {"/": ("/", "/en"), "/en": ("/", "/en"), "/privacy": ("/privacy", "/en/privacy"), "/en/privacy": ("/privacy", "/en/privacy")}
+    rows = []
+    for path, _ in pages:
+        ar, en = alt[path]
+        rows.append(f"<url><loc>{SITE_URL}{path}</loc><xhtml:link rel=\"alternate\" hreflang=\"ar\" href=\"{SITE_URL}{ar}\"/><xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"{SITE_URL}{en}\"/></url>")
+    return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' + "\n".join(rows) + "\n</urlset>\n"
+
+
+def check(pages):
+    """Fails the build on the defects found in review: broken sentences and relative SEO URLs."""
+    for name, text in pages.items():
+        bad = re.findall(r"</h2><p>([a-z])", text)
+        assert not bad, f"{name}: a paragraph after a heading starts with a lowercase letter"
+        if name.endswith(".html") and name != "404.html":
+            assert f'rel="canonical" href="{SITE_URL}' in text, f"{name}: canonical must be absolute"
+            assert f'og:image" content="{SITE_URL}' in text, f"{name}: og:image must be absolute"
+
+
 def main():
     (SITE / "en").mkdir(parents=True, exist_ok=True)
-    (SITE / "index.html").write_text(landing("ar"), encoding="utf-8")
-    (SITE / "en" / "index.html").write_text(landing("en"), encoding="utf-8")
-    (SITE / "privacy.html").write_text(privacy("ar"), encoding="utf-8")
-    (SITE / "en" / "privacy.html").write_text(privacy("en"), encoding="utf-8")
+    pages = {
+        "index.html": landing("ar"),
+        "en/index.html": landing("en"),
+        "privacy.html": privacy("ar"),
+        "en/privacy.html": privacy("en"),
+        "404.html": not_found(),
+    }
+    check(pages)
+    for name, text in pages.items():
+        (SITE / name).write_text(text, encoding="utf-8")
+    (SITE / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
+    (SITE / "sitemap.xml").write_text(sitemap(), encoding="utf-8")
     print("built", sorted(p.relative_to(SITE).as_posix() for p in SITE.rglob("*.html")))
 
 
