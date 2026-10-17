@@ -1,4 +1,5 @@
 import { isolate, isolateLtr, isolateNative } from './bidi';
+import { dayOf } from './day';
 import { validateEmail, validateLogin, validatePassword, validateRegister } from './validation';
 
 describe('validation', () => {
@@ -39,5 +40,23 @@ describe('bidi isolation', () => {
   it('isolates a native name by its language direction', () => {
     expect(isolateNative('العربية', 'rtl')).toBe('⁨العربية⁩');
     expect(isolateNative('Deutsch', 'ltr')).toBe('⁦Deutsch⁩');
+  });
+});
+
+describe('dayOf (local calendar day)', () => {
+  it('tests run in UTC+3 (jest.global-setup.js), so UTC/local mix-ups show up', () => {
+    expect(new Date('2026-10-16T22:30:00Z').getTimezoneOffset()).toBe(-180);
+  });
+
+  it("uses the learner's time zone, not UTC", () => {
+    // 22:30 UTC on the 16th is already 01:30 on the 17th in Riyadh; slicing the ISO string gave the 16th.
+    expect(dayOf(new Date('2026-10-16T22:30:00Z'))).toBe('2026-10-17');
+    expect(dayOf(new Date('2026-10-16T20:59:00Z'))).toBe('2026-10-16');
+  });
+
+  it('crosses month and year boundaries and pads single digits', () => {
+    expect(dayOf(new Date('2026-01-31T21:00:00Z'))).toBe('2026-02-01');
+    expect(dayOf(new Date('2026-12-31T21:30:00Z'))).toBe('2027-01-01');
+    expect(dayOf(new Date(2026, 2, 5, 12))).toBe('2026-03-05');
   });
 });

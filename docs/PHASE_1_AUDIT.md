@@ -155,7 +155,7 @@ Found during the device run and fixed:
 ## 12. Review findings still open
 | # | Priority | Finding | Where |
 |---|---|---|---|
-| M6 | Medium | Daily reminder switch is not saved and does nothing; its caption shows a developer note | `settings.tsx`, `ar.ts`/`en.ts` `notificationsNote` |
+| M6 | Medium | **Closed (removed):** the daily reminder switch scheduled nothing, so it was removed from Settings, the locales and `STORAGE_KEYS` | `settings.tsx`, `ar.ts`/`en.ts` |
 | M7 | Medium | Language change in Settings has no error handling and is applied twice (screen + root layout) | `settings.tsx:35-40`, `_layout.tsx:32-38` |
 | M10 | Medium | `useAsyncData` drops data on key change, so Home/Learn flash a spinner after each lesson | `hooks/useAsyncData.ts:30` |
 | M11 | Medium | Errors are swallowed; `ErrorState` cannot tell offline from bug | `hooks/useAsyncData.ts:21` |
