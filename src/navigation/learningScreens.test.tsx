@@ -2,6 +2,7 @@ import { act, fireEvent } from '@testing-library/react-native';
 import { renderRouter, screen } from 'expo-router/testing-library';
 
 import HomeScreen from '@/app/(app)/(tabs)/home';
+import LearnScreen from '@/app/(app)/(tabs)/learn';
 import ProgressScreen from '@/app/(app)/(tabs)/progress';
 import ReviewScreen from '@/app/(app)/(tabs)/review';
 import LessonScreen from '@/app/(app)/lesson/[id]';
@@ -97,6 +98,21 @@ describe('Home screen', () => {
   }, SLOW_TEST_TIMEOUT);
 });
 
+describe('Learn screen hero', () => {
+  it('shows the course path with the count of finished lessons and the level progress', async () => {
+    const repos = createMockRepositories();
+    await repos.progress.completeLesson('u1', 'de-a1-1', { correct: 12, total: 12 });
+    registerRepositories(repos);
+    renderRouter({ learn: LearnScreen }, { initialUrl: '/learn' });
+
+    expect(await screen.findByText('German lessons')).toBeTruthy();
+    expect(screen.getByLabelText('1 / 10')).toBeTruthy();
+    expect(screen.getByRole('progressbar', { name: 'Level progress' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Greetings and politeness, Completed' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Introducing yourself, Current lesson' })).toBeTruthy();
+  }, SLOW_TEST_TIMEOUT);
+});
+
 describe('Progress screen', () => {
   it('shows the real level name and current lesson', async () => {
     renderRouter({ progress: ProgressScreen }, { initialUrl: '/progress' });
@@ -104,6 +120,21 @@ describe('Progress screen', () => {
     expect(screen.getByText('Current lesson')).toBeTruthy();
     expect(screen.getByText('Greetings and politeness')).toBeTruthy();
     expect(screen.getByText('Lessons completed')).toBeTruthy();
+  }, SLOW_TEST_TIMEOUT);
+});
+
+describe('Review outcome buttons', () => {
+  it('tell when the word comes back for each outcome, from the one scheduler', async () => {
+    const repos = createMockRepositories();
+    registerRepositories({ ...repos, reviews: { ...repos.reviews, getDue: async () => [dueState] } });
+    renderRouter({ review: ReviewScreen }, { initialUrl: '/review' });
+
+    fireEvent.press(await screen.findByRole('button', { name: 'Show meaning' }));
+    // step 0: again -> now, difficult stays on rung 0 (1 day), good -> 1 day, easy jumps to rung 1 (3 days)
+    expect(screen.getByRole('button', { name: 'Again, Now' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Difficult, in 1 day' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Good, in 1 day' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Easy, in 3 days' })).toBeTruthy();
   }, SLOW_TEST_TIMEOUT);
 });
 
@@ -120,7 +151,7 @@ describe('Review screen', () => {
     expect(screen.getByText('مرحباً')).toBeTruthy();
 
     await act(async () => {
-      fireEvent.press(screen.getByRole('button', { name: 'Good' }));
+      fireEvent.press(screen.getByRole('button', { name: /^Good, / }));
     });
     expect(await screen.findByText(/^Next review:/)).toBeTruthy();
 
@@ -136,7 +167,7 @@ describe('Review screen', () => {
 
     fireEvent.press(await screen.findByRole('button', { name: 'Show meaning' }));
     await act(async () => {
-      fireEvent.press(screen.getByRole('button', { name: 'Good' }));
+      fireEvent.press(screen.getByRole('button', { name: /^Good, / }));
     });
     expect(await screen.findByText('Last reviewed: 2026-10-17')).toBeTruthy();
     expect(screen.getByText('Next review: 2026-10-18')).toBeTruthy(); // step 0 + "good" = 1 day

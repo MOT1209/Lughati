@@ -4,7 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { LanguageBadge } from '@/components/LanguageBadge';
-import { Icon, Text } from '@/components/ui';
+import { StreakChip } from '@/components/StreakChip';
+import { Text } from '@/components/ui';
 import { MIN_TOUCH_TARGET } from '@/constants/app';
 import { useTheme } from '@/hooks/useTheme';
 import type { Language } from '@/types';
@@ -55,16 +56,7 @@ export function HomeHero({ name, streakDays, language, languageName, minutesToda
             {t('home.tagline')}
           </Text>
         </View>
-        <View
-          style={[styles.row, styles.streak, { gap: spacing.xs, borderRadius: radius.pill, paddingHorizontal: spacing.md, borderColor: colors.heroGold }]}
-          accessible
-          accessibilityLabel={t('home.streakAria', { count: streakDays })}
-        >
-          <Icon name="flame" size={16} color="heroGold" />
-          <Text variant="bodyStrong" color="heroGold">
-            {t('home.streakDays', { count: streakDays })}
-          </Text>
-        </View>
+        <StreakChip days={streakDays} />
       </View>
 
       {language ? (
@@ -106,7 +98,6 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
   between: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
   flex: { flex: 1 },
-  streak: { borderWidth: 1, minHeight: 32, backgroundColor: 'rgba(255, 200, 87, 0.14)' },
   pill: { minHeight: MIN_TOUCH_TARGET, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.16)', backgroundColor: 'rgba(255, 255, 255, 0.08)' },
   chip: { minHeight: 32, justifyContent: 'center' },
   chipText: { fontFamily: fontFamilies.bold },

@@ -3,6 +3,9 @@ import { useRef, useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { HeroProgress } from '@/components/HeroProgress';
+import { ReviewOutcomeButton } from '@/components/ReviewOutcomeButton';
+import { ScreenHero } from '@/components/ScreenHero';
 import { Button, Card, EmptyState, ErrorState, LoadingState, Screen, Text } from '@/components/ui';
 import { useAsyncData } from '@/hooks/useAsyncData';
 import { useCurrentLearning } from '@/hooks/useCurrentLearning';
@@ -12,8 +15,11 @@ import { getVocabularyById } from '@/services/vocabulary';
 import { useLearningStore } from '@/store/learningStore';
 import type { ReviewOutcome, Vocabulary, VocabularyReviewState } from '@/types';
 import { dayOf } from '@/utils/day';
+import { scheduleReview } from '@/utils/srs';
 import { isolateTerm, meaningOf } from '@/utils/meaning';
 import { ROUTES } from '@/utils/routing';
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /** The four review outcomes, in the order they are offered (worst to best recall). */
 const OUTCOMES: ReviewOutcome[] = ['again', 'difficult', 'good', 'easy'];
@@ -146,50 +152,85 @@ export default function Review() {
   const answered = saved !== null;
   const term = isolateTerm(current.word);
   const meaning = meaningOf(current.word, source);
+  const now = new Date();
+  const intervalLabel = (outcome: ReviewOutcome) => {
+    const next = scheduleReview(current.state, outcome, now);
+    const days = Math.round((new Date(next.nextReviewAt).getTime() - now.getTime()) / MS_PER_DAY);
+    return days <= 0 ? t('review.intervalNow') : t('review.intervalDays', { count: days });
+  };
 
   return (
-    <Screen edges={['top']}>
-      <Card style={{ gap: spacing.md }}>
-        <Text variant="small" color="textSecondary">
-          {t('review.progress', { current: Math.min(index + 1, items.length), total: items.length })}
-        </Text>
-        <Text variant="title" accessibilityRole="header">
-          {term}
-        </Text>
+    <Screen edges={[]} contentStyle={{ padding: 0, gap: 0 }}>
+      <ScreenHero
+        eyebrow={t('review.title')}
+        title={t('review.due', { count: items.length })}
+        trailing={
+          <Text variant="title" color="heroGold">
+            {t('review.progress', { current: Math.min(index + 1, items.length), total: items.length })}
+          </Text>
+        }
+      >
+        <HeroProgress value={(index + (answered ? 1 : 0)) / items.length} accessibilityLabel={t('review.title')} />
+      </ScreenHero>
 
-        {revealed || answered ? (
-          <View style={{ gap: spacing.sm }} accessibilityLiveRegion="polite">
-            <Text variant="small" color="textSecondary">
-              {t('review.meaning')}
-            </Text>
-            <Text variant="bodyStrong">{meaning}</Text>
-            {current.word.exampleSentence ? (
+      <View style={{ padding: spacing.lg, gap: spacing.md }}>
+        <Card style={{ gap: spacing.sm, alignItems: 'center', padding: spacing.xl }}>
+          <Text variant="caption" color="textSecondary">
+            {t('review.word')}
+          </Text>
+          <Text variant="display" accessibilityRole="header" style={{ textAlign: 'center' }}>
+            {term}
+          </Text>
+
+          {revealed || answered ? (
+            <View style={{ gap: spacing.xs, alignItems: 'center' }} accessibilityLiveRegion="polite">
               <Text variant="caption" color="textSecondary">
-                {t('review.example', { sentence: current.word.exampleSentence })}
+                {t('review.meaning')}
               </Text>
-            ) : null}
-          </View>
-        ) : (
-          <Button title={t('review.showAnswer')} variant="secondary" onPress={() => setRevealed(true)} />
-        )}
+              <Text variant="title" color="primary" style={{ textAlign: 'center' }}>
+                {meaning}
+              </Text>
+              {current.word.exampleSentence ? (
+                <Text variant="small" color="textSecondary" style={{ textAlign: 'center' }}>
+                  {t('review.example', { sentence: current.word.exampleSentence })}
+                </Text>
+              ) : null}
+            </View>
+          ) : (
+            <Button title={t('review.showAnswer')} variant="secondary" onPress={() => setRevealed(true)} />
+          )}
+        </Card>
 
         {revealed && !answered ? (
           <View style={{ gap: spacing.sm }}>
-            <Text color="textSecondary">{t('review.howDidItGo')}</Text>
-            {OUTCOMES.map((outcome) => (
-              <Button key={outcome} title={t(`review.${outcome}`)} onPress={() => save(outcome)} />
-            ))}
+            <Text color="textSecondary" style={{ textAlign: 'center' }}>
+              {t('review.howDidItGo')}
+            </Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+              {OUTCOMES.map((outcome) => (
+                <ReviewOutcomeButton
+                  key={outcome}
+                  outcome={outcome}
+                  title={t(`review.${outcome}`)}
+                  interval={intervalLabel(outcome)}
+                  onPress={() => save(outcome)}
+                />
+              ))}
+            </View>
           </View>
         ) : null}
 
         {answered ? (
           <View style={{ gap: spacing.sm }} accessibilityLiveRegion="polite">
-            <Text color="textSecondary">
+            <Text color="textSecondary" style={{ textAlign: 'center' }}>
               {t('review.lastReviewed', { date: localDay(saved.lastReviewedAt) })}
             </Text>
-            <Text color="textSecondary">{t('review.nextReview', { date: localDay(saved.nextReviewAt) })}</Text>
+            <Text color="textSecondary" style={{ textAlign: 'center' }}>
+              {t('review.nextReview', { date: localDay(saved.nextReviewAt) })}
+            </Text>
             <Button
               title={index === items.length - 1 ? t('lesson.finish') : t('review.nextWord')}
+              variant="gold"
               onPress={next}
             />
           </View>
@@ -201,7 +242,7 @@ export default function Review() {
             {pendingOutcome ? <Button title={t('common.retry')} onPress={() => save(pendingOutcome)} /> : null}
           </View>
         ) : null}
-      </Card>
+      </View>
     </Screen>
   );
 }
