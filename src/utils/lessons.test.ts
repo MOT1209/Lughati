@@ -108,6 +108,31 @@ describe('buildExercises', () => {
     expect(new Set(exercises.map((e) => e.options.indexOf(e.answer))).size).toBeGreaterThan(1);
   });
 
+  it('does not give the answer away by its position or by fixed neighbours', () => {
+    const all = lessons.flatMap((lesson) => buildExercises(lesson.id, wordsOf(lesson.id)));
+    const positions = all.map((e) => e.options.indexOf(e.answer));
+    // Not the old cyclic pattern (index % 4) …
+    const cyclic = all.every((e) => {
+      const index = Number(e.id.split('-').pop()) - 1;
+      return e.options.indexOf(e.answer) === (index + (e.type === 'translate' ? 2 : 0)) % OPTIONS_PER_EXERCISE;
+    });
+    expect(cyclic).toBe(false);
+    // … and every position is used often enough that guessing one is no strategy.
+    for (let position = 0; position < OPTIONS_PER_EXERCISE; position += 1) {
+      const share = positions.filter((p) => p === position).length / all.length;
+      expect(share).toBeGreaterThan(0.15);
+      expect(share).toBeLessThan(0.35);
+    }
+    // Distractors are not always the next words in the list.
+    const neighbours = all.filter((e) => {
+      const ids = wordsOf(e.lessonId).map((w) => w.id);
+      const at = ids.indexOf(e.answer);
+      const next = Array.from({ length: OPTIONS_PER_EXERCISE - 1 }, (_, step) => ids[(at + step + 1) % ids.length]);
+      return e.options.filter((id) => id !== e.answer).every((id) => next.includes(id));
+    });
+    expect(neighbours.length).toBeLessThan(all.length / 2);
+  });
+
   it('has unique ids and returns nothing when there are too few words', () => {
     expect(new Set(exercises.map((e) => e.id)).size).toBe(exercises.length);
     expect(buildExercises('x', words.slice(0, 3))).toEqual([]);
