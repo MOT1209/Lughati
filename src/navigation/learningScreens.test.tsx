@@ -100,6 +100,20 @@ describe('Review screen', () => {
     expect(await screen.findByText('Review session complete')).toBeTruthy();
   }, SLOW_TEST_TIMEOUT);
 
+  it("shows review dates as the learner's local day, also just after midnight", async () => {
+    // 00:30 on 17 Oct in Riyadh (tests run in UTC+3) is still 16 Oct in UTC.
+    const repos = createMockRepositories({ now: () => new Date('2026-10-16T21:30:00Z') });
+    registerRepositories({ ...repos, reviews: { ...repos.reviews, getDue: async () => [dueState] } });
+    renderRouter({ review: ReviewScreen }, { initialUrl: '/review' });
+
+    fireEvent.press(await screen.findByRole('button', { name: 'Show meaning' }));
+    await act(async () => {
+      fireEvent.press(screen.getByRole('button', { name: 'Good' }));
+    });
+    expect(await screen.findByText('Last reviewed: 2026-10-17')).toBeTruthy();
+    expect(screen.getByText('Next review: 2026-10-18')).toBeTruthy(); // step 0 + "good" = 1 day
+  }, SLOW_TEST_TIMEOUT);
+
   it('shows an empty state when nothing is due', async () => {
     const repos = createMockRepositories();
     registerRepositories({ ...repos, reviews: { ...repos.reviews, getDue: async () => [] } });

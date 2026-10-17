@@ -27,7 +27,6 @@ export default function Settings() {
   const signOut = useAuthStore((s) => s.signOut);
   const [restartNeeded, setRestartNeeded] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-
   const [restartFailed, setRestartFailed] = useState(false);
   const [languageChangeFailed, setLanguageChangeFailed] = useState(false);
 
@@ -123,6 +122,7 @@ export default function Settings() {
         <Text variant="subheading">{t('settings.learningLanguages')}</Text>
         <Button title={t('settings.learningLanguages')} variant="secondary" icon="language-outline" onPress={() => router.push(ROUTES.setupLanguages)} />
       </Card>
+
 
       <Card style={{ gap: spacing.md }}>
         <Text variant="subheading">{t('settings.account')}</Text>

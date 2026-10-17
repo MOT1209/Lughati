@@ -61,11 +61,8 @@ function isValidDay(value: unknown): value is string {
   return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value);
 }
 
-/** Local calendar day (device time zone) of a date, `YYYY-MM-DD` — the same form activity is keyed by. */
-export function dayOf(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
+/** Local calendar day of a date (see utils/day.ts); re-exported because activity is keyed by it. */
+export { dayOf } from '@/utils/day';
 
 /** Exposed so activity records and streak logic agree on what a real calendar day is. */
 export { isValidDay };

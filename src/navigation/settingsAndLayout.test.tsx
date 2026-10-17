@@ -74,6 +74,13 @@ describe('Settings screen', () => {
     expect(screen.getByRole('button', { name: 'Sign out' })).toBeEnabled();
   }, SLOW_TEST_TIMEOUT);
 
+  it('offers no daily reminder switch while no reminder can actually be scheduled', async () => {
+    renderRouter(routes, { initialUrl: '/settings' });
+    expect(await screen.findByRole('button', { name: 'Sign out' })).toBeTruthy();
+    expect(screen.queryByText('Daily learning reminder')).toBeNull();
+    expect(screen.queryByRole('switch')).toBeNull();
+  }, SLOW_TEST_TIMEOUT);
+
   it('reverts the language choice and says so when applying it fails', async () => {
     jest.spyOn(appLanguage, 'applyLanguagePreference').mockRejectedValue(new Error('i18n down'));
     renderRouter(routes, { initialUrl: '/settings' });
