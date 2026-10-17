@@ -32,20 +32,20 @@ export default function LessonScreen() {
   const [saveFailed, setSaveFailed] = useState(false);
   const [quizRun, setQuizRun] = useState(0); // a new run remounts the quiz with a fresh session
   const saving = useRef(false); // a double tap on the last button must not record the lesson twice
-
-  // Leaving mid-quiz (header back, gesture or hardware back) loses every answer: ask first.
   const navigation = useNavigation();
-  const quizActive = step === 'quiz';
+
+  // Leaving mid-quiz (header back, Android back, a swipe) would drop every answer given so far,
+  // so ask first. Other steps have nothing unsaved and leave without a prompt.
   useEffect(() => {
-    if (!quizActive) return;
+    if (step !== 'quiz') return;
     return navigation.addListener('beforeRemove', (event) => {
       event.preventDefault();
       Alert.alert(t('lesson.leaveTitle'), t('lesson.leaveMessage'), [
-        { text: t('lesson.leaveStay'), style: 'cancel' },
+        { text: t('lesson.stay'), style: 'cancel' },
         { text: t('lesson.leaveConfirm'), style: 'destructive', onPress: () => navigation.dispatch(event.data.action) },
       ]);
     });
-  }, [quizActive, navigation, t]);
+  }, [navigation, step, t]);
 
   const data = useAsyncData(async () => {
     const repos = getRepositories();

@@ -1,5 +1,5 @@
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { renderRouter, screen } from 'expo-router/testing-library';
 import { Alert } from 'react-native';
 
@@ -80,22 +80,6 @@ describe('Lesson screen', () => {
     expect(useLearningStore.getState().progressVersion).toBe(1);
   }, SLOW_TEST_TIMEOUT);
 
-  it('asks before leaving a quiz in progress and leaves only when confirmed', async () => {
-    renderRouter(routes, { initialUrl: '/learn' });
-    await screen.findAllByRole('button');
-    act(() => router.push({ pathname: '/lesson/[id]', params: { id: 'de-a1-1' } }));
-    fireEvent.press(await screen.findByRole('button', { name: 'Start exercises' }));
-    await screen.findByText(/Question 1 of/);
-
-    act(() => router.back());
-    const call = (Alert.alert as jest.Mock).mock.calls.find((c) => c[0] === 'Leave the quiz?');
-    expect(call).toBeTruthy();
-    expect(screen.getByText(/Question 1 of/)).toBeTruthy(); // still in the quiz
-
-    act(() => call![2].find((b: { text: string }) => b.text === 'Leave').onPress());
-    await waitFor(() => expect(screen.queryByText(/Question 1 of/)).toBeNull());
-  }, SLOW_TEST_TIMEOUT);
-
   it('keeps the quiz and offers a retry when saving fails', async () => {
     const repos = createMockRepositories();
     let attempts = 0;
@@ -158,6 +142,39 @@ describe('Lesson screen', () => {
 
     fireEvent.press(screen.getByRole('button', { name: 'Retry the lesson' }));
     expect(await screen.findByText('Question 1 of 12')).toBeTruthy();
+  }, SLOW_TEST_TIMEOUT);
+
+  it('asks before leaving an unfinished quiz, and leaves only when confirmed', async () => {
+    const buttons: { text?: string; onPress?: () => void }[][] = [];
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, options) => {
+      buttons.push((options ?? []) as { text?: string; onPress?: () => void }[]);
+    });
+    renderRouter({ _layout: () => <Stack />, ...routes }, { initialUrl: '/learn' });
+    fireEvent.press(await screen.findByRole('button', { name: 'Numbers, Not started' }));
+    fireEvent.press(await screen.findByRole('button', { name: 'Start exercises' }));
+    expect(await screen.findByText('Question 1 of 12')).toBeTruthy();
+
+    act(() => router.back());
+    expect(alert).toHaveBeenCalledWith('Leave the quiz?', expect.any(String), expect.any(Array));
+    expect(screen.getByText('Question 1 of 12')).toBeTruthy(); // still on the quiz
+
+    act(() => buttons[0]!.find((b) => b.text === 'Keep going')?.onPress?.());
+    expect(screen.getByText('Question 1 of 12')).toBeTruthy();
+
+    act(() => router.back());
+    await act(async () => buttons[1]!.find((b) => b.text === 'Leave')!.onPress!());
+    expect(await screen.findByRole('button', { name: 'Numbers, Not started' })).toBeTruthy();
+  }, SLOW_TEST_TIMEOUT);
+
+  it('leaves the lesson intro without asking', async () => {
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+    renderRouter({ _layout: () => <Stack />, ...routes }, { initialUrl: '/learn' });
+    fireEvent.press(await screen.findByRole('button', { name: 'Numbers, Not started' }));
+    expect(await screen.findByRole('button', { name: 'Start exercises' })).toBeTruthy();
+
+    act(() => router.back());
+    expect(await screen.findByRole('button', { name: 'Numbers, Not started' })).toBeTruthy();
+    expect(alert).not.toHaveBeenCalled();
   }, SLOW_TEST_TIMEOUT);
 
   it("shows meanings in the learner's own language", async () => {

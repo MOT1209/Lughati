@@ -10,7 +10,7 @@
 <a href="#-التقنيات"><img alt="Expo SDK 57" src="https://img.shields.io/badge/Expo_SDK-57-000020?logo=expo&logoColor=white"></a>
 <a href="#-التقنيات"><img alt="React Native 0.86" src="https://img.shields.io/badge/React_Native-0.86-61DAFB?logo=react&logoColor=black"></a>
 <a href="#-التقنيات"><img alt="TypeScript strict" src="https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white"></a>
-<a href="#-الجودة"><img alt="Tests" src="https://img.shields.io/badge/Jest-28_suites_·_476_tests-99425B?logo=jest&logoColor=white"></a>
+<a href="#-الجودة"><img alt="Tests" src="https://img.shields.io/badge/Jest-28_suites_·_482_tests-99425B?logo=jest&logoColor=white"></a>
 <a href="#-التقنيات"><img alt="i18n ar · en" src="https://img.shields.io/badge/i18n-ar_·_en-EA580C"></a>
 <a href="#-الميزات"><img alt="RTL" src="https://img.shields.io/badge/واجهة-RTL-0F766E"></a>
 
@@ -92,7 +92,7 @@ bunx expo start
 | :--- | :--- |
 | `npm run typecheck` | فحص الأنواع (`tsc --noEmit`) |
 | `npm run lint` | ESLint بإعداد Expo |
-| `npm test` | اختبارات Jest (28 suite · 476 اختبار عبر `jest-expo`) |
+| `npm test` | اختبارات Jest (28 suite · 482 اختبار عبر `jest-expo`) |
 | `npx expo-doctor` | فحص سليم الاعتماديات والإعدادات |
 | `npx expo export --platform android` | التأكد أن الحزمة تُبنى |
 
@@ -146,7 +146,7 @@ registerAIProvider(provider)     // مزوّد ذكاء اصطناعي
 | :--- | :--- |
 | الأنواع (`tsc --noEmit`) | نظيف |
 | ESLint | 0 أخطاء |
-| الاختبارات | 28 ملف · 476 اختبار ناجح |
+| الاختبارات | 25 ملف · 408 اختبار ناجح |
 | CI | typecheck + lint + test + `expo export` على `main` وعند كل PR |
 
 سُلاسل الاختبار تغطّي: التنقّل والحراسة، شاشات التعلّم، الاختبارات واللعبة، التدويل (تكافؤ المفاتيح

@@ -70,7 +70,7 @@ describe('Home screen', () => {
 
   it('shows the hero: streak, current language with a change action, and the daily goal ring', async () => {
     const router = renderRouter({ home: HomeScreen, 'language-selection': () => null }, { initialUrl: '/home' });
-    expect(await screen.findByLabelText('Day streak, 0 days')).toBeTruthy();
+    expect(await screen.findByLabelText('Day streak: no days yet')).toBeTruthy();
     expect(screen.getByText('German')).toBeTruthy();
     expect(screen.getByText('Lesson 1 of 10')).toBeTruthy();
     const goal = screen.getByRole('progressbar', { name: 'Daily goal' });

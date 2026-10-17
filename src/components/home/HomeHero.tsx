@@ -58,7 +58,7 @@ export function HomeHero({ name, streakDays, language, languageName, minutesToda
         <View
           style={[styles.row, styles.streak, { gap: spacing.xs, borderRadius: radius.pill, paddingHorizontal: spacing.md, borderColor: colors.heroGold }]}
           accessible
-          accessibilityLabel={t('home.streakAria', { days: String(streakDays) })}
+          accessibilityLabel={t('home.streakAria', { count: streakDays })}
         >
           <Icon name="flame" size={16} color="heroGold" />
           <Text variant="bodyStrong" color="heroGold">

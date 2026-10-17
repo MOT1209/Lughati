@@ -20,22 +20,22 @@
 ## المهام المتبقية
 
 ### 1. توسيع اختبارات الشاشات — بند M16 الناقص
-- [ ] اختبار شاشة **Profile** (`src/app/(app)/(tabs)/profile.tsx`): المستوى، `profile.levelValue`، تقدّم اللغة، الإحصاءات، وحالة «لا لغة بعد».
-  - ملف جديد مقترح: `src/navigation/profileScreen.test.tsx` (اتبع نمط `learningScreens.test.tsx`: `renderRouter` + `SLOW_TEST_TIMEOUT`).
-- [ ] اختبارات **Login/Register** و**Onboarding** (غير مغطّاة حاليًا؛ `RootNavigator.test.tsx` يغطّي الحماية لا النماذج).
+- [x] اختبار شاشة **Profile** (`src/app/(app)/(tabs)/profile.tsx`): المستوى، `profile.levelValue`، تقدّم اللغة، الإحصاءات، وحالة «لا لغة بعد».
+  - أُضيف: `src/navigation/profileScreen.test.tsx`.
+- [x] اختبارات **Login/Register** و**Onboarding**: أُضيفت في `src/navigation/authScreens.test.tsx`.
 
 ### 2. M6 — مفتاح التذكير اليومي بلا وظيفة
 - [x] حُذف المفتاح من `settings.tsx` واللغتين ومن `STORAGE_KEYS` (لم يكن يُرسل شيئاً). تذكير حقيقي لاحقاً يحتاج التحقق من `expo-notifications` على الجهاز.
   - ملاحظة: `expo-notifications` غير متاح في Expo Go — لا تضف حزمة إشعارات.
 
 ### 3. L17 — فقدان إجابات الاختبار عند المغادرة
-- [ ] تأكيد قبل مغادرة اختبار قيد التقدّم في `src/app/(app)/lesson/[id].tsx`.
+- [x] تأكيد «مغادرة الاختبار؟» قبل مغادرة اختبار قيد التقدّم (`beforeRemove` في `src/app/(app)/lesson/[id].tsx`).
 
 ### 4. تحديث مستند التدقيق
-- [ ] `docs/PHASE_1_AUDIT.md`: وسم الحالة لكل بند — منتهي: M7, M10, M11, M13, M14, M15, L19 · متبقٍّ: M6, L17, M16 (جزئي).
+- [x] `docs/PHASE_1_AUDIT.md`: وسم الحالة لكل بند (القسم 13) — منتهي: M7, M10, M11, M13, M14, M15, L19 · متبقٍّ: M6, L17, M16 (جزئي).
 
 ### 5. لوحة README
-- [ ] تحديث شارة الاختبارات («25 suites / 408 tests») بالأرقام الفعلية بعد تشغيل المجموعة كاملة.
+- [x] تحديث شارة الاختبارات بالأرقام الفعلية (28 مجموعة · 457 اختباراً).
 
 ### 6. (منخفض الأولوية) L19 المتبقّي
 - [ ] `src/app/(app)/lesson/[id].tsx:146` — دمج تسمية `accessibilityLabel` (`${word.term}: ${meaning}`). الدمج هنا لبيانات المفردات لا لنصّ واجهة، لذا أولويته منخفضة.

@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مراجعة شاملة لمشروع لغتي · Lughati Review</title>
+<meta name="description" content="تقرير فحص الأكواد والتقنيات والملفات والبيانات لمشروع لغتي، بالعربية ثم الألمانية.">
+<style>
+:root{--bg:#f6f7f5;--card:#fff;--text:#1b2421;--muted:#5a6762;--line:#dfe4e1;--brand:#0f766e;--brand2:#0b5d57;
+--good:#15803d;--mid:#b45309;--bad:#b91c1c;--b1:#0f766e;--b2:#94a3b8;--b3:#d97706;--code:#eef2f0;--tf:#e0f2ef;--ta:#fef3c7;--to:#ede9fe}
+:root[data-theme=dark]{--bg:#0f1514;--card:#17201e;--text:#e8efec;--muted:#9bb0a9;--line:#2a3a36;--brand:#2dd4bf;--brand2:#5eead4;
+--good:#4ade80;--mid:#fbbf24;--bad:#f87171;--b1:#2dd4bf;--b2:#64748b;--b3:#fbbf24;--code:#1f2b28;--tf:#123530;--ta:#3a2f10;--to:#2a2347}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1514;--card:#17201e;--text:#e8efec;--muted:#9bb0a9;--line:#2a3a36;--brand:#2dd4bf;--brand2:#5eead4;
+--good:#4ade80;--mid:#fbbf24;--bad:#f87171;--b1:#2dd4bf;--b2:#64748b;--b3:#fbbf24;--code:#1f2b28;--tf:#123530;--ta:#3a2f10;--to:#2a2347}}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.75 "Segoe UI",Tahoma,"Noto Naskh Arabic","Noto Sans Arabic",system-ui,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px 64px}
+header.top{position:sticky;top:0;z-index:10;background:var(--card);border-bottom:1px solid var(--line)}
+header.top .in{max-width:980px;margin:0 auto;padding:8px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+header.top a,header.top button{color:var(--brand2);text-decoration:none;font:600 14px/1 inherit;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);cursor:pointer;min-height:44px;display:inline-flex;align-items:center}
+header.top .sp{flex:1}
+.hero{padding:36px 0 8px}.hero h1{margin:0 0 6px;font-size:clamp(26px,5vw,38px);line-height:1.3}.hero p{margin:0;color:var(--muted)}
+.lang{padding-top:8px}
+.lang>h1.l{font-size:15px;color:#fff;background:var(--brand2);display:inline-block;padding:4px 14px;border-radius:99px;margin:28px 0 0}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:18px 0}
+h2{margin:0 0 10px;font-size:22px;line-height:1.4;color:var(--brand2)}h3{margin:20px 0 8px;font-size:17px}
+p{margin:8px 0}.lead{font-size:18px}.note{color:var(--muted);font-size:14px}
+ul,ol{padding-inline-start:22px;margin:8px 0}li{margin:6px 0}
+code{background:var(--code);padding:1px 6px;border-radius:5px;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;direction:ltr;unicode-bidi:isolate}
+pre.diagram{background:var(--code);padding:14px;border-radius:10px;overflow-x:auto;font:12.5px/1.55 ui-monospace,Menlo,Consolas,monospace;text-align:left}
+.tw{overflow-x:auto;margin:10px 0}table{border-collapse:collapse;width:100%;font-size:14.5px}table.wide{min-width:560px}
+th,td{padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top;text-align:start}th{background:var(--code);font-weight:700;white-space:nowrap}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 9px;border-radius:99px;margin-inline-end:4px;white-space:nowrap}
+.tF{background:var(--tf);color:var(--brand2)}.tA{background:var(--ta);color:var(--mid)}.tO{background:var(--to);color:#6d28d9}
+:root[data-theme=dark] .tO{color:#c4b5fd}@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .tO{color:#c4b5fd}}
+.sev{display:inline-block;font-size:12px;font-weight:700;padding:1px 9px;border-radius:6px;color:#fff;white-space:nowrap}
+.sH{background:var(--bad)}.sM{background:#d97706}.sL{background:#64748b}
+.scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.score{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+.score .n{font-size:28px;font-weight:800;line-height:1.1}.score .n small{font-size:13px;color:var(--muted);font-weight:600}
+.score .t{font-size:13.5px;color:var(--muted);margin:4px 0 8px}.score .bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden}
+.score .bar i{display:block;height:100%;border-radius:99px}.score.good .n{color:var(--good)}.score.good i{background:var(--good)}
+.score.mid .n{color:var(--mid)}.score.mid i{background:var(--mid)}.score.bad .n{color:var(--bad)}.score.bad i{background:var(--bad)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.kpis div{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg)}
+.kpis b{display:block;font-size:24px;line-height:1.2;color:var(--brand2)}.kpis span{font-size:13px;color:var(--muted)}
+svg.chart{width:100%;height:auto;max-width:560px;display:block;margin:8px 0}
+.chart .lbl,.chart .val{font:12px system-ui,sans-serif;fill:var(--muted)}.chart .lbl{fill:var(--text)}
+.chart .b1{fill:var(--b1)}.chart .b2{fill:var(--b2)}.chart .b3{fill:var(--b3)}.chart .bg{fill:var(--line)}
+footer{color:var(--muted);font-size:13px;text-align:center;margin-top:28px}
+@media(max-width:560px){section{padding:16px 14px}.lead{font-size:16.5px}}
+@media print{header.top{display:none}section{break-inside:avoid-page}}
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+<a href="#ar">العربية</a><a href="#de">Deutsch</a><span class="sp"></span><button id="theme" type="button" aria-label="Light / Dark">☀ / ☾</button>
+</div></header>
+<div class="wrap">
+<div class="lang" id="ar" lang="ar" dir="rtl">
+<div class="hero"><h1>مراجعة شاملة لمشروع لغتي</h1><p>تقرير فحص الأكواد والتقنيات والملفات والبيانات</p><p class="note">أُنشئ في 17 أكتوبر 2026 · الفرع main عند 06c9480</p></div>
+<h1 class="l">العربية</h1>
+
+<section id="ar-verdict"><h2>1. الحكم النهائي</h2>
+<p class="lead">مشروع <b>منضبط تقنياً لكنه عرض توضيحي</b> وليس منتجاً بعد. الكود نظيف ومختبَر جيداً (تغطية أسطر 91.6٪)، لكن المصادقة وهمية، والمحتوى 60 كلمة لكل لغة لم يراجعها إنسان، ولم يُجرَّب شيء من الجديد على جهاز حقيقي. <span class="tag tO">رأي</span></p>
+<div class="scores"><div class="score good"><div class="n">4.0<small>/5</small></div><div class="t">جودة الكود</div><div class="bar"><i style="width:80%"></i></div></div><div class="score good"><div class="n">4.2<small>/5</small></div><div class="t">الاختبارات</div><div class="bar"><i style="width:84%"></i></div></div><div class="score good"><div class="n">3.8<small>/5</small></div><div class="t">المعمارية</div><div class="bar"><i style="width:76%"></i></div></div><div class="score bad"><div class="n">2.0<small>/5</small></div><div class="t">الأمان والخصوصية</div><div class="bar"><i style="width:40%"></i></div></div><div class="score mid"><div class="n">3.5<small>/5</small></div><div class="t">الوصول واللغات</div><div class="bar"><i style="width:70%"></i></div></div><div class="score bad"><div class="n">2.0<small>/5</small></div><div class="t">المحتوى</div><div class="bar"><i style="width:40%"></i></div></div><div class="score bad"><div class="n">1.5<small>/5</small></div><div class="t">الجاهزية للنشر</div><div class="bar"><i style="width:30%"></i></div></div><div class="score mid"><div class="n">3.0<small>/5</small></div><div class="t">العمليات</div><div class="bar"><i style="width:60%"></i></div></div></div>
+<p class="note">الدرجات رأيي الشخصي مبني على الأدلة أدناه، وليست قياساً آلياً. «الأمان» و«الجاهزية» منخفضتان لأن التطبيق وهمي الحسابات ولا يصلح للنشر، وهذا مقصود في هذه المرحلة، وليس خللاً برمجياً.</p>
+<h3>أهم 5 أمور تُعالَج أولاً</h3>
+<ol>
+<li><b>تحقق على جهاز Android حقيقي</b> (الاتجاه RTL/LTR، تدفق اختيار اللغات، المراجعة، السؤال عند مغادرة الاختبار). لم يُختبر معظمه على هاتف.</li>
+<li><b>مراجعة لغوية بشرية</b> للكلمات الست والستين مرتين (ست لغات)، وتوحيد مستوى الرسمية (N3، N4).</li>
+<li><b>حماية الفرع main</b> بطلب سحب ونجاح <code dir="ltr">verify</code> (N6).</li>
+<li><b>اختيار الهدف اليومي</b> في الإعدادات (N1)، لأن الدالة جاهزة ولا شاشة لها.</li>
+<li><b>فصل القواعد التجارية عن المستودع الوهمي</b> قبل أي خادم حقيقي (N2).</li>
+</ol></section>
+
+<section id="ar-numbers"><h2>2. المشروع بالأرقام</h2>
+<p><span class="tag tF">حقيقة</span> كلها مقاسة بأوامر في هذه الجلسة.</p>
+<div class="kpis">
+<div><b><bdi>5,964</bdi></b><span>سطر كود إنتاج</span></div>
+<div><b><bdi>3,558</bdi></b><span>سطر اختبارات (28 ملفاً)</span></div>
+<div><b><bdi>457</bdi></b><span>اختباراً ناجحاً (~32 ثانية)</span></div>
+<div><b><bdi>91.6٪</bdi></b><span>تغطية الأسطر</span></div>
+<div><b><bdi>82.8٪</bdi></b><span>تغطية الفروع</span></div>
+<div><b><bdi>3.2 MB</bdi></b><span>حزمة Android (Hermes)</span></div>
+<div><b><bdi>223</bdi></b><span>مفتاح ترجمة لكل لغة</span></div>
+<div><b><bdi>360</bdi></b><span>كلمة (60 × 6 لغات)</span></div>
+<div><b><bdi>67</bdi></b><span>commit (80 عبر كل الفروع)</span></div>
+</div>
+<h3>الأسطر لكل مجلد</h3><svg class="chart" viewBox="0 0 520 292" role="img" aria-label="Lines per folder" direction="ltr"><text x="0" y="17" class="lbl">app</text><rect x="110" y="6" width="237.5" height="14" rx="3" class="b1"/><rect x="347.5" y="6" width="0.0" height="14" rx="3" class="b2"/><text x="353.5" y="17" class="val">1604 + 0</text><text x="0" y="39" class="lbl">services</text><rect x="110" y="28" width="162.1" height="14" rx="3" class="b1"/><rect x="272.1" y="28" width="147.9" height="14" rx="3" class="b2"/><text x="426.0" y="39" class="val">1095 + 999</text><text x="0" y="61" class="lbl">components</text><rect x="110" y="50" width="139.6" height="14" rx="3" class="b1"/><rect x="249.6" y="50" width="58.8" height="14" rx="3" class="b2"/><text x="314.4" y="61" class="val">943 + 397</text><text x="0" y="83" class="lbl">utils</text><rect x="110" y="72" width="98.9" height="14" rx="3" class="b1"/><rect x="208.9" y="72" width="95.5" height="14" rx="3" class="b2"/><text x="310.4" y="83" class="val">668 + 645</text><text x="0" y="105" class="lbl">i18n</text><rect x="110" y="94" width="91.2" height="14" rx="3" class="b1"/><rect x="201.2" y="94" width="13.2" height="14" rx="3" class="b2"/><text x="220.4" y="105" class="val">616 + 89</text><text x="0" y="127" class="lbl">mocks</text><rect x="110" y="116" width="43.4" height="14" rx="3" class="b1"/><rect x="153.4" y="116" width="10.4" height="14" rx="3" class="b2"/><text x="169.7" y="127" class="val">293 + 70</text><text x="0" y="149" class="lbl">types</text><rect x="110" y="138" width="33.5" height="14" rx="3" class="b1"/><rect x="143.5" y="138" width="0.0" height="14" rx="3" class="b2"/><text x="149.5" y="149" class="val">226 + 0</text><text x="0" y="171" class="lbl">hooks</text><rect x="110" y="160" width="26.8" height="14" rx="3" class="b1"/><rect x="136.8" y="160" width="17.6" height="14" rx="3" class="b2"/><text x="160.4" y="171" class="val">181 + 119</text><text x="0" y="193" class="lbl">store</text><rect x="110" y="182" width="23.7" height="14" rx="3" class="b1"/><rect x="133.7" y="182" width="20.1" height="14" rx="3" class="b2"/><text x="159.8" y="193" class="val">160 + 136</text><text x="0" y="215" class="lbl">theme</text><rect x="110" y="204" width="21.2" height="14" rx="3" class="b1"/><rect x="131.2" y="204" width="11.1" height="14" rx="3" class="b2"/><text x="148.3" y="215" class="val">143 + 75</text><text x="0" y="237" class="lbl">navigation</text><rect x="110" y="226" width="3.7" height="14" rx="3" class="b1"/><rect x="113.7" y="226" width="152.2" height="14" rx="3" class="b2"/><text x="271.9" y="237" class="val">25 + 1028</text><text x="0" y="259" class="lbl">constants</text><rect x="110" y="248" width="1.5" height="14" rx="3" class="b1"/><rect x="111.5" y="248" width="0.0" height="14" rx="3" class="b2"/><text x="117.5" y="259" class="val">10 + 0</text><rect x="110" y="275" width="10" height="10" rx="2" class="b1"/><text x="124" y="284" class="val">source</text><rect x="190" y="275" width="10" height="10" rx="2" class="b2"/><text x="204" y="284" class="val">tests</text></svg>
+<p class="note">مجلد <code dir="ltr">navigation</code> يحوي اختبارات التكامل فقط (1028 سطراً)، وبقية المجلدات كود إنتاج مع اختباراتها.</p></section>
+
+<section id="ar-stack"><h2>3. التقنيات</h2>
+<div class="tw"><table class="wide"><thead><tr><th>التقنية</th><th>الإصدار</th><th>الدور</th><th>ملاحظة</th></tr></thead><tbody><tr><td>Expo SDK</td><td>57.0.29</td><td>منصة البناء والتشغيل (Expo Go)</td><td>متاح 57.0.30؛ SDK 58 موجود. البقاء على 57 مرتبط بإصدار Expo Go على الهاتف (افتراض)</td></tr><tr><td>React Native / React</td><td>0.86.3 / 19.2.3</td><td>الواجهة</td><td>مع React Compiler مفعّل</td></tr><tr><td>TypeScript</td><td>6.0.3 (strict)</td><td>الأنواع</td><td>أنواع <code dir="ltr">jest</code> تُعلَن يدوياً</td></tr><tr><td>Expo Router</td><td>57.0.27</td><td>التنقل (ملفات + أنواع المسارات)</td><td><code dir="ltr">Stack.Protected</code> لحماية المسارات</td></tr><tr><td>zustand</td><td>5.0.15</td><td>حالة الجلسة والتفضيلات</td><td>مخازن صغيرة، التفضيلات محفوظة</td></tr><tr><td>i18next / react-i18next</td><td>26.4.4 / 17.0.16</td><td>الترجمة (ar، en)</td><td>جمع عربي بست صيغ، مع polyfill لـ Hermes</td></tr><tr><td>AsyncStorage</td><td>2.2.0</td><td>التخزين المحلي</td><td>خلف واجهة <code dir="ltr">KeyValueStorage</code></td></tr><tr><td>Jest / RNTL</td><td>29.7 / 13.3.3</td><td>الاختبارات</td><td>RNTL مثبّت لأن 14 يحتاج React 19.3</td></tr><tr><td>ESLint</td><td>9.39.5</td><td>فحص الشيفرة</td><td><code dir="ltr">expo lint</code> بلا تحذيرات</td></tr></tbody></table></div>
+<p><span class="tag tF">حقيقة</span> <code dir="ltr">npm outdated</code>: الإصدارات الأحدث متاحة لمعظم الحزم لأنها قفزات رئيسية (SDK 58 وRN 0.88 وAsyncStorage 3 وTypeScript 7). الترقية ليست عاجلة، لكن SDK 57 سيقدم لاحقاً.</p></section>
+
+<section id="ar-arch"><h2>4. المعمارية</h2>
+<pre class="diagram" dir="ltr">routes (src/app)          thin screens, no logic
+   │
+hooks / store             useCurrentLearning · zustand (auth, learning, prefs)
+   │
+services (4 seams)        auth · repositories · ai · storage     ← swapped via register*()
+   │
+mocks + AsyncStorage      src/mocks/*  ·  savedData.ts (validates every stored record)
+   ▲
+utils (pure rules)        progression · srs · streaks · recommendations · exercises · day</pre>
+<ul>
+<li><span class="tag tF">حقيقة</span> <b>نقاط القوة:</b> أربعة «مفاصل» قابلة للاستبدال، والشاشات لا تستورد أي تنفيذ وهمي (فحصتُ ذلك: صفر استيراد لـ <code dir="ltr">mocks</code> من <code dir="ltr">app</code> أو <code dir="ltr">components</code> أو <code dir="ltr">hooks</code> أو <code dir="ltr">store</code>). القواعد النقية (التقدّم، التكرار المتباعد، السلسلة، التوصيات) سهلة الاختبار. كل قراءة من التخزين تُتحقق وتُسقَط السجلات التالفة منفردة.</li>
+<li><span class="tag tF">حقيقة</span> <b>تسلسل الدرس:</b> الاختبار ← <code dir="ltr">completeLesson</code> ← (التقدّم + المحاولة + النشاط اليومي + حالات المراجعة عند النجاح) ← الحفظ ثم النشر ← السلسلة والتوصيات. الكتابة متسلسلة (<code dir="ltr">exclusive</code>) فلا تتداخل عمليتان.</li>
+<li><span class="tag tF">حقيقة</span> <b>الضعف:</b> N2 أعلاه، والملف <code dir="ltr">mock.ts</code> أكبر ملف (355 سطراً). كما أن خدمة الذكاء الاصطناعي وكيان الإنجازات غير موصولين بأي شاشة (N7).</li>
+<li><span class="tag tO">رأي</span> المعمارية متناسبة مع الحجم الحالي. تحذير من الهندسة الزائدة: لا تضف طبقات جديدة قبل وجود خادم فعلي.</li>
+</ul></section>
+
+<section id="ar-code"><h2>5. فحص الكود</h2>
+<div class="tw"><table><thead><tr><th>المقياس</th><th>القيمة</th><th>التقييم</th></tr></thead><tbody><tr><td><code dir="ltr">any</code> في كود الإنتاج</td><td>1</td><td>ممتاز</td></tr><tr><td><code dir="ltr">console.*</code></td><td>0</td><td>ممتاز</td></tr><tr><td>TODO / FIXME</td><td>0</td><td>ممتاز</td></tr><tr><td><code dir="ltr">eslint-disable</code></td><td>4 (2 في الإنتاج، كلاهما معلّل)</td><td>جيد</td></tr><tr><td>تحويلات غير آمنة (<code dir="ltr">as never/unknown</code>) في الإنتاج</td><td>0</td><td>ممتاز</td></tr><tr><td>أكبر ملف</td><td><code dir="ltr">repositories/mock.ts</code> 355 سطراً</td><td>مقبول، انظر N2</td></tr><tr><td>طبقات: شاشة تستورد تنفيذاً وهمياً</td><td>0 حالة</td><td>ممتاز</td></tr><tr><td><code dir="ltr">tsc --noEmit</code> و <code dir="ltr">expo lint --max-warnings 0</code></td><td>ناجحان بلا أخطاء</td><td>ممتاز</td></tr></tbody></table></div>
+<p><span class="tag tF">حقيقة</span> الأسرار: لا مفاتيح ولا رموز في الشيفرة (بحث نصي)، ولا ملفات <code dir="ltr">.env</code>. <span class="tag tO">رأي</span> الكود مقروء ومتسق مع تعليقات تشرح «لماذا». أضعف نقطة في الجودة ليست الأخطاء بل التضخم المحتمل في <code dir="ltr">mock.ts</code> وبعض الكيانات غير المستخدمة.</p>
+<h3>نتائج هذه المراجعة (أعلى إلى أدنى)</h3>
+<div class="tw"><table class="wide"><thead><tr><th>#</th><th>الأولوية</th><th>النوع</th><th>المشكلة</th><th>الإصلاح المقترح</th></tr></thead><tbody><tr><td>N1</td><td><span class="sev sH">عالية</span></td><td><span class="tag tF">حقيقة</span></td><td>الهدف اليومي ثابت على 15 دقيقة: الدالة <code dir="ltr">plans.setDailyGoal</code> موجودة ومختبرة لكن لا توجد أي شاشة تستدعيها، فلا يستطيع المستخدم تغيير هدفه.</td><td>إضافة اختيار الهدف في الإعدادات (5/10/15/30). جهد صغير.</td></tr><tr><td>N2</td><td><span class="sev sM">متوسطة</span></td><td><span class="tag tF">حقيقة</span></td><td>كل القواعد التجارية (إكمال الدرس، إنشاء حالات المراجعة، النشاط اليومي، السلسلة) تعيش داخل <code dir="ltr">createMockRepositories</code>. عند وجود خادم حقيقي يجب إعادة كتابتها هناك، وقد تختلف النتائج.</td><td>نقل قواعد الخطوات إلى دوال نقية في <code dir="ltr">utils/</code> (مثل <code dir="ltr">applyLessonCompletion</code>) وجعل المستودع طبقة تخزين فقط.</td></tr><tr><td>N3</td><td><span class="sev sM">متوسطة</span></td><td><span class="tag tF">حقيقة</span></td><td>المحتوى: 60 كلمة فقط لكل لغة (6 كلمات × 10 دروس)، وكل كلمة لها معنى واحد بحكم الترتيب (الفهرس). لا أمثلة (<code dir="ltr">exampleSentence</code> فارغ في كل البيانات)، ولا تعليم للمذكر/المؤنث أو الأدوات في الألمانية والفرنسية والإسبانية إلا ضمن الكلمة نفسها.</td><td>مراجعة لغوية بشرية قبل أي توسّع، ثم إضافة أمثلة وملاحظات للكلمات الملتبسة.</td></tr><tr><td>N4</td><td><span class="sev sM">متوسطة</span></td><td><span class="tag tO">رأي</span></td><td>مستوى الرسمية غير متسق داخل اللغة الواحدة: في التركية «Hoş geldiniz» (رسمي) بجانب «Adın ne?» (غير رسمي)، وفي الفرنسية «S'il vous plaît» بجانب «Comment tu t'appelles ?». كلمة «billete» (إسبانيا) تُقابل «boleto» في أمريكا اللاتينية، و«Bitte» الألمانية تعني «من فضلك» و«عفواً» معاً. الحكم لغوي ولم يراجعه متخصص.</td><td>قرار منتج: مستوى رسمية واحد، وتحديد أي لهجة إسبانية مستهدفة.</td></tr><tr><td>N5</td><td><span class="sev sM">متوسطة</span></td><td><span class="tag tF">حقيقة</span></td><td>غير جاهز للنشر: لا <code dir="ltr">android.package</code> ولا <code dir="ltr">ios.bundleIdentifier</code> ولا <code dir="ltr">versionCode</code>، ولا إعداد EAS، ولا سياسة خصوصية، ولا تتبع أعطال. التطبيق يعمل داخل Expo Go فقط.</td><td>يُعالَج عند قرار النشر، لا قبله.</td></tr><tr><td>N6</td><td><span class="sev sM">متوسطة</span></td><td><span class="tag tF">حقيقة</span></td><td>الفرع <code dir="ltr">main</code> بلا حماية، وعدة جلسات تدفع إليه مباشرة: فشل CI عليه مرتين (التشغيلان 10 و11) في 15 أكتوبر، ولم يظهر ذلك إلا بعد الدفع. هناك 10 فروع بعيدة، بعضها قديم.</td><td>تفعيل حماية الفرع (PR + نجاح <code dir="ltr">verify</code>) وحذف الفروع المدموجة.</td></tr><tr><td>N7</td><td><span class="sev sL">منخفضة</span></td><td><span class="tag tF">حقيقة</span></td><td>تعميم مبكر: <code dir="ltr">Achievement</code> وأنواع التمارين <code dir="ltr">listen</code> و<code dir="ltr">match</code> غير مستخدمة في أي مكان، و<code dir="ltr">services/ai</code> لا يستعمله أي شاشة، و<code dir="ltr">activity.getRecent</code> لا تستدعيه أي شاشة. كلها كود ميت ينتظر ميزة.</td><td>اتركها صغيرة؛ لا تبنِ فوقها قبل وجود ميزة فعلية.</td></tr><tr><td>N8</td><td><span class="sev sL">منخفضة</span></td><td><span class="tag tF">حقيقة</span></td><td>التوثيق موزع على 8 ملفات (826 سطراً) بتداخل واضح: <code dir="ltr">README</code> و<code dir="ltr">CLAUDE.md</code> و<code dir="ltr">AGENTS.md</code> (قالب Expo عام) و<code dir="ltr">TESTING.md</code> و<code dir="ltr">plan.md</code> و<code dir="ltr">docs/PHASE_1_AUDIT.md</code> و<code dir="ltr">docs/INTEGRATION_AGENT2.md</code> و<code dir="ltr">docs/audit/*</code>. حالة المشروع مكررة في أكثر من مكان وتتقادم.</td><td>مصدر واحد للحالة، وأرشفة تقارير المراحل المنتهية.</td></tr><tr><td>N9</td><td><span class="sev sL">منخفضة</span></td><td><span class="tag tF">حقيقة</span></td><td>تكرار في الواجهة: الرئيسية تعرض بطاقتَي «تابع التعلّم» معاً عندما تكون التوصية «أكمل الدرس»، وشاشة التقدّم تعرض XP والكلمات والدقائق مرتين (نص ثم بطاقات) وزرّين بنفس العنوان «تابع التعلّم». حكم التصميم رأيي.</td><td>دمج البطاقات وحذف التكرار.</td></tr><tr><td>N10</td><td><span class="sev sL">منخفضة</span></td><td><span class="tag tF">حقيقة</span></td><td>الشاشات أضعف جزء مختبَر: تغطية فروع الشاشات 65.9٪ مقابل 82.8٪ للمشروع، وأقلها <code dir="ltr">home.tsx</code> (57.6٪ أسطر، 46.3٪ فروع) و<code dir="ltr">progress.tsx</code> (50٪ فروع). لا يوجد حد أدنى للتغطية في CI.</td><td>اختبارات للتوصيات على الرئيسية، ثم حد أدنى معقول في CI.</td></tr><tr><td>N11</td><td><span class="sev sL">منخفضة</span></td><td><span class="tag tF">حقيقة</span></td><td>لا توجد <code dir="ltr">ErrorBoundary</code> على مستوى المسارات: خطأ تصيير غير متوقع يُسقط الشاشة بدل عرض رسالة. (حالات التحميل/الخطأ للبيانات موجودة وجيدة.)</td><td>تصدير <code dir="ltr">ErrorBoundary</code> من المسار الجذر.</td></tr><tr><td>N12</td><td><span class="sev sL">منخفضة</span></td><td><span class="tag tF">حقيقة</span></td><td>دورة حياة البيانات: لا مسح لبيانات التعلّم عند تسجيل الخروج (مقصود)، ولا ترحيل بين إصدارات المخطط (المفاتيح <code dir="ltr">.v1</code> فقط)، والمحاولات محدودة بـ 500 لكل لغة. لا مشكلة اليوم، لكن أول تغيير في الشكل المخزَّن سيحتاج استراتيجية ترحيل.</td><td>تصميم الترحيل عند أول تغيير للمخطط.</td></tr></tbody></table></div></section>
+
+<section id="ar-tests"><h2>6. الاختبارات وبوابات الجودة</h2>
+<p><span class="tag tF">حقيقة</span> 457 اختباراً في 28 ملفاً، كلها ناجحة، بتغطية أسطر 91.6٪ وفروع 82.8٪ ودوال 89.0٪. الاختبارات تعمل بتوقيت الرياض (UTC+3) عمداً لكشف أخطاء التوقيت.</p>
+<svg class="chart" viewBox="0 0 520 196" role="img" aria-label="Coverage per folder" direction="ltr"><text x="0" y="18" class="lbl">components</text><rect x="150" y="5" width="300" height="8" rx="3" class="bg"/><rect x="150" y="5" width="287.4" height="8" rx="3" class="b1"/><rect x="150" y="15" width="300" height="8" rx="3" class="bg"/><rect x="150" y="15" width="265.8" height="8" rx="3" class="b3"/><text x="456" y="13" class="val">96%</text><text x="456" y="23" class="val">89%</text><text x="0" y="42" class="lbl">services/auth</text><rect x="150" y="29" width="300" height="8" rx="3" class="bg"/><rect x="150" y="29" width="300.0" height="8" rx="3" class="b1"/><rect x="150" y="39" width="300" height="8" rx="3" class="bg"/><rect x="150" y="39" width="292.8" height="8" rx="3" class="b3"/><text x="456" y="37" class="val">100%</text><text x="456" y="47" class="val">98%</text><text x="0" y="66" class="lbl">services/repositories</text><rect x="150" y="53" width="300" height="8" rx="3" class="bg"/><rect x="150" y="53" width="285.0" height="8" rx="3" class="b1"/><rect x="150" y="63" width="300" height="8" rx="3" class="bg"/><rect x="150" y="63" width="273.3" height="8" rx="3" class="b3"/><text x="456" y="61" class="val">95%</text><text x="456" y="71" class="val">91%</text><text x="0" y="90" class="lbl">store</text><rect x="150" y="77" width="300" height="8" rx="3" class="bg"/><rect x="150" y="77" width="293.1" height="8" rx="3" class="b1"/><rect x="150" y="87" width="300" height="8" rx="3" class="bg"/><rect x="150" y="87" width="270.0" height="8" rx="3" class="b3"/><text x="456" y="85" class="val">98%</text><text x="456" y="95" class="val">90%</text><text x="0" y="114" class="lbl">utils</text><rect x="150" y="101" width="300" height="8" rx="3" class="bg"/><rect x="150" y="101" width="284.1" height="8" rx="3" class="b1"/><rect x="150" y="111" width="300" height="8" rx="3" class="bg"/><rect x="150" y="111" width="270.9" height="8" rx="3" class="b3"/><text x="456" y="109" class="val">95%</text><text x="456" y="119" class="val">90%</text><text x="0" y="138" class="lbl">hooks</text><rect x="150" y="125" width="300" height="8" rx="3" class="bg"/><rect x="150" y="125" width="300.0" height="8" rx="3" class="b1"/><rect x="150" y="135" width="300" height="8" rx="3" class="bg"/><rect x="150" y="135" width="241.8" height="8" rx="3" class="b3"/><text x="456" y="133" class="val">100%</text><text x="456" y="143" class="val">81%</text><text x="0" y="162" class="lbl">app (screens)</text><rect x="150" y="149" width="300" height="8" rx="3" class="bg"/><rect x="150" y="149" width="244.5" height="8" rx="3" class="b1"/><rect x="150" y="159" width="300" height="8" rx="3" class="bg"/><rect x="150" y="159" width="197.7" height="8" rx="3" class="b3"/><text x="456" y="157" class="val">82%</text><text x="456" y="167" class="val">66%</text><rect x="150" y="179" width="10" height="10" rx="2" class="b1"/><text x="164" y="188" class="val">lines</text><rect x="220" y="179" width="10" height="10" rx="2" class="b3"/><text x="234" y="188" class="val">branches</text></svg>
+<p class="note">الشريط الأعلى لكل مجلد = الأسطر، والأدنى = الفروع.</p>
+<h3>الملفات الأقل تغطية</h3>
+<div class="tw"><table><thead><tr><th>الملف</th><th>أسطر ٪</th><th>فروع ٪</th></tr></thead><tbody><tr><td><code dir="ltr">app/(tabs)/home.tsx</code></td><td>57.6</td><td>46.3</td></tr><tr><td><code dir="ltr">app/setup-languages.tsx</code></td><td>73.8</td><td>70.0</td></tr><tr><td><code dir="ltr">utils/content.ts</code></td><td>80.0</td><td>81.6</td></tr><tr><td><code dir="ltr">app/(tabs)/progress.tsx</code></td><td>83.3</td><td>50.0</td></tr><tr><td><code dir="ltr">app/settings.tsx</code></td><td>88.6</td><td>78.6</td></tr><tr><td><code dir="ltr">app/(tabs)/review.tsx</code></td><td>88.9</td><td>70.4</td></tr></tbody></table></div>
+<ul>
+<li><span class="tag tF">حقيقة</span> <b>CI</b> (<code dir="ltr">.github/workflows/ci.yml</code>): تثبيت من القفل، فحص أنواع، lint، اختبارات، وتصدير حزمة Android. صلاحيات قراءة فقط، ومهلة 20 دقيقة، بلا أسرار. <b>لا يفحص:</b> حداً أدنى للتغطية، ثغرات الاعتماديات، <code dir="ltr">expo-doctor</code>.</li>
+<li><span class="tag tF">حقيقة</span> مكونات الواجهة الأساسية (<code dir="ltr">ui/*</code>) والمخازن لها ملفات اختبار قليلة لكنها مغطاة بشكل غير مباشر عبر اختبارات الشاشات (تغطية المكونات 95.8٪).</li>
+<li><span class="tag tA">افتراض</span> اختبارات التكامل بطيئة على الأجهزة المثقلة (ذُكر في تقرير سابق)، ولم أقِس ذلك هنا إلا بإجمالي ~32 ثانية.</li>
+<li><span class="tag tF">حقيقة</span> <b>غير مغطى إطلاقاً:</b> السلوك على جهاز حقيقي (الاتجاه، لوحة المفاتيح، زر الرجوع، الأداء).</li>
+</ul></section>
+
+<section id="ar-data"><h2>7. البيانات والمحتوى</h2>
+<h3>نموذج البيانات والتخزين</h3>
+<div class="tw"><table><thead><tr><th>مفتاح AsyncStorage</th><th>المحتوى</th><th>التحقق</th></tr></thead><tbody><tr><td><code dir="ltr">lughati.preferences.v1</code></td><td>السمة، لغة الواجهة، تم عرض التعريف</td><td>تُنقّى القيم غير المعروفة</td></tr><tr><td><code dir="ltr">lughati.session.v1</code></td><td>المستخدم + وقت الإصدار (بلا كلمة مرور)</td><td>تُرفض الجلسة غير المتسقة</td></tr><tr><td><code dir="ltr">lughati.learning-progress.v1</code></td><td>التقدّم والخطط والمحاولات والنشاط اليومي</td><td>كل سجل يُتحقق منه منفرداً</td></tr><tr><td><code dir="ltr">lughati.vocab-reviews.v1</code></td><td>حالات المراجعة (الخطوة، المواعيد، العدادات)</td><td>نفس القاعدة</td></tr><tr><td><code dir="ltr">lughati.learning-profile.v1</code></td><td>لغتي ولغة التعلّم لكل حساب</td><td>تُرفض اللغتان المتطابقتان</td></tr></tbody></table></div>
+<p><span class="tag tF">حقيقة</span> الحدود: المحاولات 500 لكل لغة، والأعداد مقيّدة بسقف، والتواريخ أيام محلية (<code dir="ltr">YYYY-MM-DD</code>). N12 عن الترحيل.</p>
+<h3>المحتوى التعليمي</h3>
+<ul>
+<li><span class="tag tF">حقيقة</span> 6 لغات × 10 دروس × 6 كلمات = 360 كلمة فقط، مستوى A1 فقط. لا كلمات مكررة داخل أي لغة (فحصتُ: 60 فريدة من 60 في كل لغة).</li>
+<li><span class="tag tF">حقيقة</span> كل كلمة تأتي بمعنى واحد لكل لغة أخرى لأن القوائم متطابقة الفهرس. هذا أبسط تصميم ممكن ويجعل كل زوج لغات يعمل بلا عمل إضافي، لكنه يمنع التعامل مع الكلمات متعددة المعاني (N4).</li>
+<li><span class="tag tO">رأي</span> حجم المحتوى يكفي لمراجعة تجريبية فقط (تقدير: نحو ساعة تعلّم لكل لغة)، وهو بعيد عن منتج يُستخدم يومياً. توسيع اللغات قبل مراجعة الموجود أسوأ استثمار حالياً.</li>
+<li><span class="tag tA">افتراض</span> لا أعرف دقة الترجمات خارج العربية والإنجليزية والألمانية بشكل مؤكد؛ الأرجح أنها صحيحة في مستوى A1 لكنها لم تُراجع بشرياً.</li>
+</ul></section>
+
+<section id="ar-sec"><h2>8. الأمان والخصوصية</h2>
+<ul>
+<li><span class="tag tF">حقيقة</span> <b>المصادقة وهمية:</b> أي بريد صحيح وكلمة مرور من 8 أحرف يدخل، ومن يكتب بريد غيره يرى بياناته المحلية. واضح للمستخدم عبر تنبيه «نسخة تجريبية». لا يمثّل ثغرة اليوم لأن لا بيانات خارج الجهاز.</li>
+<li><span class="tag tF">حقيقة</span> لا شيء يغادر الجهاز، ولا أسرار في المستودع، وكلمات المرور لا تُخزَّن أبداً (فقط المستخدم ووقت الجلسة).</li>
+<li><span class="tag tF">حقيقة</span> <code dir="ltr">npm audit --omit=dev</code>: 61 نتيجة (16 متوسطة، 45 عالية، 0 حرجة). تعود إلى 5 تحذيرات جذرية فقط؛ وبحسب تحليل سابق موثّق في <code dir="ltr">docs/audit</code> واحد منها فقط (<code dir="ltr">decode-uri-component</code>) يصل إلى التطبيق المشحون، وأثره إيقاف مؤقت عند رابط عميق خبيث. لم أعد التحقق من ذلك التحليل.</li>
+<li><span class="tag tO">رأي</span> <b>عند وجود خادم حقيقي:</b> الرموز تُخزَّن في تخزين آمن لا في AsyncStorage، وحذف الحساب والبيانات، وسياسة خصوصية، وتشفير النقل. هذه ليست مطلوبة الآن.</li>
+</ul></section>
+
+<section id="ar-a11y"><h2>9. الوصول واللغات (i18n / RTL)</h2>
+<ul>
+<li><span class="tag tF">حقيقة</span> 40 وسم <code dir="ltr">accessibilityLabel</code> و25 دوراً، وأهداف لمس 48 نقطة، واختبارات آلية لتباين الألوان (4.5:1 للنص و3:1 للحدود) في الوضعين الفاتح والداكن.</li>
+<li><span class="tag tF">حقيقة</span> خصائص منطقية (<code dir="ltr">start/end</code>)، وعزل النص ثنائي الاتجاه، وجمع عربي كامل بست صيغ مع polyfill لـ Hermes، وأيقونات اتجاهية. مفاتيح الترجمة متطابقة بين العربية والإنجليزية (اختبار آلي).</li>
+<li><span class="tag tF">حقيقة</span> <b>مفتوح:</b> نطق الكلمات الأجنبية بصوت لغة الواجهة، و<code dir="ltr">supportsRTL</code> في الإعداد، واسم التطبيق في المشغّل غير مترجم، وتغيير الاتجاه يدوياً في Expo Go غير مؤكد (يعيد Expo Go ضبطه حسب التوثيق الداخلي).</li>
+<li><span class="tag tA">افتراض</span> <b>لم يُتحقق منه على جهاز:</b> سلوك الاتجاه بعد إعادة التشغيل، تكبير الخط، لوحة المفاتيح، قارئ الشاشة TalkBack.</li>
+</ul></section>
+
+<section id="ar-files"><h2>10. الملفات والمستودع</h2>
+<pre class="diagram" dir="ltr">.github/workflows/ci.yml   CI (typecheck · lint · test · export)
+assets/                    980 KB: icons, splash (+ Expo template icon.json)
+docs/                      PHASE_1_AUDIT · INTEGRATION_AGENT2 · audit/DEPENDENCY_AUDIT (+ raw JSON)
+src/app (1604 lines)       routes: (auth) onboarding/login/register · (app) tabs + settings + lesson
+src/components · hooks · store · services · utils · mocks · i18n · theme · types
+jest.setup.ts · jest.global-setup.js (TZ = Asia/Riyadh)
+README · CLAUDE.md · AGENTS.md · TESTING.md · plan.md</pre>
+<ul>
+<li><span class="tag tF">حقيقة</span> <code dir="ltr">.gitignore</code> سليم (لا أسرار ولا مجلدات أصلية مولّدة). لا ملفات كبيرة مرفوعة (<code dir="ltr">.git</code> = 5.4 MB).</li>
+<li><span class="tag tF">حقيقة</span> <code dir="ltr">AGENTS.md</code> قالب Expo عام (يذكر bun وEAS غير المستخدمين). <code dir="ltr">docs/INTEGRATION_AGENT2.md</code> أثر من تقسيم العمل بين وكلاء، ومرجعه مفيد لكنه ليس توثيق منتج.</li>
+<li><span class="tag tF">حقيقة</span> 10 فروع بعيدة (<code dir="ltr">claude/*</code> و<code dir="ltr">fix/*</code>)؛ معظمها مدموج أو قديم. 3 أسماء مؤلفين في السجل (Claude، RASHID778، Rashid)؛ الأرجح أن الأخيرين الشخص نفسه (افتراض).</li>
+</ul></section>
+
+<section id="ar-ready"><h2>11. الجاهزية للمنتج</h2>
+<ul>
+<li><span class="tag tF">حقيقة</span> <b>موانع النشر:</b> N5 (معرّفات الحزمة، EAS، الخصوصية، تتبع الأعطال)، ومصادقة وخادم حقيقيان، ومحتوى مراجَع.</li>
+<li><span class="tag tF">حقيقة</span> <b>غائب عن التجربة:</b> الصوت والنطق، الهدف اليومي القابل للتعديل (N1)، المستوى A2 فما فوق، التذكيرات، الإنجازات.</li>
+<li><span class="tag tO">رأي</span> <b>السوق:</b> المنافسة قوية (تطبيقات تعلّم لغات كبيرة تدعم العربية). التمايز الممكن هو جودة المحتوى العربي والتخصص (مثلاً العرب الذين يتعلمون الألمانية). لا أعرف أرقام الطلب الفعلية ولم أبحث فيها؛ ما سبق تقدير.</li>
+<li><span class="tag tO">رأي</span> <b>الجدوى:</b> الصعوبة التقنية متوسطة وقد أُنجزت بإتقان؛ الصعوبة الحقيقية في المحتوى والتوزيع وليست في الكود.</li>
+</ul></section>
+
+<section id="ar-road"><h2>12. خارطة الطريق المقترحة</h2>
+<div class="tw"><table class="wide"><thead><tr><th>المرحلة</th><th>العمل</th><th>الجهد</th><th>الخطر المُزال</th></tr></thead><tbody><tr><td>الآن (1–2 يوم)</td><td>اختبار على جهاز حقيقي بحسب TESTING.md</td><td>S</td><td>أخطاء لا تكشفها الاختبارات الآلية</td></tr><tr><td>الآن</td><td>حماية <code dir="ltr">main</code>، حذف الفروع المدموجة</td><td>S</td><td>انكسار CI على main (N6)</td></tr><tr><td>الآن</td><td>اختيار الهدف اليومي (N1) ودمج البطاقات المكررة (N9)</td><td>S</td><td>ميزة ناقصة وواجهة مزدحمة</td></tr><tr><td>خلال 2–4 أسابيع</td><td>مراجعة لغوية بشرية وتوحيد الرسمية (N3، N4)</td><td>M</td><td>محتوى خاطئ يهدم الثقة</td></tr><tr><td>خلال 2–4 أسابيع</td><td>نقل القواعد من <code dir="ltr">mock.ts</code> إلى <code dir="ltr">utils/</code> (N2) وحد أدنى للتغطية في CI</td><td>M</td><td>إعادة كتابة مكلفة مع الخادم</td></tr><tr><td>خلال 2–4 أسابيع</td><td>ErrorBoundary (N11) ودمج التوثيق (N8)</td><td>S</td><td>سقوط الشاشات وتشتت التوثيق</td></tr><tr><td>لاحقاً</td><td>الصوت (نطق) ثم A2</td><td>L</td><td>قيمة تعليمية أعلى</td></tr><tr><td>لاحقاً</td><td>خادم ومصادقة حقيقيان، ثم إعداد النشر (N5)</td><td>L</td><td>الجاهزية للمتجر</td></tr></tbody></table></div>
+<h3>لا تبنِ الآن (تحذير من الهندسة الزائدة)</h3>
+<ul><li>الذكاء الاصطناعي الحقيقي والإنجازات: لا يوجد محتوى ولا مستخدمون يبرران ذلك.</li><li>لغات إضافية: راجِع الست الحالية أولاً.</li><li>طبقات تجريد جديدة فوق المفاصل الأربعة.</li></ul></section>
+
+<section id="ar-method"><h2>13. الملحق: المنهجية والحدود</h2>
+<ul>
+<li>الأوامر المُشغَّلة: <code dir="ltr">jest --coverage</code> (28 مجموعة، 457 اختباراً)، <code dir="ltr">tsc --noEmit</code>، <code dir="ltr">expo lint --max-warnings 0</code>، <code dir="ltr">expo export --platform android</code>، <code dir="ltr">npm outdated</code>، <code dir="ltr">npm audit --omit=dev</code>، وبحث نصي (<code dir="ltr">grep</code>) وعدّ أسطر وقراءة الملفات الرئيسية.</li>
+<li><b>لم أقِس:</b> السلوك على جهاز، الأداء الفعلي (زمن البدء والذاكرة)، <code dir="ltr">expo-doctor</code> (يحتاج شبكة)، حجم التثبيت النهائي، المستخدمين الحقيقيين.</li>
+<li><b>قرأتُ كاملاً:</b> الرئيسية والتقدّم والإعدادات والدرس والمراجعة والمخازن والمصادقة الوهمية ومعظم الأدوات النقية. <b>لم أقرأ سطراً بسطر:</b> مكونات <code dir="ltr">ui/*</code> وملفات الاختبار نفسها.</li>
+<li>كل رقم في هذا التقرير من مخرجات أوامر هذه الجلسة، وما عدا ذلك موسوم كافتراض أو رأي.</li>
+</ul></section>
+</div>
+<div class="lang" id="de" lang="de" dir="ltr">
+<div class="hero"><h1>Umfassende Prüfung des Projekts Lughati</h1><p>Bericht zu Code, Technik, Dateien und Daten</p><p class="note">Erstellt am 17. Oktober 2026 · Branch main bei 06c9480</p></div>
+<h1 class="l">Deutsch</h1>
+
+<section id="de-verdict"><h2>1. Gesamturteil</h2>
+<p class="lead">Ein <b>technisch sauberes, aber noch kein fertiges Produkt</b>, sondern eine Demo. Der Code ist ordentlich und gut getestet (Zeilenabdeckung 91,6 %), aber die Anmeldung ist simuliert, der Inhalt umfasst 60 Wörter pro Sprache ohne menschliche Prüfung, und nichts Neues wurde auf einem echten Gerät ausprobiert. <span class="tag tO">Meinung</span></p>
+<div class="scores"><div class="score good"><div class="n">4.0<small>/5</small></div><div class="t">Codequalität</div><div class="bar"><i style="width:80%"></i></div></div><div class="score good"><div class="n">4.2<small>/5</small></div><div class="t">Tests</div><div class="bar"><i style="width:84%"></i></div></div><div class="score good"><div class="n">3.8<small>/5</small></div><div class="t">Architektur</div><div class="bar"><i style="width:76%"></i></div></div><div class="score bad"><div class="n">2.0<small>/5</small></div><div class="t">Sicherheit &amp; Datenschutz</div><div class="bar"><i style="width:40%"></i></div></div><div class="score mid"><div class="n">3.5<small>/5</small></div><div class="t">Barrierefreiheit &amp; Sprachen</div><div class="bar"><i style="width:70%"></i></div></div><div class="score bad"><div class="n">2.0<small>/5</small></div><div class="t">Inhalt</div><div class="bar"><i style="width:40%"></i></div></div><div class="score bad"><div class="n">1.5<small>/5</small></div><div class="t">Veröffentlichungsreife</div><div class="bar"><i style="width:30%"></i></div></div><div class="score mid"><div class="n">3.0<small>/5</small></div><div class="t">Prozesse</div><div class="bar"><i style="width:60%"></i></div></div></div>
+<p class="note">Die Noten sind meine Einschätzung auf Basis der Belege unten, keine automatische Messung. „Sicherheit“ und „Reife“ sind niedrig, weil die App simulierte Konten hat und nicht veröffentlichungsfähig ist. Das ist in dieser Phase gewollt und kein Programmierfehler.</p>
+<h3>Die 5 wichtigsten Punkte zuerst</h3>
+<ol>
+<li><b>Test auf einem echten Android-Gerät</b> (RTL/LTR, Sprachwahl, Wiederholung, Nachfrage beim Verlassen des Quiz). Das meiste davon lief noch nie auf einem Handy.</li>
+<li><b>Sprachliche Prüfung durch Menschen</b> aller 360 Wörter und einheitliches Register (N3, N4).</li>
+<li><b>Branch-Schutz für main</b> mit PR und grünem <code dir="ltr">verify</code> (N6).</li>
+<li><b>Tagesziel auswählbar machen</b> (N1): Die Funktion existiert, aber kein Screen nutzt sie.</li>
+<li><b>Geschäftsregeln aus dem Mock-Repository lösen</b>, bevor es ein echtes Backend gibt (N2).</li>
+</ol></section>
+
+<section id="de-numbers"><h2>2. Das Projekt in Zahlen</h2>
+<p><span class="tag tF">Fakt</span> Alles mit Befehlen in dieser Session gemessen.</p>
+<div class="kpis">
+<div><b><bdi>5,964</bdi></b><span>Zeilen Produktionscode</span></div>
+<div><b><bdi>3,558</bdi></b><span>Zeilen Tests (28 Dateien)</span></div>
+<div><b><bdi>457</bdi></b><span>Tests bestanden (~32 s)</span></div>
+<div><b><bdi>91,6 %</bdi></b><span>Zeilenabdeckung</span></div>
+<div><b><bdi>82,8 %</bdi></b><span>Zweigabdeckung</span></div>
+<div><b><bdi>3,2 MB</bdi></b><span>Android-Bundle (Hermes)</span></div>
+<div><b><bdi>223</bdi></b><span>Übersetzungsschlüssel je Sprache</span></div>
+<div><b><bdi>360</bdi></b><span>Wörter (60 × 6 Sprachen)</span></div>
+<div><b><bdi>67</bdi></b><span>Commits (80 über alle Branches)</span></div>
+</div>
+<h3>Zeilen pro Ordner</h3><svg class="chart" viewBox="0 0 520 292" role="img" aria-label="Lines per folder" direction="ltr"><text x="0" y="17" class="lbl">app</text><rect x="110" y="6" width="237.5" height="14" rx="3" class="b1"/><rect x="347.5" y="6" width="0.0" height="14" rx="3" class="b2"/><text x="353.5" y="17" class="val">1604 + 0</text><text x="0" y="39" class="lbl">services</text><rect x="110" y="28" width="162.1" height="14" rx="3" class="b1"/><rect x="272.1" y="28" width="147.9" height="14" rx="3" class="b2"/><text x="426.0" y="39" class="val">1095 + 999</text><text x="0" y="61" class="lbl">components</text><rect x="110" y="50" width="139.6" height="14" rx="3" class="b1"/><rect x="249.6" y="50" width="58.8" height="14" rx="3" class="b2"/><text x="314.4" y="61" class="val">943 + 397</text><text x="0" y="83" class="lbl">utils</text><rect x="110" y="72" width="98.9" height="14" rx="3" class="b1"/><rect x="208.9" y="72" width="95.5" height="14" rx="3" class="b2"/><text x="310.4" y="83" class="val">668 + 645</text><text x="0" y="105" class="lbl">i18n</text><rect x="110" y="94" width="91.2" height="14" rx="3" class="b1"/><rect x="201.2" y="94" width="13.2" height="14" rx="3" class="b2"/><text x="220.4" y="105" class="val">616 + 89</text><text x="0" y="127" class="lbl">mocks</text><rect x="110" y="116" width="43.4" height="14" rx="3" class="b1"/><rect x="153.4" y="116" width="10.4" height="14" rx="3" class="b2"/><text x="169.7" y="127" class="val">293 + 70</text><text x="0" y="149" class="lbl">types</text><rect x="110" y="138" width="33.5" height="14" rx="3" class="b1"/><rect x="143.5" y="138" width="0.0" height="14" rx="3" class="b2"/><text x="149.5" y="149" class="val">226 + 0</text><text x="0" y="171" class="lbl">hooks</text><rect x="110" y="160" width="26.8" height="14" rx="3" class="b1"/><rect x="136.8" y="160" width="17.6" height="14" rx="3" class="b2"/><text x="160.4" y="171" class="val">181 + 119</text><text x="0" y="193" class="lbl">store</text><rect x="110" y="182" width="23.7" height="14" rx="3" class="b1"/><rect x="133.7" y="182" width="20.1" height="14" rx="3" class="b2"/><text x="159.8" y="193" class="val">160 + 136</text><text x="0" y="215" class="lbl">theme</text><rect x="110" y="204" width="21.2" height="14" rx="3" class="b1"/><rect x="131.2" y="204" width="11.1" height="14" rx="3" class="b2"/><text x="148.3" y="215" class="val">143 + 75</text><text x="0" y="237" class="lbl">navigation</text><rect x="110" y="226" width="3.7" height="14" rx="3" class="b1"/><rect x="113.7" y="226" width="152.2" height="14" rx="3" class="b2"/><text x="271.9" y="237" class="val">25 + 1028</text><text x="0" y="259" class="lbl">constants</text><rect x="110" y="248" width="1.5" height="14" rx="3" class="b1"/><rect x="111.5" y="248" width="0.0" height="14" rx="3" class="b2"/><text x="117.5" y="259" class="val">10 + 0</text><rect x="110" y="275" width="10" height="10" rx="2" class="b1"/><text x="124" y="284" class="val">source</text><rect x="190" y="275" width="10" height="10" rx="2" class="b2"/><text x="204" y="284" class="val">tests</text></svg>
+<p class="note"><code dir="ltr">navigation</code> enthält nur Integrationstests (1028 Zeilen); alle anderen Ordner Produktionscode samt Tests.</p></section>
+
+<section id="de-stack"><h2>3. Technik</h2>
+<div class="tw"><table class="wide"><thead><tr><th>Technik</th><th>Version</th><th>Rolle</th><th>Hinweis</th></tr></thead><tbody><tr><td>Expo SDK</td><td>57.0.29</td><td>Build- und Laufzeitplattform (Expo Go)</td><td>57.0.30 verfügbar; SDK 58 existiert. Das Bleiben auf 57 hängt an der Expo-Go-Version auf dem Handy (Annahme)</td></tr><tr><td>React Native / React</td><td>0.86.3 / 19.2.3</td><td>Oberfläche</td><td>React Compiler aktiv</td></tr><tr><td>TypeScript</td><td>6.0.3 (strict)</td><td>Typen</td><td><code dir="ltr">jest</code>-Typen werden manuell deklariert</td></tr><tr><td>Expo Router</td><td>57.0.27</td><td>Navigation (Dateien + typisierte Routen)</td><td><code dir="ltr">Stack.Protected</code> für den Routenschutz</td></tr><tr><td>zustand</td><td>5.0.15</td><td>Sitzungs- und Einstellungszustand</td><td>kleine Stores, Einstellungen persistent</td></tr><tr><td>i18next / react-i18next</td><td>26.4.4 / 17.0.16</td><td>Übersetzung (ar, en)</td><td>Arabische Plurale mit sechs Formen, Polyfill für Hermes</td></tr><tr><td>AsyncStorage</td><td>2.2.0</td><td>lokaler Speicher</td><td>hinter der Schnittstelle <code dir="ltr">KeyValueStorage</code></td></tr><tr><td>Jest / RNTL</td><td>29.7 / 13.3.3</td><td>Tests</td><td>RNTL festgepinnt, weil 14 React 19.3 braucht</td></tr><tr><td>ESLint</td><td>9.39.5</td><td>Codeprüfung</td><td><code dir="ltr">expo lint</code> ohne Warnungen</td></tr></tbody></table></div>
+<p><span class="tag tF">Fakt</span> <code dir="ltr">npm outdated</code>: Für die meisten Pakete gibt es neuere Versionen, meist große Sprünge (SDK 58, RN 0.88, AsyncStorage 3, TypeScript 7). Ein Upgrade ist nicht dringend, SDK 57 wird aber irgendwann veralten.</p></section>
+
+<section id="de-arch"><h2>4. Architektur</h2>
+<pre class="diagram" dir="ltr">routes (src/app)          thin screens, no logic
+   │
+hooks / store             useCurrentLearning · zustand (auth, learning, prefs)
+   │
+services (4 seams)        auth · repositories · ai · storage     ← swapped via register*()
+   │
+mocks + AsyncStorage      src/mocks/*  ·  savedData.ts (validates every stored record)
+   ▲
+utils (pure rules)        progression · srs · streaks · recommendations · exercises · day</pre>
+<ul>
+<li><span class="tag tF">Fakt</span> <b>Stärken:</b> vier austauschbare Nahtstellen; Screens importieren keine Mock-Implementierung (geprüft: null Importe von <code dir="ltr">mocks</code> aus <code dir="ltr">app</code>, <code dir="ltr">components</code>, <code dir="ltr">hooks</code>, <code dir="ltr">store</code>). Die reinen Regeln (Fortschritt, Wiederholung, Streak, Empfehlungen) sind leicht testbar. Jedes gelesene Speicher-Objekt wird geprüft, defekte Einträge werden einzeln verworfen.</li>
+<li><span class="tag tF">Fakt</span> <b>Ablauf einer Lektion:</b> Quiz → <code dir="ltr">completeLesson</code> → (Fortschritt + Versuch + Tagesaktivität + Review-Zustände bei Bestehen) → erst speichern, dann veröffentlichen → Streak und Empfehlungen. Schreibvorgänge sind serialisiert (<code dir="ltr">exclusive</code>).</li>
+<li><span class="tag tF">Fakt</span> <b>Schwächen:</b> N2 oben; <code dir="ltr">mock.ts</code> ist die größte Datei (355 Zeilen). KI-Dienst und Erfolge sind mit keinem Screen verbunden (N7).</li>
+<li><span class="tag tO">Meinung</span> Die Architektur passt zur aktuellen Größe. Warnung vor Overengineering: keine neuen Schichten, bevor es ein echtes Backend gibt.</li>
+</ul></section>
+
+<section id="de-code"><h2>5. Code-Prüfung</h2>
+<div class="tw"><table><thead><tr><th>Messgröße</th><th>Wert</th><th>Bewertung</th></tr></thead><tbody><tr><td><code dir="ltr">any</code> im Produktionscode</td><td>1</td><td>sehr gut</td></tr><tr><td><code dir="ltr">console.*</code></td><td>0</td><td>sehr gut</td></tr><tr><td>TODO / FIXME</td><td>0</td><td>sehr gut</td></tr><tr><td><code dir="ltr">eslint-disable</code></td><td>4 (2 in Produktion, beide begründet)</td><td>gut</td></tr><tr><td>unsichere Casts (<code dir="ltr">as never/unknown</code>) in Produktion</td><td>0</td><td>sehr gut</td></tr><tr><td>größte Datei</td><td><code dir="ltr">repositories/mock.ts</code> 355 Zeilen</td><td>akzeptabel, siehe N2</td></tr><tr><td>Schichten: Screen importiert Mock-Implementierung</td><td>0 Fälle</td><td>sehr gut</td></tr><tr><td><code dir="ltr">tsc --noEmit</code> und <code dir="ltr">expo lint --max-warnings 0</code></td><td>beide fehlerfrei</td><td>sehr gut</td></tr></tbody></table></div>
+<p><span class="tag tF">Fakt</span> Geheimnisse: keine Schlüssel oder Tokens im Code (Textsuche), keine <code dir="ltr">.env</code>-Dateien. <span class="tag tO">Meinung</span> Der Code ist lesbar und konsistent, Kommentare erklären das „Warum“. Die schwächste Stelle ist nicht Fehleranfälligkeit, sondern mögliches Aufblähen von <code dir="ltr">mock.ts</code> und ungenutzte Entitäten.</p>
+<h3>Befunde dieser Prüfung (nach Priorität)</h3>
+<div class="tw"><table class="wide"><thead><tr><th>#</th><th>Priorität</th><th>Art</th><th>Befund</th><th>Vorschlag</th></tr></thead><tbody><tr><td>N1</td><td><span class="sev sH">Hoch</span></td><td><span class="tag tF">Fakt</span></td><td>Das Tagesziel ist fest auf 15 Minuten: <code dir="ltr">plans.setDailyGoal</code> existiert und ist getestet, aber kein Screen ruft sie auf. Nutzer können ihr Ziel nicht ändern.</td><td>Zielauswahl in den Einstellungen (5/10/15/30). Kleiner Aufwand.</td></tr><tr><td>N2</td><td><span class="sev sM">Mittel</span></td><td><span class="tag tF">Fakt</span></td><td>Alle Geschäftsregeln (Lektionsabschluss, Review-Zustände, Tagesaktivität, Streak) leben in <code dir="ltr">createMockRepositories</code>. Mit einem echten Backend müssen sie dort neu geschrieben werden und können abweichen.</td><td>Regeln als reine Funktionen nach <code dir="ltr">utils/</code> (wie <code dir="ltr">applyLessonCompletion</code>), das Repository nur noch als Speicherschicht.</td></tr><tr><td>N3</td><td><span class="sev sM">Mittel</span></td><td><span class="tag tF">Fakt</span></td><td>Inhalt: nur 60 Wörter pro Sprache (6 × 10 Lektionen), jedes Wort hat durch die Index-Zuordnung genau eine Bedeutung. Keine Beispielsätze (<code dir="ltr">exampleSentence</code> ist in allen Daten leer).</td><td>Sprachliche Prüfung durch Menschen vor jeder Erweiterung, dann Beispiele und Hinweise für mehrdeutige Wörter.</td></tr><tr><td>N4</td><td><span class="sev sM">Mittel</span></td><td><span class="tag tO">Meinung</span></td><td>Das Register ist innerhalb einer Sprache uneinheitlich: Türkisch „Hoş geldiniz“ (formell) neben „Adın ne?“ (informell), Französisch „S'il vous plaît“ neben „Comment tu t'appelles ?“. „billete“ ist Spanien-Spanisch („boleto“ in Lateinamerika), „Bitte“ heißt „bitte“ und „gern geschehen“. Das Urteil ist sprachlich und nicht von Fachleuten geprüft.</td><td>Produktentscheidung: ein einheitliches Register und eine Zielvariante des Spanischen.</td></tr><tr><td>N5</td><td><span class="sev sM">Mittel</span></td><td><span class="tag tF">Fakt</span></td><td>Nicht veröffentlichungsreif: kein <code dir="ltr">android.package</code>, kein <code dir="ltr">ios.bundleIdentifier</code>, kein <code dir="ltr">versionCode</code>, keine EAS-Konfiguration, keine Datenschutzerklärung, kein Crash-Reporting. Die App läuft nur in Expo Go.</td><td>Wird erst bei der Veröffentlichungsentscheidung angegangen, nicht vorher.</td></tr><tr><td>N6</td><td><span class="sev sM">Mittel</span></td><td><span class="tag tF">Fakt</span></td><td><code dir="ltr">main</code> ist ungeschützt und mehrere Sessions pushen direkt darauf: CI war dort am 15. Oktober zweimal rot (Läufe 10 und 11), sichtbar erst nach dem Push. Es gibt 10 Remote-Branches, einige veraltet.</td><td>Branch-Schutz (PR + grünes <code dir="ltr">verify</code>) aktivieren, gemergte Branches löschen.</td></tr><tr><td>N7</td><td><span class="sev sL">Niedrig</span></td><td><span class="tag tF">Fakt</span></td><td>Vorzeitige Verallgemeinerung: <code dir="ltr">Achievement</code> und die Übungstypen <code dir="ltr">listen</code>/<code dir="ltr">match</code> werden nirgends benutzt, <code dir="ltr">services/ai</code> von keinem Screen, <code dir="ltr">activity.getRecent</code> ebenfalls nicht. Toter Code, der auf ein Feature wartet.</td><td>Klein halten; nichts darauf aufbauen, bevor es ein echtes Feature gibt.</td></tr><tr><td>N8</td><td><span class="sev sL">Niedrig</span></td><td><span class="tag tF">Fakt</span></td><td>Die Dokumentation verteilt sich auf 8 Dateien (826 Zeilen) mit Überschneidungen: <code dir="ltr">README</code>, <code dir="ltr">CLAUDE.md</code>, <code dir="ltr">AGENTS.md</code> (generische Expo-Vorlage), <code dir="ltr">TESTING.md</code>, <code dir="ltr">plan.md</code>, <code dir="ltr">docs/PHASE_1_AUDIT.md</code>, <code dir="ltr">docs/INTEGRATION_AGENT2.md</code>, <code dir="ltr">docs/audit/*</code>. Der Projektstatus steht an mehreren Stellen und veraltet.</td><td>Eine Quelle für den Status, abgeschlossene Phasenberichte archivieren.</td></tr><tr><td>N9</td><td><span class="sev sL">Niedrig</span></td><td><span class="tag tF">Fakt</span></td><td>Doppelungen in der Oberfläche: Home zeigt zwei „Weiterlernen“-Karten, wenn die Empfehlung „Lektion fortsetzen“ ist; der Fortschritts-Screen zeigt XP, Wörter und Minuten zweimal (Text und Kacheln) sowie zwei Buttons mit gleichem Titel. Das Designurteil ist meine Meinung.</td><td>Karten zusammenführen, Doppelungen entfernen.</td></tr><tr><td>N10</td><td><span class="sev sL">Niedrig</span></td><td><span class="tag tF">Fakt</span></td><td>Screens sind der am schwächsten getestete Teil: Zweigabdeckung 65,9 % gegenüber 82,8 % im Projekt, am niedrigsten <code dir="ltr">home.tsx</code> (57,6 % Zeilen, 46,3 % Zweige) und <code dir="ltr">progress.tsx</code> (50 % Zweige). Im CI gibt es keine Mindestabdeckung.</td><td>Tests für die Empfehlungen auf Home, danach eine sinnvolle Mindestabdeckung im CI.</td></tr><tr><td>N11</td><td><span class="sev sL">Niedrig</span></td><td><span class="tag tF">Fakt</span></td><td>Keine <code dir="ltr">ErrorBoundary</code> auf Routenebene: ein unerwarteter Render-Fehler reißt den Screen weg, statt eine Meldung zu zeigen. (Lade-/Fehlerzustände für Daten gibt es und sie sind gut.)</td><td><code dir="ltr">ErrorBoundary</code> vom Wurzel-Layout exportieren.</td></tr><tr><td>N12</td><td><span class="sev sL">Niedrig</span></td><td><span class="tag tF">Fakt</span></td><td>Datenlebenszyklus: Lerndaten werden beim Abmelden nicht gelöscht (gewollt), es gibt keine Schema-Migration (nur <code dir="ltr">.v1</code>-Schlüssel), Versuche sind auf 500 pro Sprache begrenzt. Heute unkritisch, aber die erste Änderung am gespeicherten Format braucht eine Migrationsstrategie.</td><td>Migration beim ersten Schemawechsel entwerfen.</td></tr></tbody></table></div></section>
+
+<section id="de-tests"><h2>6. Tests und Qualitätsschranken</h2>
+<p><span class="tag tF">Fakt</span> 457 Tests in 28 Dateien, alle grün, bei 91,6 % Zeilen-, 82,8 % Zweig- und 89,0 % Funktionsabdeckung. Die Tests laufen bewusst in Riad-Zeit (UTC+3), um Zeitzonenfehler aufzudecken.</p>
+<svg class="chart" viewBox="0 0 520 196" role="img" aria-label="Coverage per folder" direction="ltr"><text x="0" y="18" class="lbl">components</text><rect x="150" y="5" width="300" height="8" rx="3" class="bg"/><rect x="150" y="5" width="287.4" height="8" rx="3" class="b1"/><rect x="150" y="15" width="300" height="8" rx="3" class="bg"/><rect x="150" y="15" width="265.8" height="8" rx="3" class="b3"/><text x="456" y="13" class="val">96%</text><text x="456" y="23" class="val">89%</text><text x="0" y="42" class="lbl">services/auth</text><rect x="150" y="29" width="300" height="8" rx="3" class="bg"/><rect x="150" y="29" width="300.0" height="8" rx="3" class="b1"/><rect x="150" y="39" width="300" height="8" rx="3" class="bg"/><rect x="150" y="39" width="292.8" height="8" rx="3" class="b3"/><text x="456" y="37" class="val">100%</text><text x="456" y="47" class="val">98%</text><text x="0" y="66" class="lbl">services/repositories</text><rect x="150" y="53" width="300" height="8" rx="3" class="bg"/><rect x="150" y="53" width="285.0" height="8" rx="3" class="b1"/><rect x="150" y="63" width="300" height="8" rx="3" class="bg"/><rect x="150" y="63" width="273.3" height="8" rx="3" class="b3"/><text x="456" y="61" class="val">95%</text><text x="456" y="71" class="val">91%</text><text x="0" y="90" class="lbl">store</text><rect x="150" y="77" width="300" height="8" rx="3" class="bg"/><rect x="150" y="77" width="293.1" height="8" rx="3" class="b1"/><rect x="150" y="87" width="300" height="8" rx="3" class="bg"/><rect x="150" y="87" width="270.0" height="8" rx="3" class="b3"/><text x="456" y="85" class="val">98%</text><text x="456" y="95" class="val">90%</text><text x="0" y="114" class="lbl">utils</text><rect x="150" y="101" width="300" height="8" rx="3" class="bg"/><rect x="150" y="101" width="284.1" height="8" rx="3" class="b1"/><rect x="150" y="111" width="300" height="8" rx="3" class="bg"/><rect x="150" y="111" width="270.9" height="8" rx="3" class="b3"/><text x="456" y="109" class="val">95%</text><text x="456" y="119" class="val">90%</text><text x="0" y="138" class="lbl">hooks</text><rect x="150" y="125" width="300" height="8" rx="3" class="bg"/><rect x="150" y="125" width="300.0" height="8" rx="3" class="b1"/><rect x="150" y="135" width="300" height="8" rx="3" class="bg"/><rect x="150" y="135" width="241.8" height="8" rx="3" class="b3"/><text x="456" y="133" class="val">100%</text><text x="456" y="143" class="val">81%</text><text x="0" y="162" class="lbl">app (screens)</text><rect x="150" y="149" width="300" height="8" rx="3" class="bg"/><rect x="150" y="149" width="244.5" height="8" rx="3" class="b1"/><rect x="150" y="159" width="300" height="8" rx="3" class="bg"/><rect x="150" y="159" width="197.7" height="8" rx="3" class="b3"/><text x="456" y="157" class="val">82%</text><text x="456" y="167" class="val">66%</text><rect x="150" y="179" width="10" height="10" rx="2" class="b1"/><text x="164" y="188" class="val">lines</text><rect x="220" y="179" width="10" height="10" rx="2" class="b3"/><text x="234" y="188" class="val">branches</text></svg>
+<p class="note">Oberer Balken je Ordner = Zeilen, unterer = Zweige.</p>
+<h3>Am schwächsten abgedeckte Dateien</h3>
+<div class="tw"><table><thead><tr><th>Datei</th><th>Zeilen %</th><th>Zweige %</th></tr></thead><tbody><tr><td><code dir="ltr">app/(tabs)/home.tsx</code></td><td>57,6</td><td>46,3</td></tr><tr><td><code dir="ltr">app/setup-languages.tsx</code></td><td>73,8</td><td>70,0</td></tr><tr><td><code dir="ltr">utils/content.ts</code></td><td>80,0</td><td>81,6</td></tr><tr><td><code dir="ltr">app/(tabs)/progress.tsx</code></td><td>83,3</td><td>50,0</td></tr><tr><td><code dir="ltr">app/settings.tsx</code></td><td>88,6</td><td>78,6</td></tr><tr><td><code dir="ltr">app/(tabs)/review.tsx</code></td><td>88,9</td><td>70,4</td></tr></tbody></table></div>
+<ul>
+<li><span class="tag tF">Fakt</span> <b>CI</b> (<code dir="ltr">.github/workflows/ci.yml</code>): Installation aus der Lock-Datei, Typecheck, Lint, Tests, Android-Export. Nur Lesezugriff, 20 Minuten Timeout, keine Geheimnisse. <b>Prüft nicht:</b> Mindestabdeckung, Sicherheitslücken in Abhängigkeiten, <code dir="ltr">expo-doctor</code>.</li>
+<li><span class="tag tF">Fakt</span> Die UI-Grundbausteine (<code dir="ltr">ui/*</code>) und die Stores haben wenige eigene Testdateien, werden aber indirekt über Screen-Tests abgedeckt (Komponenten 95,8 %).</li>
+<li><span class="tag tA">Annahme</span> Integrationstests sind auf stark belasteten Rechnern langsam (früher berichtet); hier nur gemessen als Gesamtdauer ~32 s.</li>
+<li><span class="tag tF">Fakt</span> <b>Gar nicht abgedeckt:</b> Verhalten auf einem echten Gerät (Layoutrichtung, Tastatur, Zurück-Taste, Performance).</li>
+</ul></section>
+
+<section id="de-data"><h2>7. Daten und Inhalt</h2>
+<h3>Datenmodell und Speicher</h3>
+<div class="tw"><table><thead><tr><th>AsyncStorage-Schlüssel</th><th>Inhalt</th><th>Prüfung</th></tr></thead><tbody><tr><td><code dir="ltr">lughati.preferences.v1</code></td><td>Design, UI-Sprache, Onboarding gesehen</td><td>unbekannte Werte werden bereinigt</td></tr><tr><td><code dir="ltr">lughati.session.v1</code></td><td>Nutzer + Ausstellungszeit (ohne Passwort)</td><td>inkonsistente Sitzung wird abgelehnt</td></tr><tr><td><code dir="ltr">lughati.learning-progress.v1</code></td><td>Fortschritt, Pläne, Versuche, Tagesaktivität</td><td>jeder Eintrag einzeln geprüft</td></tr><tr><td><code dir="ltr">lughati.vocab-reviews.v1</code></td><td>Review-Zustände (Stufe, Termine, Zähler)</td><td>gleiche Regel</td></tr><tr><td><code dir="ltr">lughati.learning-profile.v1</code></td><td>eigene Sprache und Lernsprache je Konto</td><td>gleiche Sprachen werden abgelehnt</td></tr></tbody></table></div>
+<p><span class="tag tF">Fakt</span> Grenzen: 500 Versuche pro Sprache, Zähler mit Obergrenze, Tage als lokale Kalendertage (<code dir="ltr">YYYY-MM-DD</code>). N12 zur Migration.</p>
+<h3>Lerninhalt</h3>
+<ul>
+<li><span class="tag tF">Fakt</span> 6 Sprachen × 10 Lektionen × 6 Wörter = 360 Wörter, nur Niveau A1. Keine doppelten Wörter innerhalb einer Sprache (geprüft: je 60 von 60 eindeutig).</li>
+<li><span class="tag tF">Fakt</span> Jedes Wort hat pro anderer Sprache genau eine Bedeutung, weil die Listen indexgleich sind. Das ist das einfachste Design und lässt jedes Sprachpaar ohne Zusatzarbeit funktionieren, verhindert aber mehrdeutige Wörter (N4).</li>
+<li><span class="tag tO">Meinung</span> Der Umfang reicht für eine Testrunde (Schätzung: etwa eine Lernstunde je Sprache), ist aber weit von einem täglich genutzten Produkt entfernt. Mehr Sprachen vor der Prüfung der vorhandenen wären derzeit die schlechteste Investition.</li>
+<li><span class="tag tA">Annahme</span> Ich weiß nicht sicher, wie korrekt die Übersetzungen außerhalb von Arabisch, Englisch und Deutsch sind; auf A1-Niveau wahrscheinlich richtig, aber nicht von Menschen geprüft.</li>
+</ul></section>
+
+<section id="de-sec"><h2>8. Sicherheit und Datenschutz</h2>
+<ul>
+<li><span class="tag tF">Fakt</span> <b>Die Anmeldung ist simuliert:</b> Jede gültige E-Mail mit 8 Zeichen Passwort kommt hinein, und wer die E-Mail eines anderen tippt, sieht dessen lokale Daten. Für Nutzer durch den Hinweis „Demo-Build“ kenntlich. Heute keine Lücke, weil keine Daten das Gerät verlassen.</li>
+<li><span class="tag tF">Fakt</span> Nichts verlässt das Gerät, keine Geheimnisse im Repository, Passwörter werden nie gespeichert (nur Nutzer und Sitzungszeit).</li>
+<li><span class="tag tF">Fakt</span> <code dir="ltr">npm audit --omit=dev</code>: 61 Treffer (16 mittel, 45 hoch, 0 kritisch). Sie gehen auf nur 5 Ursprungsmeldungen zurück; laut einer früheren, in <code dir="ltr">docs/audit</code> dokumentierten Analyse gelangt nur eine (<code dir="ltr">decode-uri-component</code>) in die ausgelieferte App, mit höchstens kurzem Hängen bei einem bösartigen Deep Link. Diese Analyse habe ich nicht erneut geprüft.</li>
+<li><span class="tag tO">Meinung</span> <b>Mit echtem Backend:</b> Tokens in sicherem Speicher statt AsyncStorage, Konto- und Datenlöschung, Datenschutzerklärung, Transportverschlüsselung. Jetzt nicht nötig.</li>
+</ul></section>
+
+<section id="de-a11y"><h2>9. Barrierefreiheit und Sprachen (i18n / RTL)</h2>
+<ul>
+<li><span class="tag tF">Fakt</span> 40 <code dir="ltr">accessibilityLabel</code>, 25 Rollen, Touch-Ziele von 48, automatische Kontrasttests (4,5:1 für Text, 3:1 für Ränder) in hellem und dunklem Design.</li>
+<li><span class="tag tF">Fakt</span> Logische Eigenschaften (<code dir="ltr">start/end</code>), Isolation bidirektionalen Textes, vollständige arabische Plurale mit sechs Formen samt Hermes-Polyfill, Richtungs-Icons. Übersetzungsschlüssel in Arabisch und Englisch sind identisch (automatischer Test).</li>
+<li><span class="tag tF">Fakt</span> <b>Offen:</b> Fremdwörter werden mit der Stimme der Oberflächensprache vorgelesen, <code dir="ltr">supportsRTL</code> in der Konfiguration, der App-Name im Launcher ist nicht übersetzt, manueller Richtungswechsel in Expo Go ist unbestätigt (Expo Go setzt ihn laut interner Doku zurück).</li>
+<li><span class="tag tA">Annahme</span> <b>Nicht auf einem Gerät geprüft:</b> Richtungsverhalten nach Neustart, große Schrift, Tastatur, Screenreader TalkBack.</li>
+</ul></section>
+
+<section id="de-files"><h2>10. Dateien und Repository</h2>
+<pre class="diagram" dir="ltr">.github/workflows/ci.yml   CI (typecheck · lint · test · export)
+assets/                    980 KB: icons, splash (+ Expo template icon.json)
+docs/                      PHASE_1_AUDIT · INTEGRATION_AGENT2 · audit/DEPENDENCY_AUDIT (+ raw JSON)
+src/app (1604 lines)       routes: (auth) onboarding/login/register · (app) tabs + settings + lesson
+src/components · hooks · store · services · utils · mocks · i18n · theme · types
+jest.setup.ts · jest.global-setup.js (TZ = Asia/Riyadh)
+README · CLAUDE.md · AGENTS.md · TESTING.md · plan.md</pre>
+<ul>
+<li><span class="tag tF">Fakt</span> <code dir="ltr">.gitignore</code> ist in Ordnung (keine Geheimnisse, keine generierten nativen Ordner). Keine großen Dateien im Repository (<code dir="ltr">.git</code> = 5,4 MB).</li>
+<li><span class="tag tF">Fakt</span> <code dir="ltr">AGENTS.md</code> ist eine generische Expo-Vorlage (erwähnt bun und EAS, die nicht genutzt werden). <code dir="ltr">docs/INTEGRATION_AGENT2.md</code> ist ein Überbleibsel der Arbeitsteilung zwischen Agenten; als Referenz nützlich, aber keine Produktdokumentation.</li>
+<li><span class="tag tF">Fakt</span> 10 Remote-Branches (<code dir="ltr">claude/*</code>, <code dir="ltr">fix/*</code>), die meisten gemergt oder alt. 3 Autorennamen im Verlauf (Claude, RASHID778, Rashid); die letzten beiden sind vermutlich dieselbe Person (Annahme).</li>
+</ul></section>
+
+<section id="de-ready"><h2>11. Produktreife</h2>
+<ul>
+<li><span class="tag tF">Fakt</span> <b>Blocker für die Veröffentlichung:</b> N5 (Bundle-IDs, EAS, Datenschutz, Crash-Reporting), echte Anmeldung und Backend, geprüfte Inhalte.</li>
+<li><span class="tag tF">Fakt</span> <b>Fehlt im Erlebnis:</b> Audio/Aussprache, einstellbares Tagesziel (N1), Niveau A2 und höher, Erinnerungen, Erfolge.</li>
+<li><span class="tag tO">Meinung</span> <b>Markt:</b> Die Konkurrenz ist stark (große Sprach-Apps mit Arabisch-Unterstützung). Differenzierung ist über die Qualität arabischer Inhalte und eine Nische möglich (z. B. Arabischsprachige, die Deutsch lernen). Echte Nachfragezahlen kenne ich nicht und habe nicht recherchiert; das Obige ist eine Schätzung.</li>
+<li><span class="tag tO">Meinung</span> <b>Machbarkeit:</b> Die technische Schwierigkeit ist mittel und wurde sauber umgesetzt; die eigentliche Schwierigkeit liegt bei Inhalt und Vertrieb, nicht im Code.</li>
+</ul></section>
+
+<section id="de-road"><h2>12. Empfohlene Roadmap</h2>
+<div class="tw"><table class="wide"><thead><tr><th>Phase</th><th>Arbeit</th><th>Aufwand</th><th>Beseitigtes Risiko</th></tr></thead><tbody><tr><td>Jetzt (1–2 Tage)</td><td>Test auf echtem Gerät nach TESTING.md</td><td>S</td><td>Fehler, die automatische Tests nicht finden</td></tr><tr><td>Jetzt</td><td><code dir="ltr">main</code> schützen, gemergte Branches löschen</td><td>S</td><td>rotes CI auf main (N6)</td></tr><tr><td>Jetzt</td><td>Tagesziel wählbar (N1), doppelte Karten zusammenführen (N9)</td><td>S</td><td>fehlende Funktion und volle Oberfläche</td></tr><tr><td>In 2–4 Wochen</td><td>Sprachprüfung durch Menschen, Register vereinheitlichen (N3, N4)</td><td>M</td><td>falsche Inhalte zerstören Vertrauen</td></tr><tr><td>In 2–4 Wochen</td><td>Regeln aus <code dir="ltr">mock.ts</code> nach <code dir="ltr">utils/</code> (N2), Mindestabdeckung im CI</td><td>M</td><td>teures Umschreiben mit Backend</td></tr><tr><td>In 2–4 Wochen</td><td>ErrorBoundary (N11), Dokumentation zusammenführen (N8)</td><td>S</td><td>abstürzende Screens, verstreute Doku</td></tr><tr><td>Später</td><td>Audio (Aussprache), dann A2</td><td>L</td><td>höherer Lernwert</td></tr><tr><td>Später</td><td>Backend und echte Anmeldung, dann Veröffentlichungs-Setup (N5)</td><td>L</td><td>Store-Reife</td></tr></tbody></table></div>
+<h3>Jetzt nicht bauen (Overengineering-Warnung)</h3>
+<ul><li>Echte KI und Erfolge: weder Inhalte noch Nutzer rechtfertigen das heute.</li><li>Weitere Sprachen: erst die sechs vorhandenen prüfen.</li><li>Neue Abstraktionsschichten über den vier Nahtstellen.</li></ul></section>
+
+<section id="de-method"><h2>13. Anhang: Methode und Grenzen</h2>
+<ul>
+<li>Ausgeführte Befehle: <code dir="ltr">jest --coverage</code> (28 Suites, 457 Tests), <code dir="ltr">tsc --noEmit</code>, <code dir="ltr">expo lint --max-warnings 0</code>, <code dir="ltr">expo export --platform android</code>, <code dir="ltr">npm outdated</code>, <code dir="ltr">npm audit --omit=dev</code>, Textsuche (<code dir="ltr">grep</code>), Zeilenzählung und das Lesen der Hauptdateien.</li>
+<li><b>Nicht gemessen:</b> Verhalten auf einem Gerät, echte Performance (Startzeit, Speicher), <code dir="ltr">expo-doctor</code> (braucht Netzwerk), endgültige Installationsgröße, echte Nutzer.</li>
+<li><b>Vollständig gelesen:</b> Home, Fortschritt, Einstellungen, Lektion, Wiederholung, Stores, Mock-Anmeldung und die meisten reinen Hilfsfunktionen. <b>Nicht Zeile für Zeile gelesen:</b> die <code dir="ltr">ui/*</code>-Bausteine und die Testdateien selbst.</li>
+<li>Jede Zahl in diesem Bericht stammt aus Befehlsausgaben dieser Session; alles andere ist als Annahme oder Meinung gekennzeichnet.</li>
+</ul></section>
+</div>
+<footer>Lughati · docs/PROJECT_REVIEW.html</footer>
+</div>
+<script>
+const r=document.documentElement;
+try{const s=localStorage.getItem('theme');if(s)r.setAttribute('data-theme',s)}catch(e){}
+document.getElementById('theme').addEventListener('click',()=>{
+  const dark=r.getAttribute('data-theme')==='dark'||(!r.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches);
+  const next=dark?'light':'dark';r.setAttribute('data-theme',next);try{localStorage.setItem('theme',next)}catch(e){}
+});
+</script>
+</body>
+</html>
