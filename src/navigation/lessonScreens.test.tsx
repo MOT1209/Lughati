@@ -115,6 +115,34 @@ describe('Lesson screen', () => {
     expect(attempts).toBe(2);
   }, SLOW_TEST_TIMEOUT);
 
+  it('below the pass mark the lesson stays unfinished and can be retried', async () => {
+    renderRouter(routes, { initialUrl: '/lesson/de-a1-3' });
+    fireEvent.press(await screen.findByRole('button', { name: 'Start exercises' }));
+
+    const words = vocabulary.filter((w) => w.lessonId === 'de-a1-3');
+    const byId = new Map(words.map((w) => [w.id, w]));
+    const exercises = buildExercises('de-a1-3', words);
+    // Wrong on every question: pick the first option that is not the answer.
+    for (const [index, exercise] of exercises.entries()) {
+      const word = byId.get(exercise.options.find((id) => id !== exercise.answer)!)!;
+      const text = exercise.type === 'multiple-choice' ? word.translations.ar : isolateLtr(word.term);
+      fireEvent.press(await screen.findByRole('button', { name: `Option: ${text}` }));
+      await act(async () => {
+        fireEvent.press(screen.getByRole('button', { name: index === exercises.length - 1 ? 'Finish' : 'Next' }));
+      });
+    }
+
+    expect(await screen.findByText('Not passed yet')).toBeTruthy();
+    expect(screen.getByText('You got 0 of 12 right')).toBeTruthy();
+    expect(screen.getByText('You need 70% correct answers to complete the lesson. Give it another go.')).toBeTruthy();
+    expect(screen.getByText('You earned 0 XP')).toBeTruthy();
+    const progress = await getRepositories().progress.get('', 'de');
+    expect(progress?.completedLessonIds).not.toContain('de-a1-3');
+
+    fireEvent.press(screen.getByRole('button', { name: 'Retry the lesson' }));
+    expect(await screen.findByText('Question 1 of 12')).toBeTruthy();
+  }, SLOW_TEST_TIMEOUT);
+
   it("shows meanings in the learner's own language", async () => {
     useLearningStore.setState({ profile: { source: 'es', target: 'de' } });
     renderRouter(routes, { initialUrl: '/lesson/de-a1-1' });

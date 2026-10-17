@@ -15,7 +15,7 @@ import { useLearningStore } from '@/store/learningStore';
 import type { LessonResult } from '@/types';
 import { localize } from '@/utils/localize';
 import { isolateTerm, meaningOf } from '@/utils/meaning';
-import { XP_LESSON_BONUS, XP_PER_CORRECT_ANSWER } from '@/utils/progression';
+import { isPassed, lessonXp, PASS_RATIO } from '@/utils/progression';
 
 type Step = 'intro' | 'quiz' | 'practice' | 'summary';
 
@@ -30,6 +30,7 @@ export default function LessonScreen() {
   const [step, setStep] = useState<Step>('intro');
   const [result, setResult] = useState<LessonResult | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
+  const [quizRun, setQuizRun] = useState(0); // a new run remounts the quiz with a fresh session
   const saving = useRef(false); // a double tap on the last button must not record the lesson twice
 
   const data = useAsyncData(async () => {
@@ -104,7 +105,7 @@ export default function LessonScreen() {
   if (step === 'quiz') {
     return (
       <Screen edges={['bottom']}>
-        <LessonQuiz exercises={exercises} words={words} source={source} onFinish={finish} />
+        <LessonQuiz key={quizRun} exercises={exercises} words={words} source={source} onFinish={finish} />
         {saveFailed && result ? (
           <View style={{ gap: spacing.sm }} accessibilityLiveRegion="polite">
             <Text color="error">{t('lesson.saveFailed')}</Text>
@@ -116,17 +117,34 @@ export default function LessonScreen() {
   }
 
   if (step === 'summary' && result) {
-    const xp = result.correct * XP_PER_CORRECT_ANSWER + XP_LESSON_BONUS;
+    const passed = isPassed(result);
+    const retryLesson = () => {
+      setResult(null);
+      setQuizRun((run) => run + 1);
+      setStep('quiz');
+    };
     return (
       <Screen edges={['bottom']} contentStyle={{ justifyContent: 'center' }}>
         <Card style={{ gap: spacing.md, alignItems: 'center' }}>
           <Text variant="title" accessibilityRole="header" style={{ textAlign: 'center' }}>
-            {t('lesson.summaryTitle')}
+            {t(passed ? 'lesson.summaryTitle' : 'lesson.notPassedTitle')}
           </Text>
           <Text>{t('lesson.summaryScore', { correct: result.correct, total: result.total })}</Text>
-          <Text color="textSecondary">{t('lesson.summaryXp', { xp })}</Text>
+          {passed ? null : (
+            <Text color="textSecondary" style={{ textAlign: 'center' }}>
+              {t('lesson.notPassedMessage', { percent: Math.round(PASS_RATIO * 100) })}
+            </Text>
+          )}
+          <Text color="textSecondary">{t('lesson.summaryXp', { xp: lessonXp(result) })}</Text>
         </Card>
-        <Button title={t('lesson.backToLessons')} icon="arrow-back-outline" iconDirectional onPress={() => router.back()} />
+        {passed ? null : <Button title={t('lesson.retryLesson')} icon="refresh-outline" onPress={retryLesson} />}
+        <Button
+          title={t('lesson.backToLessons')}
+          variant={passed ? 'primary' : 'secondary'}
+          icon="arrow-back-outline"
+          iconDirectional
+          onPress={() => router.back()}
+        />
       </Screen>
     );
   }

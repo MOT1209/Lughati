@@ -31,6 +31,14 @@ export function intervalForStep(step: number): number {
 
 const iso = (date: Date) => date.toISOString();
 
+/**
+ * Where a word starts once the learner has passed the lesson that taught it: step 0, first due
+ * one interval (1 day) later. It has not been reviewed yet, so it has no review timestamp.
+ */
+export function initialReviewState(now: Date = new Date()): Pick<VocabularyReviewState, 'step' | 'nextReviewAt'> {
+  return { step: 0, nextReviewAt: iso(new Date(now.getTime() + intervalForStep(0))) };
+}
+
 /** One state advanced by one outcome. `now` defaults to the current time (injectable in tests). */
 export function scheduleReview(
   state: Pick<VocabularyReviewState, 'step'> | null,
