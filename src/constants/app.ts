@@ -8,7 +8,6 @@ export const STORAGE_KEYS = {
   learningProgress: 'lughati.learning-progress.v1',
   learningProfile: 'lughati.learning-profile.v1',
   vocabReviews: 'lughati.vocab-reviews.v1',
-  dailyReminder: 'lughati.daily-reminder.v1',
 } as const;
 
 export const MIN_TOUCH_TARGET = 48;

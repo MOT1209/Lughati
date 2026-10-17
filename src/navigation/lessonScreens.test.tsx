@@ -1,4 +1,5 @@
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
+import { router } from 'expo-router';
 import { renderRouter, screen } from 'expo-router/testing-library';
 import { Alert } from 'react-native';
 
@@ -77,6 +78,22 @@ describe('Lesson screen', () => {
     const progress = await getRepositories().progress.get('', 'de');
     expect(progress?.completedLessonIds).toContain('de-a1-3');
     expect(useLearningStore.getState().progressVersion).toBe(1);
+  }, SLOW_TEST_TIMEOUT);
+
+  it('asks before leaving a quiz in progress and leaves only when confirmed', async () => {
+    renderRouter(routes, { initialUrl: '/learn' });
+    await screen.findAllByRole('button');
+    act(() => router.push({ pathname: '/lesson/[id]', params: { id: 'de-a1-1' } }));
+    fireEvent.press(await screen.findByRole('button', { name: 'Start exercises' }));
+    await screen.findByText(/Question 1 of/);
+
+    act(() => router.back());
+    const call = (Alert.alert as jest.Mock).mock.calls.find((c) => c[0] === 'Leave the quiz?');
+    expect(call).toBeTruthy();
+    expect(screen.getByText(/Question 1 of/)).toBeTruthy(); // still in the quiz
+
+    act(() => call![2].find((b: { text: string }) => b.text === 'Leave').onPress());
+    await waitFor(() => expect(screen.queryByText(/Question 1 of/)).toBeNull());
   }, SLOW_TEST_TIMEOUT);
 
   it('keeps the quiz and offers a retry when saving fails', async () => {

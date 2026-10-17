@@ -1,6 +1,6 @@
-import { router, useLocalSearchParams } from 'expo-router';
-import { useRef, useState } from 'react';
-import { View } from 'react-native';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import { Alert, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { LessonQuiz } from '@/components/LessonQuiz';
@@ -31,6 +31,20 @@ export default function LessonScreen() {
   const [result, setResult] = useState<LessonResult | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
   const saving = useRef(false); // a double tap on the last button must not record the lesson twice
+
+  // Leaving mid-quiz (header back, gesture or hardware back) loses every answer: ask first.
+  const navigation = useNavigation();
+  const quizActive = step === 'quiz';
+  useEffect(() => {
+    if (!quizActive) return;
+    return navigation.addListener('beforeRemove', (event) => {
+      event.preventDefault();
+      Alert.alert(t('lesson.leaveTitle'), t('lesson.leaveMessage'), [
+        { text: t('lesson.leaveStay'), style: 'cancel' },
+        { text: t('lesson.leaveConfirm'), style: 'destructive', onPress: () => navigation.dispatch(event.data.action) },
+      ]);
+    });
+  }, [quizActive, navigation, t]);
 
   const data = useAsyncData(async () => {
     const repos = getRepositories();

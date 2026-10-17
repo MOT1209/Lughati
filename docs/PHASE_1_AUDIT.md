@@ -155,16 +155,16 @@ Found during the device run and fixed:
 ## 12. Review findings still open
 | # | Priority | Finding | Where |
 |---|---|---|---|
-| M6 | Medium | Daily reminder switch is not saved and does nothing; its caption shows a developer note | `settings.tsx`, `ar.ts`/`en.ts` `notificationsNote` |
-| M7 | Medium | Language change in Settings has no error handling and is applied twice (screen + root layout) | `settings.tsx:35-40`, `_layout.tsx:32-38` |
-| M10 | Medium | `useAsyncData` drops data on key change, so Home/Learn flash a spinner after each lesson | `hooks/useAsyncData.ts:30` |
-| M11 | Medium | Errors are swallowed; `ErrorState` cannot tell offline from bug | `hooks/useAsyncData.ts:21` |
-| M13 | Medium | After answering, screen readers cannot tell the right option from the wrong one | `components/OptionButton.tsx:28` |
-| M14 | Medium | Lesson cards give no press feedback | `(tabs)/learn.tsx:51-56` |
-| M15 | Medium | Progress tab is a "coming soon" placeholder | `(tabs)/progress.tsx` |
+| M6 | Medium | Daily reminder switch is not saved and does nothing; its caption shows a developer note | `settings.tsx`, `ar.ts`/`en.ts` `notificationsNote` — **FIXED (switch removed; no real notifications in Expo Go)** |
+| M7 | Medium | Language change in Settings has no error handling and is applied twice (screen + root layout) | `settings.tsx:35-40`, `_layout.tsx:32-38` — **FIXED** |
+| M10 | Medium | `useAsyncData` drops data on key change, so Home/Learn flash a spinner after each lesson | `hooks/useAsyncData.ts:30` — **FIXED** |
+| M11 | Medium | Errors are swallowed; `ErrorState` cannot tell offline from bug | `hooks/useAsyncData.ts:21` — **FIXED** |
+| M13 | Medium | After answering, screen readers cannot tell the right option from the wrong one | `components/OptionButton.tsx:28` — **FIXED** |
+| M14 | Medium | Lesson cards give no press feedback | `(tabs)/learn.tsx:51-56` — **FIXED** |
+| M15 | Medium | Progress tab is a "coming soon" placeholder | `(tabs)/progress.tsx` — **FIXED** |
 | M16 | Medium | No screen tests for Home, Profile, Settings, Login/Register, Onboarding, setup-languages, root layout | `src/app` |
-| L17 | Low | Leaving a quiz loses all answers without confirmation | `lesson/[id].tsx` |
-| L19 | Low | A few strings are concatenated in code instead of one interpolated key | `settings.tsx:128`, `learn.tsx:65`, `profile.tsx:63` |
+| L17 | Low | Leaving a quiz loses all answers without confirmation | `lesson/[id].tsx` — **FIXED (beforeRemove confirmation + test)** |
+| L19 | Low | A few strings are concatenated in code instead of one interpolated key | `settings.tsx:128`, `learn.tsx:65`, `profile.tsx:63` — **MOSTLY FIXED** |
 | L20 | Low | Unused i18n keys (`app.tagline`, `common.continue`, `common.back`, `common.comingSoon`, `common.minutesShort`, `languageSelection.selected`, `profile.title`, `progress.title`) | locales |
 | L21 | Low | Dead code: `APP_NAME`; `services/ai` only used in tests | `constants/app.ts:3` |
 | L22 | Low | `supportsRTL` not set for `expo-localization`; launcher name not localised | `app.json` |

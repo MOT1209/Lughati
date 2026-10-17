@@ -23,7 +23,7 @@ Always add packages with `npx expo install <pkg>` (resolves SDK-compatible versi
 Expo SDK 57 postdates most model knowledge: before touching an Expo/RN API, check `https://docs.expo.dev/versions/v57.0.0/` (index: `https://docs.expo.dev/llms.txt`). Some doc pages (RTL, `Stack.Protected` `redirectTo`) describe "SDK 58+" behaviour that is not available on 57.
 
 ## Gotchas
-- **Typed routes vs `tsc`.** `experiments.typedRoutes` is on. `tsc` passes on a fresh checkout, but once `expo start` has generated the git-ignored `.expo/types/router.d.ts`, `router.push(`/lesson/${id}`)` in `(tabs)/home.tsx` and `(tabs)/learn.tsx` fails (dynamic hrefs must be `{ pathname: '/lesson/[id]', params: { id } }`). Use the object form for new dynamic links.
+- **Typed routes vs `tsc`.** `experiments.typedRoutes` is on. Once `expo start` has generated the git-ignored `.expo/types/router.d.ts`, template-string hrefs such as `router.push(`/lesson/${id}`)` fail typecheck; dynamic hrefs must be `{ pathname: '/lesson/[id]', params: { id } }` (home and learn already use it). Use the object form for new dynamic links.
 - `@testing-library/react-native` is pinned to **13.3.3** and `react-test-renderer` to **19.2.3**: RNTL 14 needs React 19.3 while Expo pins 19.2.3.
 - `tsconfig.json` sets `"types": ["jest"]` because TypeScript 6 no longer auto-loads `@types/*`.
 - `jest.setup.ts` mocks AsyncStorage and the Ionicons font (async glyph loading causes `act()` noise).

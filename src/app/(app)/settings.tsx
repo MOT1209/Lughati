@@ -1,11 +1,9 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { useState, useEffect } from 'react';
-import { Alert, StyleSheet, Switch, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { STORAGE_KEYS } from '@/constants/app';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Button, Card, Screen, Text } from '@/components/ui';
 import { useTheme } from '@/hooks/useTheme';
@@ -20,7 +18,7 @@ import { ROUTES } from '@/utils/routing';
 
 export default function Settings() {
   const { t } = useTranslation();
-  const { colors, spacing } = useTheme();
+  const { spacing } = useTheme();
   const themePreference = usePreferencesStore((s) => s.themePreference);
   const languagePreference = usePreferencesStore((s) => s.languagePreference);
   const setThemePreference = usePreferencesStore((s) => s.setThemePreference);
@@ -28,33 +26,7 @@ export default function Settings() {
   const user = useAuthStore((s) => s.session?.user);
   const signOut = useAuthStore((s) => s.signOut);
   const [restartNeeded, setRestartNeeded] = useState(false);
-  const [dailyReminder, setDailyReminder] = useState(false); // UI only: no permission is requested
   const [signingOut, setSigningOut] = useState(false);
-
-  // Load saved daily reminder preference from AsyncStorage
-  useEffect(() => {
-    async function loadDailyReminder() {
-      try {
-        const raw = await AsyncStorage.getItem(STORAGE_KEYS.dailyReminder);
-        if (raw !== null) setDailyReminder(JSON.parse(raw));
-      } catch {
-        // keep default false if we can't read
-      }
-    }
-    loadDailyReminder();
-  }, []);
-
-  // Persist daily reminder preference whenever it changes
-  useEffect(() => {
-    async function saveDailyReminder() {
-      try {
-        await AsyncStorage.setItem(STORAGE_KEYS.dailyReminder, JSON.stringify(dailyReminder));
-      } catch {
-        // keep UI usable even if persist fails
-      }
-    }
-    saveDailyReminder();
-  }, [dailyReminder]);
 
   const [restartFailed, setRestartFailed] = useState(false);
   const [languageChangeFailed, setLanguageChangeFailed] = useState(false);
@@ -152,22 +124,6 @@ export default function Settings() {
         <Button title={t('settings.learningLanguages')} variant="secondary" icon="language-outline" onPress={() => router.push(ROUTES.setupLanguages)} />
       </Card>
 
-      <Card style={{ gap: spacing.sm }}>
-        <Text variant="subheading">{t('settings.notifications')}</Text>
-        <View style={[styles.row, { gap: spacing.md }]}>
-          <Text style={styles.flex}>{t('settings.notificationsDaily')}</Text>
-          <Switch
-            value={dailyReminder}
-            onValueChange={setDailyReminder}
-            accessibilityLabel={t('settings.notificationsDaily')}
-            trackColor={{ true: colors.primary, false: colors.borderStrong }}
-          />
-        </View>
-        <Text variant="caption" color="textSecondary">
-          {t('settings.notificationsNote')}
-        </Text>
-      </Card>
-
       <Card style={{ gap: spacing.md }}>
         <Text variant="subheading">{t('settings.account')}</Text>
         <Text color="textSecondary">{isolateLtr(user?.email ?? '')}</Text>
@@ -187,8 +143,3 @@ export default function Settings() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center' },
-  flex: { flex: 1 },
-});
