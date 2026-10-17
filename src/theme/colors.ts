@@ -29,6 +29,10 @@ export interface ColorPalette {
   /** Light chip on the hero (e.g. "Change"). */
   heroChip: string;
   onHeroChip: string;
+  /** Translucent white / gold surfaces on the hero (pills, tracks, inactive dots). */
+  heroOverlay: string;
+  heroOverlayStrong: string;
+  heroGoldTint: string;
   /** Gold call-to-action fill. */
   gold: string;
   onGold: string;
@@ -61,6 +65,9 @@ const light: ColorPalette = {
   heroGold: '#FFD978',
   heroChip: '#C9F3EA',
   onHeroChip: '#04201E',
+  heroOverlay: 'rgba(255, 255, 255, 0.08)',
+  heroOverlayStrong: 'rgba(255, 255, 255, 0.16)',
+  heroGoldTint: 'rgba(255, 200, 87, 0.14)',
   gold: '#F2B33D',
   onGold: '#2A1A00',
 };
@@ -91,6 +98,9 @@ const dark: ColorPalette = {
   heroGold: '#FFD978',
   heroChip: '#C9F3EA',
   onHeroChip: '#04201E',
+  heroOverlay: 'rgba(255, 255, 255, 0.08)',
+  heroOverlayStrong: 'rgba(255, 255, 255, 0.16)',
+  heroGoldTint: 'rgba(255, 200, 87, 0.14)',
   gold: '#FFC857',
   onGold: '#2A1A00',
 };

@@ -10,7 +10,7 @@ export function StreakChip({ days }: { days: number }) {
   const { colors, spacing, radius } = useTheme();
   return (
     <View
-      style={[styles.chip, { gap: spacing.xs, borderRadius: radius.pill, paddingHorizontal: spacing.md, borderColor: colors.heroGold }]}
+      style={[styles.chip, { gap: spacing.xs, borderRadius: radius.pill, paddingHorizontal: spacing.md, borderColor: colors.heroGold, backgroundColor: colors.heroGoldTint }]}
       accessible
       accessibilityLabel={t('home.streakAria', { count: days })}
     >
@@ -23,5 +23,5 @@ export function StreakChip({ days }: { days: number }) {
 }
 
 const styles = StyleSheet.create({
-  chip: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, minHeight: 32, backgroundColor: 'rgba(255, 200, 87, 0.14)' },
+  chip: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, minHeight: 32 },
 });

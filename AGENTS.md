@@ -5,7 +5,7 @@ This is an Expo/React Native mobile application. Prioritize mobile-first pattern
 Read `CLAUDE.md` first: it has the commands, gotchas and the architecture (service seams, i18n/RTL rules, theme, lessons, persistence, brand/release/website, git workflow). Short version for any agent:
 
 - **Language:** replies to the owner in Arabic first, then German. UI strings only through `t()`; add keys to `src/i18n/locales/ar.ts` first, then `en.ts` (Arabic plurals need all six suffixes).
-- **Theme:** use `useTheme()` tokens and avoid literal colours in screens (the few translucent white overlays on the hero are the exception). New colour tokens go in `src/theme/colors.ts` together with a contrast pair in `src/theme/theme.test.ts` (≥ 4.5:1 for text).
+- **Theme:** use `useTheme()` tokens and avoid literal colours in screens (hero overlays have tokens: `heroOverlay`, `heroOverlayStrong`, `heroGoldTint`). New colour tokens go in `src/theme/colors.ts` together with a contrast pair in `src/theme/theme.test.ts` (≥ 4.5:1 for text).
 - **Layout:** logical style props (`marginStart`, `start/end`), `Icon directional` for arrows, `utils/bidi.ts` around mixed-script text. Verify nothing depends on LTR.
 - **Design:** reuse `ScreenHero`, `BrandHero`, `HeroProgress`, `StreakChip`, `Button variant="gold"` and the `components/home/*` parts instead of new one-off styles.
 - **Seams:** screens never import a concrete auth/repository/AI implementation; register replacements via `registerAuthService` / `registerRepositories` / `registerAIProvider`.

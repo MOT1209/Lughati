@@ -50,7 +50,7 @@ export default function Onboarding() {
       </View>
 
       <View style={[styles.center, { gap: spacing.lg }]}>
-        <View style={[styles.iconWrap, { backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: colors.heroGold, borderRadius: radius.xl }]}>
+        <View style={[styles.iconWrap, { backgroundColor: colors.heroOverlay, borderColor: colors.heroGold, borderRadius: radius.xl }]}>
           <Icon name={slide.icon} size={72} color="heroGold" />
         </View>
         <Text variant="display" color="onHero" style={styles.text} accessibilityRole="header">
@@ -70,7 +70,7 @@ export default function Onboarding() {
                 width: dot === index ? 24 : 8,
                 height: 8,
                 borderRadius: radius.pill,
-                backgroundColor: dot === index ? colors.heroGold : 'rgba(255, 255, 255, 0.3)',
+                backgroundColor: dot === index ? colors.heroGold : colors.heroOverlayStrong,
               }}
             />
           ))}

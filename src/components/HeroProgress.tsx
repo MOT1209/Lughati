@@ -20,7 +20,7 @@ export function HeroProgress({ value, accessibilityLabel }: HeroProgressProps) {
       accessibilityRole="progressbar"
       accessibilityLabel={accessibilityLabel}
       accessibilityValue={{ min: 0, max: 100, now: percent }}
-      style={{ height: 8, borderRadius: radius.pill, backgroundColor: 'rgba(255, 255, 255, 0.16)', overflow: 'hidden' }}
+      style={{ height: 8, borderRadius: radius.pill, backgroundColor: colors.heroOverlayStrong, overflow: 'hidden' }}
     >
       <View style={{ width: `${percent}%`, height: '100%', borderRadius: radius.pill, backgroundColor: colors.heroGold }} />
     </View>

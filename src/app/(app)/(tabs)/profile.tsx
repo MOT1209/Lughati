@@ -73,7 +73,7 @@ export default function Profile() {
           {isolateLtr(learning.user?.email ?? '')}
         </Text>
 
-        <View style={[styles.pill, { gap: spacing.sm, borderRadius: radius.md, paddingHorizontal: spacing.md, marginTop: spacing.sm }]}>
+        <View style={[styles.pill, { borderColor: colors.heroOverlayStrong, backgroundColor: colors.heroOverlay, gap: spacing.sm, borderRadius: radius.md, paddingHorizontal: spacing.md, marginTop: spacing.sm }]}>
           {language ? <LanguageBadge language={language} /> : null}
           <Text variant="bodyStrong" color="onHero">
             {language ? localize(language.name, locale) : ''}
@@ -108,6 +108,6 @@ export default function Profile() {
 
 const styles = StyleSheet.create({
   avatar: { width: 72, height: 72, borderRadius: 36, borderWidth: 3, alignItems: 'center', justifyContent: 'center' },
-  pill: { flexDirection: 'row', alignItems: 'center', minHeight: 48, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.16)', backgroundColor: 'rgba(255, 255, 255, 0.08)' },
+  pill: { flexDirection: 'row', alignItems: 'center', minHeight: 48, borderWidth: 1 },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },
 });

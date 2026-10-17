@@ -124,12 +124,6 @@ export const ar = {
     statusDone: 'مكتمل',
     statusCurrent: 'الدرس الحالي',
     statusTodo: 'لم يبدأ',
-    lessonMeta_zero: '{{level}} · {{count}} دقيقة · {{status}}',
-    lessonMeta_one: '{{level}} · دقيقة واحدة · {{status}}',
-    lessonMeta_two: '{{level}} · دقيقتان · {{status}}',
-    lessonMeta_few: '{{level}} · {{count}} دقائق · {{status}}',
-    lessonMeta_many: '{{level}} · {{count}} دقيقة · {{status}}',
-    lessonMeta_other: '{{level}} · {{count}} دقيقة · {{status}}',
     lessonLabel: '{{title}}، {{status}}',
   },
   lesson: {
@@ -204,7 +198,6 @@ export const ar = {
     nextWord: 'الكلمة التالية',
     lastReviewed: 'آخر مراجعة: {{date}}',
     nextReview: 'المراجعة القادمة: {{date}}',
-    neverReviewed: 'لم تُراجع بعد',
     noDue: 'لا يوجد ما يُراجع الآن',
     noDueDesc: 'راجعت كل الكلمات المستحقة. عُد عند حلول موعد الدفعة التالية.',
     allDone: 'انتهت جلسة المراجعة',
@@ -215,7 +208,6 @@ export const ar = {
   },
   practice: {
     play: 'العب تدريب المطابقة',
-    title: 'طابق كل كلمة مع معناها',
     summaryTitle: 'انتهى التدريب',
     summaryScore: 'طابقت {{correct}} من {{total}}',
     needWords: 'لا توجد كلمات كافية للتدريب بعد.',
