@@ -60,7 +60,7 @@ export function HomeHero({ name, streakDays, language, languageName, minutesToda
       </View>
 
       {language ? (
-        <View style={[styles.row, styles.pill, { gap: spacing.sm, borderRadius: radius.md, paddingHorizontal: spacing.md }]}>
+        <View style={[styles.row, styles.pill, { borderColor: colors.heroOverlayStrong, backgroundColor: colors.heroOverlay, gap: spacing.sm, borderRadius: radius.md, paddingHorizontal: spacing.md }]}>
           <LanguageBadge language={language} />
           <View style={[styles.row, styles.flex, { gap: spacing.sm }]}>
             <Text variant="bodyStrong" color="onHero">
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
   between: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
   flex: { flex: 1 },
-  pill: { minHeight: MIN_TOUCH_TARGET, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.16)', backgroundColor: 'rgba(255, 255, 255, 0.08)' },
+  pill: { minHeight: MIN_TOUCH_TARGET, borderWidth: 1 },
   chip: { minHeight: 32, justifyContent: 'center' },
   chipText: { fontFamily: fontFamilies.bold },
 });

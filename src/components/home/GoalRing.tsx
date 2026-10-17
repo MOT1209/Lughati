@@ -3,12 +3,8 @@ import Svg, { Circle } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 
 import { Text } from '@/components/ui';
+import { goalRingGeometry, RING_SIZE as SIZE, RING_STROKE as STROKE } from '@/components/home/goalRing';
 import { useTheme } from '@/hooks/useTheme';
-
-const SIZE = 56;
-const STROKE = 7;
-const RADIUS = (SIZE - STROKE) / 2;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 interface GoalRingProps {
   minutesToday: number;
@@ -19,10 +15,7 @@ interface GoalRingProps {
 export function GoalRing({ minutesToday, goalMinutes }: GoalRingProps) {
   const { t } = useTranslation();
   const { colors, spacing } = useTheme();
-  const raw = goalMinutes > 0 ? minutesToday / goalMinutes : 0;
-  const ratio = Number.isFinite(raw) ? Math.min(1, Math.max(0, raw)) : 0;
-  const percent = Math.round(ratio * 100);
-  const reached = goalMinutes > 0 && minutesToday >= goalMinutes;
+  const { percent, reached, radius, circumference, dashOffset, transform } = goalRingGeometry(minutesToday, goalMinutes, I18nManager.isRTL);
 
   return (
     <View
@@ -35,18 +28,18 @@ export function GoalRing({ minutesToday, goalMinutes }: GoalRingProps) {
       <Svg
         width={SIZE}
         height={SIZE}
-        style={{ transform: [{ rotate: '-90deg' }, ...(I18nManager.isRTL ? [{ scaleY: -1 }] : [])] }}
+        style={{ transform }}
       >
-        <Circle cx={SIZE / 2} cy={SIZE / 2} r={RADIUS} stroke={colors.onHero} strokeOpacity={0.18} strokeWidth={STROKE} fill="none" />
+        <Circle cx={SIZE / 2} cy={SIZE / 2} r={radius} stroke={colors.onHero} strokeOpacity={0.18} strokeWidth={STROKE} fill="none" />
         <Circle
           cx={SIZE / 2}
           cy={SIZE / 2}
-          r={RADIUS}
+          r={radius}
           stroke={colors.heroGold}
           strokeWidth={STROKE}
           strokeLinecap="round"
-          strokeDasharray={`${CIRCUMFERENCE} ${CIRCUMFERENCE}`}
-          strokeDashoffset={CIRCUMFERENCE * (1 - ratio)}
+          strokeDasharray={`${circumference} ${circumference}`}
+          strokeDashoffset={dashOffset}
           fill="none"
         />
       </Svg>

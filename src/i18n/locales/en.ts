@@ -125,12 +125,6 @@ export const en: Translation = {
     statusDone: 'Completed',
     statusCurrent: 'Current lesson',
     statusTodo: 'Not started',
-    lessonMeta_zero: '{{level}} · {{count}} min · {{status}}',
-    lessonMeta_one: '{{level}} · {{count}} min · {{status}}',
-    lessonMeta_two: '{{level}} · {{count}} min · {{status}}',
-    lessonMeta_few: '{{level}} · {{count}} min · {{status}}',
-    lessonMeta_many: '{{level}} · {{count}} min · {{status}}',
-    lessonMeta_other: '{{level}} · {{count}} min · {{status}}',
     lessonLabel: '{{title}}, {{status}}',
   },
   lesson: {
@@ -205,7 +199,6 @@ export const en: Translation = {
     nextWord: 'Next word',
     lastReviewed: 'Last reviewed: {{date}}',
     nextReview: 'Next review: {{date}}',
-    neverReviewed: 'Not reviewed yet',
     noDue: 'Nothing to review right now',
     noDueDesc: 'You have reviewed every word that was due. Come back when the next ones are ready.',
     allDone: 'Review session complete',
@@ -216,7 +209,6 @@ export const en: Translation = {
   },
   practice: {
     play: 'Play matching practice',
-    title: 'Match each word with its meaning',
     summaryTitle: 'Practice complete',
     summaryScore: 'You matched {{correct}} of {{total}}',
     needWords: 'There are not enough words to practise yet.',
