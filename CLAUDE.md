@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Lughati (لغتي) is a language-learning app for Arabic speakers: Expo SDK 57 + React Native 0.86 + TypeScript (`strict`), targeting Android first via **Expo Go** (no custom native code). Phase 1 foundation plus local, offline A1 lessons: no network, no real AI. The README and TESTING.md are written in Arabic.
+Lughati (لغتي) is a language-learning app for Arabic speakers: Expo SDK 57 + React Native 0.86 + TypeScript (`strict`), targeting Android first via **Expo Go** (no custom native code; iOS config exists but is untested and not released). Phase 1 foundation plus local, offline A1 lessons: no network, no real AI. The app has a unified brand design (see Theme), a static website in `site/` and Google Play release files in `docs/store/`. The README and TESTING.md are written in Arabic.
 
 ## Commands
 
@@ -11,11 +11,13 @@ npm install
 npx expo start --lan            # scan the QR in Expo Go (same Wi-Fi), or enter exp://<LAN-IP>:8081
 npm run typecheck               # tsc --noEmit (see the typed-routes caveat below)
 npm run lint                    # expo lint (ESLint 9 flat config, eslint-config-expo)
-npm test                        # jest (jest-expo preset); the full suite takes ~2.5 min
+npm test                        # jest (jest-expo preset); the full suite takes ~10 s locally (~2.5 min on a slow machine)
 npx jest src/utils/routing.test.ts          # one file
 npx jest -t "meets WCAG AA"                 # one test by name
 npx expo-doctor                 # dependency/config check (the schema check needs network)
 npx expo export --platform android          # proves the bundle builds
+node scripts/render-icons.js                # icon/splash/favicon/Play graphic PNGs from assets/icon-src (needs Playwright + Chromium)
+python3 scripts/build-site.py               # regenerates site/ (ar + en); the privacy text comes from docs/store/privacy-policy.md
 ```
 
 Always add packages with `npx expo install <pkg>` (resolves SDK-compatible versions). Without access to Expo's API (cloud sandbox) it fails; then install the exact version listed in `node_modules/expo/bundledNativeModules.json`. Run typecheck + lint + tests before calling work done.
@@ -28,6 +30,7 @@ Expo SDK 57 postdates most model knowledge: before touching an Expo/RN API, chec
 - `tsconfig.json` sets `"types": ["jest"]` because TypeScript 6 no longer auto-loads `@types/*`.
 - `jest.setup.ts` mocks AsyncStorage and the Ionicons font (async glyph loading causes `act()` noise).
 - Jest runs in **`Asia/Riyadh` (UTC+3)**, set by `jest.global-setup.js` (setting `process.env.TZ` inside a test file has no effect). Calendar days come from `utils/day.ts` `dayOf` (local), never `toISOString().slice(0, 10)` (UTC).
+- **No network in the cloud sandbox** for Expo's API/docs (`expo install`, `expo-doctor` schema check, docs.expo.dev fail); use `node_modules/expo/bundledNativeModules.json` for versions. `curl` to `*.vercel.app` is blocked too: use the Vercel MCP `web_fetch_vercel_url` to check the live site.
 - Cairo fonts are imported per weight (`@expo-google-fonts/cairo/400Regular`, …) so the bundle does not carry every weight.
 
 ## Architecture
@@ -55,5 +58,11 @@ Routes live in `src/app/` (Expo Router; `@/*` → `src/*`) and stay thin; logic 
 
 **Persistence.** AsyncStorage keys are in `STORAGE_KEYS`: preferences (`store/preferencesStore.ts`, zustand `persist` with `partialize`: theme, UI language, `onboardingSeen`), the mock session, and learning progress. Reads of stored blobs are defensive: corrupt data is treated as "nothing saved".
 
+## Brand, release and website
+- **Visual identity** (icon, hero gradient, gold CTA, Cairo) lives in `assets/icon-src/*.svg` (sources) → `assets/images/*.png` and `assets/store/feature-graphic.png` (generated; commit both). Android adaptive icon background/splash colour is `#0A4E49`. iOS uses `assets/images/icon.png` (opaque, no alpha).
+- **Android release** (not done yet, needs the owner's accounts): `eas.json` (profiles `preview` APK, `production` AAB, `autoIncrement`), listing text `docs/store/play-listing.md`, `docs/store/data-safety.md`, steps `docs/store/RELEASE_ANDROID.md`. `android.package`/`ios.bundleIdentifier` = `com.lughati.app`; it is **permanent after the first Play upload**. Keep Data-safety/privacy answers in sync with reality: the app makes no network calls and stores everything on the device (adding a backend or analytics requires updating them first).
+- **Website** `site/` (static, ar at `/`, en at `/en/`, privacy at `/privacy`) is generated, do not hand-edit the HTML: change `scripts/build-site.py` (copy, features, mockups) or `docs/store/privacy-policy.md`, rebuild and commit. Contact e-mail: `CONTACT_EMAIL` in `build-site.py` and the policy markdown (keep both in sync). Cairo is self-hosted, no third-party requests or cookies; mockups are labelled as illustrations (do not present them as store screenshots) and the Play button says "coming soon" until the app is published.
+- **Hosting:** Vercel project `lughati` (team `mot1209's projects`), connected to `MOT1209/Lughati`, root directory `site`, no build step, Vercel Auth disabled so the pages are public. `main` deploys to production automatically; the public URL is `https://lughati-sigma.vercel.app`.
+
 ## Git
-This folder is its own git repo (remote `origin` → `https://github.com/MOT1209/Lughati.git`, branch `main`) nested inside a larger monorepo whose root is two levels up with unrelated remotes; run git from this directory and never push the parent repo here. `origin/main` also receives pull-request merges from other sessions (`claude/*`, `fix/*` branches), so `git fetch` and rebase before pushing, and never force-push.
+This folder is its own git repo (remote `origin` → `https://github.com/MOT1209/Lughati.git`, branch `main`) nested inside a larger monorepo whose root is two levels up with unrelated remotes; run git from this directory and never push the parent repo here. `origin/main` also receives pull-request merges from other sessions (`claude/*`, `fix/*` branches), so `git fetch` and merge/rebase before pushing, and never force-push. Merge to `main` (via a PR) only when the owner asks; commits end with the attribution lines the session specifies. Run typecheck + lint + the full jest suite before every push (the suite takes ~10 s locally).
