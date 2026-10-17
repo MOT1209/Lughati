@@ -4,20 +4,16 @@ import type { Translation } from '../types';
 export const en: Translation = {
   app: {
     name: 'Lughati',
-    tagline: 'Learn languages step by step',
   },
   common: {
     continue: 'Continue',
     skip: 'Skip',
     next: 'Next',
-    back: 'Back',
     retry: 'Try again',
     loading: 'Loading…',
     errorTitle: 'Something went wrong',
     errorMessage: 'We could not complete that. Please try again.',
     offlineMessage: 'You seem to be offline. Check your connection and try again.',
-    comingSoon: 'Coming soon',
-    minutesShort: '{{count}} min',
   },
   onboarding: {
     slide1Title: 'Learn multiple languages',
@@ -218,7 +214,6 @@ export const en: Translation = {
     needWords: 'There are not enough words to practise yet.',
   },
   profile: {
-    title: 'Profile',
     language: 'Current language',
     level: 'Level',
     levelValue: '{{level}} · {{title}}',
@@ -239,7 +234,6 @@ export const en: Translation = {
   languageSelection: {
     title: 'Choose a language',
     subtitle: 'Pick the language you want to learn.',
-    selected: 'Selected',
     select: 'Select {{language}}',
   },
   setupLanguages: {

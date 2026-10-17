@@ -3,20 +3,16 @@
 export const ar = {
   app: {
     name: 'لغتي',
-    tagline: 'تعلّم اللغات خطوة بخطوة',
   },
   common: {
     continue: 'متابعة',
     skip: 'تخطي',
     next: 'التالي',
-    back: 'رجوع',
     retry: 'إعادة المحاولة',
     loading: 'جارٍ التحميل…',
     errorTitle: 'حدث خطأ ما',
     errorMessage: 'تعذّر إكمال العملية. حاول مرة أخرى.',
     offlineMessage: 'يبدو أنك غير متصل. تحقّق من اتصالك وحاول مرة أخرى.',
-    comingSoon: 'قريباً',
-    minutesShort: '{{count}} د',
   },
   onboarding: {
     slide1Title: 'تعلّم لغات متعددة',
@@ -217,7 +213,6 @@ export const ar = {
     needWords: 'لا توجد كلمات كافية للتدريب بعد.',
   },
   profile: {
-    title: 'حسابي',
     language: 'اللغة الحالية',
     level: 'المستوى',
     levelValue: '{{level}} · {{title}}',
@@ -238,7 +233,6 @@ export const ar = {
   languageSelection: {
     title: 'اختيار اللغة',
     subtitle: 'اختر اللغة التي تريد تعلّمها.',
-    selected: 'محددة',
     select: 'اختيار {{language}}',
   },
   setupLanguages: {
