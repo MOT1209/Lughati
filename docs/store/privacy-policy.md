@@ -19,7 +19,7 @@
 
 **التغييرات:** إذا أضفنا لاحقاً حسابات على الإنترنت أو مزامنة، سنحدّث هذه السياسة قبل ذلك.
 
-**التواصل:** [CONTACT_EMAIL]
+**التواصل:** zwnt45602@gmail.com
 
 ## English
 
@@ -38,4 +38,4 @@ Lughati currently works **fully offline**.
 
 **Changes:** if online accounts or sync are added later, this policy will be updated first.
 
-**Contact:** [CONTACT_EMAIL]
+**Contact:** zwnt45602@gmail.com

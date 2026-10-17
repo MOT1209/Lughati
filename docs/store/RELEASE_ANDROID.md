@@ -3,7 +3,7 @@
 ما هو جاهز في المستودع: الأيقونة ومجموعتها، `eas.json`، صورة الغلاف `assets/store/feature-graphic.png` (1024×500)، نص المتجر (`play-listing.md`)، سياسة الخصوصية (`privacy-policy.md`) وإجابات Data safety (`data-safety.md`).
 
 ## 0) قبل أي بناء: اسم الحزمة (قرار نهائي)
-`app.json` ← `android.package` = `com.lughati.app` (مؤقت). **بعد أول رفع إلى Play لا يمكن تغييره.** عدّله الآن إن أردت اسماً آخر.
+`app.json` ← `android.package` = `com.lughati.app` (مُعتمد حالياً). **بعد أول رفع إلى Play لا يمكن تغييره.** عدّله الآن إن أردت اسماً آخر.
 
 ## 1) حساب Expo و EAS (على جهازك، مرة واحدة)
 ```bash
@@ -27,7 +27,7 @@ eas build --platform android --profile production
 
 ## 4) Play Console
 1. أنشئ التطبيق: الاسم «لغتي: تعلّم اللغات بلغتك»، اللغة الافتراضية العربية، تطبيق مجاني.
-2. **سياسة الخصوصية:** تحتاج رابطاً عاماً. صفحتها جاهزة في الموقع (`site/privacy.html`، والإنجليزية `site/en/privacy.html`) وتُنشر مع الموقع على Vercel؛ الرابط يكون `https://<نطاق الموقع>/privacy`. ضع بريد تواصل مكان `[CONTACT_EMAIL]` في `docs/store/privacy-policy.md` ثم أعد توليد الموقع: `python3 scripts/build-site.py`.
+2. **سياسة الخصوصية:** تحتاج رابطاً عاماً. صفحتها جاهزة في الموقع (`site/privacy.html`، والإنجليزية `site/en/privacy.html`) وتُنشر مع الموقع على Vercel؛ الرابط يكون `https://<نطاق الموقع>/privacy`. بريد التواصل (`zwnt45602@gmail.com`) مكتوب في `docs/store/privacy-policy.md` وفي `scripts/build-site.py`؛ إن غيّرته عدّله في الملفين ثم أعد توليد الموقع: `python3 scripts/build-site.py`.
 3. **App content:** املأ الأقسام من `data-safety.md` (لا إعلانات، لا جمع بيانات، 13+، الوصول بأي بريد وكلمة مرور من 8 أحرف).
 4. **Store listing:** النصوص من `play-listing.md`، الأيقونة 512×512 (صغّر `assets/images/icon.png`)، صورة الغلاف، و**لقطتان على الأقل** من الهاتف (خذها من نسخة الخطوة 2).
 5. **Testing → Internal testing:** ارفع ملف AAB (يدوياً، أو `eas submit --platform android` بعد إعداد Service Account).
