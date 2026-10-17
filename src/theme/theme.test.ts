@@ -29,6 +29,18 @@ const textPairs: [keyof ColorPalette, keyof ColorPalette][] = [
   ['onErrorMuted', 'errorMuted'],
   ['accent', 'surface'],
   ['success', 'surface'],
+  // Home hero: text sits anywhere on the gradient, so check every stop.
+  ['onHero', 'heroStart'],
+  ['onHero', 'heroMid'],
+  ['onHero', 'heroEnd'],
+  ['onHeroMuted', 'heroStart'],
+  ['onHeroMuted', 'heroMid'],
+  ['onHeroMuted', 'heroEnd'],
+  ['heroGold', 'heroStart'],
+  ['heroGold', 'heroMid'],
+  ['heroGold', 'heroEnd'],
+  ['onHeroChip', 'heroChip'],
+  ['onGold', 'gold'],
 ];
 
 describe.each(['light', 'dark'] as const)('%s palette', (scheme) => {

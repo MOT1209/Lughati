@@ -67,6 +67,34 @@ describe('Home screen', () => {
     expect(screen.getByText('You have 15 minutes left to reach today’s goal.')).toBeTruthy();
     expect(screen.queryByText('home.recDailyGoal')).toBeNull();
   }, SLOW_TEST_TIMEOUT);
+
+  it('shows the hero: streak, current language with a change action, and the daily goal ring', async () => {
+    const router = renderRouter({ home: HomeScreen, 'language-selection': () => null }, { initialUrl: '/home' });
+    expect(await screen.findByLabelText('Day streak, 0 days')).toBeTruthy();
+    expect(screen.getByText('German')).toBeTruthy();
+    expect(screen.getByText('Lesson 1 of 10')).toBeTruthy();
+    const goal = screen.getByRole('progressbar', { name: 'Daily goal' });
+    expect(goal.props.accessibilityValue).toEqual({ min: 0, max: 100, now: 0 });
+
+    fireEvent.press(screen.getByRole('button', { name: 'Change language' }));
+    expect(router.getPathname()).toBe('/language-selection');
+  }, SLOW_TEST_TIMEOUT);
+
+  it('opens the current lesson from the recommendation row', async () => {
+    const repos = createMockRepositories();
+    registerRepositories({ ...repos, reviews: { ...repos.reviews, getDue: async () => [] } });
+    const router = renderRouter({ home: HomeScreen, 'lesson/[id]': () => null }, { initialUrl: '/home' });
+
+    const row = await screen.findByRole('button', { name: /^Recommended for you: / });
+    fireEvent.press(row);
+    expect(router.getPathname()).toBe('/lesson/de-a1-1');
+  }, SLOW_TEST_TIMEOUT);
+
+  it('opens the current lesson from the gold continue button', async () => {
+    const router = renderRouter({ home: HomeScreen, 'lesson/[id]': () => null }, { initialUrl: '/home' });
+    fireEvent.press(await screen.findByRole('button', { name: 'Continue learning' }));
+    expect(router.getPathname()).toBe('/lesson/de-a1-1');
+  }, SLOW_TEST_TIMEOUT);
 });
 
 describe('Progress screen', () => {

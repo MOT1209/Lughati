@@ -18,7 +18,7 @@ npx expo-doctor                 # dependency/config check (the schema check need
 npx expo export --platform android          # proves the bundle builds
 ```
 
-Always add packages with `npx expo install <pkg>` (resolves SDK-compatible versions). Run typecheck + lint + tests before calling work done.
+Always add packages with `npx expo install <pkg>` (resolves SDK-compatible versions). Without access to Expo's API (cloud sandbox) it fails; then install the exact version listed in `node_modules/expo/bundledNativeModules.json`. Run typecheck + lint + tests before calling work done.
 
 Expo SDK 57 postdates most model knowledge: before touching an Expo/RN API, check `https://docs.expo.dev/versions/v57.0.0/` (index: `https://docs.expo.dev/llms.txt`). Some doc pages (RTL, `Stack.Protected` `redirectTo`) describe "SDK 58+" behaviour that is not available on 57.
 
@@ -51,7 +51,7 @@ Routes live in `src/app/` (Expo Router; `@/*` → `src/*`) and stay thin; logic 
 - `services/appLanguage.ts` `applyLanguagePreference` is the single path from the stored preference to i18n **and** native layout direction (startup and Settings both call it). Locale = manual preference, else device language, else Arabic (`i18n/resolveLocale.ts`). A changed direction needs a reload via `reloadApp()` (`reloadAppAsync` from `expo`; `DevSettings.reload` is a no-op outside `__DEV__`). **Expo Go resets runtime RTL overrides**, so manual language switching on a device is unverified (see TESTING.md).
 - Use logical style props (`marginStart`, `start/end`), `Icon directional` for arrows, and `utils/bidi.ts` (`isolate`, `isolateLtr`, `isolateNative`) around mixed-script text. Languages are shown with a decorative flag (`LanguageBadge`, `Language.flag`) next to the name, which is what screen readers announce.
 
-**Theme.** `useTheme()` combines the persisted preference with the OS scheme (`theme/resolveScheme.ts`). Palettes are in `theme/colors.ts`; `theme.test.ts` asserts text/background pairs are ≥ 4.5:1, interactive borders (`borderStrong`) ≥ 3:1, and that light/dark define identical tokens, so change colors together with that test. Cairo is used via explicit per-weight font families (`theme/typography.ts`), not `fontWeight`.
+**Theme.** Home's header uses the brand hero gradient (`heroStart/heroMid/heroEnd`, same in light and dark, via `expo-linear-gradient`) with `onHero*`/`heroGold` text and a `gold` CTA (`Button variant="gold"`); its parts live in `components/home/`. `useTheme()` combines the persisted preference with the OS scheme (`theme/resolveScheme.ts`). Palettes are in `theme/colors.ts`; `theme.test.ts` asserts text/background pairs are ≥ 4.5:1, interactive borders (`borderStrong`) ≥ 3:1, and that light/dark define identical tokens, so change colors together with that test. Cairo is used via explicit per-weight font families (`theme/typography.ts`), not `fontWeight`.
 
 **Persistence.** AsyncStorage keys are in `STORAGE_KEYS`: preferences (`store/preferencesStore.ts`, zustand `persist` with `partialize`: theme, UI language, `onboardingSeen`), the mock session, and learning progress. Reads of stored blobs are defensive: corrupt data is treated as "nothing saved".
 

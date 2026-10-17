@@ -6,7 +6,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { Icon, type IconName } from './Icon';
 import { Text } from './Text';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'gold';
 
 interface ButtonProps {
   title: string;
@@ -21,7 +21,7 @@ interface ButtonProps {
   style?: StyleProp<ViewStyle>;
 }
 
-type ForegroundKey = 'onPrimary' | 'primary' | 'onErrorMuted';
+type ForegroundKey = 'onPrimary' | 'primary' | 'onErrorMuted' | 'onGold';
 
 export function Button({
   title,
@@ -42,6 +42,7 @@ export function Button({
     secondary: { bg: colors.surface, fg: 'primary', border: colors.borderStrong },
     ghost: { bg: 'transparent', fg: 'primary', border: 'transparent' },
     danger: { bg: colors.errorMuted, fg: 'onErrorMuted', border: colors.errorMuted },
+    gold: { bg: colors.gold, fg: 'onGold', border: colors.gold },
   };
   const palette = palettes[variant];
 
