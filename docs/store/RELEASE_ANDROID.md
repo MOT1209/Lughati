@@ -27,7 +27,7 @@ eas build --platform android --profile production
 
 ## 4) Play Console
 1. أنشئ التطبيق: الاسم «لغتي: تعلّم اللغات بلغتك»، اللغة الافتراضية العربية، تطبيق مجاني.
-2. **سياسة الخصوصية:** تحتاج رابطاً عاماً. ضع بريد تواصل مكان `[CONTACT_EMAIL]` ثم انشر الملف (مثلاً GitHub Pages أو أي صفحة عامة).
+2. **سياسة الخصوصية:** تحتاج رابطاً عاماً. صفحتها جاهزة في الموقع (`site/privacy.html`، والإنجليزية `site/en/privacy.html`) وتُنشر مع الموقع على Vercel؛ الرابط يكون `https://<نطاق الموقع>/privacy`. ضع بريد تواصل مكان `[CONTACT_EMAIL]` في `docs/store/privacy-policy.md` ثم أعد توليد الموقع: `python3 scripts/build-site.py`.
 3. **App content:** املأ الأقسام من `data-safety.md` (لا إعلانات، لا جمع بيانات، 13+، الوصول بأي بريد وكلمة مرور من 8 أحرف).
 4. **Store listing:** النصوص من `play-listing.md`، الأيقونة 512×512 (صغّر `assets/images/icon.png`)، صورة الغلاف، و**لقطتان على الأقل** من الهاتف (خذها من نسخة الخطوة 2).
 5. **Testing → Internal testing:** ارفع ملف AAB (يدوياً، أو `eas submit --platform android` بعد إعداد Service Account).

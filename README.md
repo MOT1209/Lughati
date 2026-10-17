@@ -175,3 +175,6 @@ registerAIProvider(provider)     // مزوّد ذكاء اصطناعي
 صُنع بـ ❤️ — **لغتي · Lughati**
 
 </div>
+
+## الموقع
+موقع ثابت (عربي وإنجليزي: صفحة تعريفية وسياسة الخصوصية) في `site/`، يُولَّد بالأمر `python3 scripts/build-site.py` (نص الخصوصية يُقرأ من `docs/store/privacy-policy.md`). خط Cairo مستضاف ذاتياً فلا طلبات لجهات خارجية. النشر على Vercel بنشر مجلد `site/`.
