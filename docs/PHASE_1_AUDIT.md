@@ -190,3 +190,6 @@ Found during the device run and fixed:
 | Setup back (–) | Closed earlier: hardware back is handled in `setup-languages.tsx`. |
 
 Also fixed after §12 (from the 2026-10-17 review): any score completed a lesson (70% pass mark added); the Review tab never received words (a passed lesson now schedules them); the quiz answer position was guessable; review dates were in UTC; reviews now count toward the streak; the match game needs 4 playable words. Tests run in `Asia/Riyadh`.
+
+## 14. After the redesign (2026-10-17)
+All screens moved to the brand design (hero gradient headers, gold CTA, tinted quiz verdicts); translucent hero colours are now theme tokens and the goal-ring arithmetic is a tested helper. Typecheck, lint and the Jest suite pass. **Not verified on a device:** the new look as a whole, the goal ring direction in RTL, keyboard behaviour on sign-in, and the RTL language switch in Expo Go (checklist: `TESTING.md` §9). Sign-in is still a mock and data is local only.
