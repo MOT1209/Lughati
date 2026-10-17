@@ -162,7 +162,7 @@ Found during the device run and fixed:
 | M13 | Medium | After answering, screen readers cannot tell the right option from the wrong one | `components/OptionButton.tsx:28` — **FIXED** |
 | M14 | Medium | Lesson cards give no press feedback | `(tabs)/learn.tsx:51-56` — **FIXED** |
 | M15 | Medium | Progress tab is a "coming soon" placeholder | `(tabs)/progress.tsx` — **FIXED** |
-| M16 | Medium | No screen tests for Home, Profile, Settings, Login/Register, Onboarding, setup-languages, root layout | `src/app` |
+| M16 | Medium | No screen tests for Home, Profile, Settings, Login/Register, Onboarding, setup-languages, root layout | `src/app` — **FIXED** (Profile, Login/Register, Onboarding tests added; Home, Settings, setup-languages already covered) |
 | L17 | Low | Leaving a quiz loses all answers without confirmation | `lesson/[id].tsx` — **FIXED (beforeRemove confirmation + test)** |
 | L19 | Low | A few strings are concatenated in code instead of one interpolated key | `settings.tsx:128`, `learn.tsx:65`, `profile.tsx:63` — **MOSTLY FIXED** |
 | L20 | Low | Unused i18n keys (`app.tagline`, `common.continue`, `common.back`, `common.comingSoon`, `common.minutesShort`, `languageSelection.selected`, `profile.title`, `progress.title`) | locales |
