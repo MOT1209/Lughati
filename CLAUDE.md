@@ -27,6 +27,7 @@ Expo SDK 57 postdates most model knowledge: before touching an Expo/RN API, chec
 - `@testing-library/react-native` is pinned to **13.3.3** and `react-test-renderer` to **19.2.3**: RNTL 14 needs React 19.3 while Expo pins 19.2.3.
 - `tsconfig.json` sets `"types": ["jest"]` because TypeScript 6 no longer auto-loads `@types/*`.
 - `jest.setup.ts` mocks AsyncStorage and the Ionicons font (async glyph loading causes `act()` noise).
+- Jest runs in **`Asia/Riyadh` (UTC+3)**, set by `jest.global-setup.js` (setting `process.env.TZ` inside a test file has no effect). Calendar days come from `utils/day.ts` `dayOf` (local), never `toISOString().slice(0, 10)` (UTC).
 - Cairo fonts are imported per weight (`@expo-google-fonts/cairo/400Regular`, …) so the bundle does not carry every weight.
 
 ## Architecture

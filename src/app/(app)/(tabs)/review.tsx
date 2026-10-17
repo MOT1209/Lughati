@@ -11,6 +11,7 @@ import { getRepositories } from '@/services/repositories';
 import { getVocabularyById } from '@/services/vocabulary';
 import { useLearningStore } from '@/store/learningStore';
 import type { ReviewOutcome, Vocabulary, VocabularyReviewState } from '@/types';
+import { dayOf } from '@/utils/day';
 import { isolateTerm, meaningOf } from '@/utils/meaning';
 import { ROUTES } from '@/utils/routing';
 
@@ -22,9 +23,9 @@ interface DueWord {
   state: VocabularyReviewState;
 }
 
-/** `YYYY-MM-DD` from an ISO timestamp. Hermes has no Intl, and the day is all a learner needs here. */
-function dayOf(iso: string | null): string {
-  return iso ? iso.slice(0, 10) : '';
+/** The learner's local calendar day of an ISO timestamp, or '' when there is none. */
+function localDay(iso: string | null): string {
+  return iso ? dayOf(new Date(iso)) : '';
 }
 
 export default function Review() {
@@ -184,9 +185,9 @@ export default function Review() {
         {answered ? (
           <View style={{ gap: spacing.sm }} accessibilityLiveRegion="polite">
             <Text color="textSecondary">
-              {t('review.lastReviewed', { date: dayOf(saved.lastReviewedAt) })}
+              {t('review.lastReviewed', { date: localDay(saved.lastReviewedAt) })}
             </Text>
-            <Text color="textSecondary">{t('review.nextReview', { date: dayOf(saved.nextReviewAt) })}</Text>
+            <Text color="textSecondary">{t('review.nextReview', { date: localDay(saved.nextReviewAt) })}</Text>
             <Button
               title={index === items.length - 1 ? t('lesson.finish') : t('review.nextWord')}
               onPress={next}
