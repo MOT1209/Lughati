@@ -18,7 +18,7 @@ const src = path.join(root, 'assets/icon-src');
 const out = path.join(root, 'assets/images');
 const fontDir = path.join(root, 'node_modules/@expo-google-fonts/cairo/800ExtraBold/Cairo_800ExtraBold.ttf');
 
-// [source svg, output png, size, transparent background]
+// [source svg, output png, size (or [width, height]), transparent background]
 const jobs = [
   ['icon.svg', 'icon.png', 1024, false],
   ['android-foreground.svg', 'android-icon-foreground.png', 512, true],
@@ -26,22 +26,24 @@ const jobs = [
   ['android-monochrome.svg', 'android-icon-monochrome.png', 432, true],
   ['splash.svg', 'splash-icon.png', 512, true],
   ['icon.svg', 'favicon.png', 48, false],
+  ['feature-graphic.svg', '../store/feature-graphic.png', [1024, 500], false],
 ];
 
 (async () => {
   const font = fs.readFileSync(fontDir).toString('base64');
   const browser = await chromium.launch();
   for (const [svgName, pngName, size, transparent] of jobs) {
-    const page = await browser.newPage({ viewport: { width: size, height: size } });
+    const [width, height] = Array.isArray(size) ? size : [size, size];
+    const page = await browser.newPage({ viewport: { width, height } });
     const svg = fs.readFileSync(path.join(src, svgName), 'utf8');
     await page.setContent(
       `<html><head><style>@font-face{font-family:Cairo;font-weight:800;src:url(data:font/ttf;base64,${font})}` +
-        `html,body{margin:0;background:transparent}svg{width:${size}px;height:${size}px;display:block}</style></head><body>${svg}</body></html>`,
+        `html,body{margin:0;background:transparent}svg{width:${width}px;height:${height}px;display:block}</style></head><body>${svg}</body></html>`,
     );
     await page.evaluate(() => document.fonts.ready);
     await page.screenshot({ path: path.join(out, pngName), omitBackground: transparent });
     await page.close();
-    console.log(`${pngName} ${size}x${size}`);
+    console.log(`${pngName} ${width}x${height}`);
   }
   await browser.close();
 })();

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <defs>
+    <radialGradient id="bg" cx="0.72" cy="0.42" r="0.95">
+      <stop offset="0" stop-color="#11887D"/>
+      <stop offset="0.55" stop-color="#0A4E49"/>
+      <stop offset="1" stop-color="#04201E"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#E8962E" stop-opacity="0"/>
+      <stop offset="0.25" stop-color="#FFD978"/>
+      <stop offset="1" stop-color="#E8962E"/>
+    </linearGradient>
+    <linearGradient id="ink" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#C9F3EA"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feColorMatrix in="b" type="matrix" values="0 0 0 0 0.37  0 0 0 0 0.92  0 0 0 0 0.83  0 0 0 0.55 0"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1024" height="500" fill="url(#bg)"/>
+  <!-- wordmark on the reading-start (right) side; text right-aligned to its left -->
+  <g transform="translate(790 250) scale(0.5) translate(-521 -560)">
+    <text x="512" y="540" text-anchor="middle" font-family="Cairo" font-weight="800" font-size="330" fill="url(#ink)" filter="url(#glow)">لغتي</text>
+    <path d="M230 770 C 400 830, 640 830, 800 750" stroke="url(#gold)" stroke-width="30" stroke-linecap="round" fill="none"/>
+    <circle cx="812" cy="746" r="22" fill="#FFD978"/>
+  </g>
+  <text x="560" y="205" text-anchor="end" font-family="Cairo" font-weight="800" font-size="58" fill="#FFFFFF">تعلّم لغة جديدة</text>
+  <text x="560" y="275" text-anchor="end" font-family="Cairo" font-weight="800" font-size="40" fill="#FFD978">بلغتك أنت</text>
+  <text x="560" y="330" text-anchor="end" font-family="Cairo" font-weight="800" font-size="22" fill="#BFE9E1">الألمانية · الإنجليزية · الإسبانية · الفرنسية · التركية</text>
+</svg>
