@@ -419,3 +419,30 @@ describe('Phase 1 final verification: auth persistence', () => {
     await expect(new MockAuthService(0, storage).getSession()).resolves.toBeNull();
   });
 });
+
+describe('pass mark in the repositories', () => {
+  const day = () => new Date(2026, 9, 15, 12, 0);
+
+  it('a failed run is recorded as an attempt that did not complete the lesson', async () => {
+    const repos = createMockRepositories({ now: day });
+    const after = await repos.progress.completeLesson('u1', 'de-a1-1', { correct: 3, total: 12 });
+
+    expect(after.completedLessonIds).toEqual([]);
+    expect(after.currentLessonId).toBe('de-a1-1');
+    const [attempt] = await repos.progress.getAttempts('u1', 'de');
+    expect(attempt).toMatchObject({ lessonId: 'de-a1-1', completed: false, result: { correct: 3, total: 12 } });
+    const today = await repos.activity.getDay('u1', '2026-10-15');
+    expect(today).toMatchObject({ lessonsCompleted: 0, xp: 30, correctAnswers: 3 });
+  });
+
+  it('a passed run completes the lesson once and counts it in the day', async () => {
+    const repos = createMockRepositories({ now: day });
+    await repos.progress.completeLesson('u1', 'de-a1-1', { correct: 3, total: 12 });
+    await repos.progress.completeLesson('u1', 'de-a1-1', { correct: 10, total: 12 });
+
+    expect((await repos.progress.get('u1', 'de'))?.completedLessonIds).toEqual(['de-a1-1']);
+    const attempts = await repos.progress.getAttempts('u1', 'de');
+    expect(attempts.map((a) => a.completed)).toEqual([false, true]);
+    expect(await repos.activity.getDay('u1', '2026-10-15')).toMatchObject({ lessonsCompleted: 1, xp: 30 + 120 });
+  });
+});

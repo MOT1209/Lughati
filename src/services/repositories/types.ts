@@ -42,7 +42,11 @@ export interface ProgressRepository {
   get(userId: string, language: LanguageCode): Promise<Progress | null>;
   /** The streak belongs to the user and is shared by every language they learn; computed from real activity. */
   getStreak(userId: string): Promise<Streak>;
-  /** Records a finished lesson run and returns the updated progress (also adds study time to the plan). */
+  /**
+   * Records a finished lesson run and returns the updated progress (also adds study time to the
+   * plan). The lesson only counts as completed when the run passes (PASS_RATIO); a failed run still
+   * earns its XP and minutes and leaves the lesson current.
+   */
   completeLesson(userId: string, lessonId: string, result: LessonResult): Promise<Progress>;
   /** Every recorded run for the pair, oldest first, even runs that did not complete the lesson. */
   getAttempts(userId: string, language: LanguageCode): Promise<LessonAttempt[]>;

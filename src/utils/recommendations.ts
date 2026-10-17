@@ -1,6 +1,7 @@
 import type { Lesson, LessonAttempt, LearningPlan, Progress, Recommendation } from '@/types';
 
 import { scoreRatio } from './exercises';
+import { PASS_RATIO } from './progression';
 
 /**
  * Transparent, rule-based learning recommendations — no AI, no randomness, no network. Every rule
@@ -19,7 +20,8 @@ import { scoreRatio } from './exercises';
  * Deterministic: identical inputs produce identical output and ordering.
  */
 
-export const RETRY_SCORE_THRESHOLD = 0.6;
+/** A run below the pass mark leaves the lesson unfinished, so that is exactly when to suggest a retry. */
+export const RETRY_SCORE_THRESHOLD = PASS_RATIO;
 
 export interface RecommendationInput {
   progress: Progress;

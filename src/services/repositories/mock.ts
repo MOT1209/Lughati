@@ -13,7 +13,7 @@ import type {
   VocabularyReviewState,
 } from '@/types';
 import { buildExercises } from '@/utils/exercises';
-import { addStudyMinutes, applyLessonCompletion, XP_LESSON_BONUS, XP_PER_CORRECT_ANSWER } from '@/utils/progression';
+import { addStudyMinutes, applyLessonCompletion, isPassed, lessonXp } from '@/utils/progression';
 import { computeStreakStats } from '@/utils/streaks';
 import { scheduleReview } from '@/utils/srs';
 
@@ -179,8 +179,9 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
           const own = lessons.filter((l) => l.targetLanguage === lesson.targetLanguage);
           const wordCount = vocabulary.filter((w) => w.lessonId === lessonId).length;
           const updated = applyLessonCompletion(current, lesson, own, levels, result, wordCount);
-          const countedAsCompletion = !current.completedLessonIds.includes(lessonId);
-          const xpDelta = result.correct * XP_PER_CORRECT_ANSWER + XP_LESSON_BONUS;
+          const passed = isPassed(result);
+          const countedAsCompletion = passed && !current.completedLessonIds.includes(lessonId);
+          const xpDelta = lessonXp(result);
           const plan = addStudyMinutes(await readPlan(userId, lesson.targetLanguage), lesson.estimatedMinutes);
 
           const attempt: LessonAttempt = {
@@ -190,7 +191,7 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
             targetLanguage: lesson.targetLanguage,
             attemptedAt: now().toISOString(),
             result: { correct: result.correct, total: result.total },
-            completed: true,
+            completed: passed,
           };
           const prior = await attemptsFor(userId, lesson.targetLanguage);
           const attempts = [...prior, attempt].slice(-MAX_ATTEMPTS_PER_RECORD);
