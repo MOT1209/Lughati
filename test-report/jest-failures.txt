@@ -1,0 +1,10 @@
+  ● Home screen › renders the current lesson meta and daily goal from data, not raw keys
+  ● Home screen › renders the current lesson meta and daily goal from data, not raw keys
+  ● Home screen › surfaces the top recommendation with localized copy and a way to act on it
+  ● Home screen › surfaces the top recommendation with localized copy and a way to act on it
+  ● Home screen › shows the hero: streak, current language with a change action, and the daily goal ring
+  ● Home screen › shows the hero: streak, current language with a change action, and the daily goal ring
+  ● Home screen › opens the current lesson from the recommendation row
+  ● Home screen › opens the current lesson from the recommendation row
+  ● Home screen › opens the current lesson from the gold continue button
+  ● Home screen › opens the current lesson from the gold continue button

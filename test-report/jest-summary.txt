@@ -1,0 +1,12 @@
+     [90m 96 |[39m     fireEvent[33m.[39mpress([36mawait[39m screen[33m.[39mfindByRole([32m'button'[39m[33m,[39m { name[33m:[39m [32m'Continue learning'[39m }))[33m;[39m
+     [90m 97 |[39m     expect(router[33m.[39mgetPathname())[33m.[39mtoBe([32m'/lesson/de-a1-1'[39m)[33m;[39m[0m
+
+      at it (src/navigation/learningScreens.test.tsx:94:3)
+      at Object.describe (src/navigation/learningScreens.test.tsx:53:1)
+
+
+Test Suites: 1 failed, 28 passed, 29 total
+Tests:       5 failed, 485 passed, 490 total
+Snapshots:   0 total
+Time:        1045.996 s
+Ran all test suites.
