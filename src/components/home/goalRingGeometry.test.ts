@@ -1,4 +1,4 @@
-import { goalRingGeometry } from './goalRing';
+import { goalRingGeometry } from './goalRingGeometry';
 
 describe('goalRingGeometry', () => {
   it('is empty at 0 minutes and full at the goal', () => {
