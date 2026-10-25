@@ -10,6 +10,7 @@ import LessonScreen from '@/app/(app)/lesson/[id]';
 import { setUiLocale } from '@/i18n';
 import { registerRepositories } from '@/services/repositories';
 import { createMockRepositories } from '@/services/repositories/mock';
+import { getSpeechService, registerSpeechService } from '@/services/speech';
 import { useAuthStore } from '@/store/authStore';
 import { useLearningStore } from '@/store/learningStore';
 import type { VocabularyReviewState } from '@/types';
@@ -247,6 +248,42 @@ describe('Lesson practice entry', () => {
     expect(await screen.findByText('What does this word mean?')).toBeTruthy();
   }, SLOW_TEST_TIMEOUT);
 
+  it('opens the listening practice, whose run is an attempt, not a completion', async () => {
+    const repos = createMockRepositories();
+    registerRepositories(repos);
+    renderRouter(routes, { initialUrl: '/lesson/de-a1-1' });
+    fireEvent.press(await screen.findByRole('button', { name: 'Listening practice' }));
+    expect(await screen.findByText('Listen and pick the word you hear')).toBeTruthy();
+
+    for (let i = 0; i < 6; i += 1) {
+      fireEvent.press(screen.getAllByRole('button', { name: /^Option: / })[0]!);
+      await act(async () => {
+        fireEvent.press(screen.getByRole('button', { name: i === 5 ? 'Finish' : 'Next' }));
+      });
+    }
+    expect(await screen.findByText('Listening practice complete')).toBeTruthy();
+    const attempts = await repos.progress.getAttempts('u1', 'de');
+    expect(attempts).toEqual([expect.objectContaining({ lessonId: 'de-a1-1', completed: false, kind: 'practice', result: expect.objectContaining({ total: 6 }) })]);
+    expect((await repos.progress.get('u1', 'de'))?.completedLessonIds ?? []).not.toContain('de-a1-1');
+
+    fireEvent.press(screen.getByRole('button', { name: 'Continue' }));
+    expect(await screen.findByRole('button', { name: 'Listening practice' })).toBeTruthy();
+  }, SLOW_TEST_TIMEOUT);
+
+  it('hides the listening practice and the listen buttons when the device has no voice for the language', async () => {
+    const original = getSpeechService();
+    registerSpeechService({ supports: async () => false, speak: () => {}, stop: () => {} });
+    try {
+      renderRouter(routes, { initialUrl: '/lesson/de-a1-1' });
+      await screen.findByRole('button', { name: 'Play matching practice' });
+      await act(async () => {});
+      expect(screen.queryByRole('button', { name: 'Listening practice' })).toBeNull();
+      expect(screen.queryByRole('button', { name: /^Listen to / })).toBeNull();
+    } finally {
+      registerSpeechService(original);
+    }
+  }, SLOW_TEST_TIMEOUT);
+
   it('hides the practice when the lesson has too few words', async () => {
     const repos = createMockRepositories();
     registerRepositories({
@@ -259,5 +296,6 @@ describe('Lesson practice entry', () => {
     renderRouter(routes, { initialUrl: '/lesson/de-a1-1' });
     await screen.findByText(isolateLtr('Hallo'));
     expect(screen.queryByRole('button', { name: 'Play matching practice' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Listening practice' })).toBeNull();
   }, SLOW_TEST_TIMEOUT);
 });

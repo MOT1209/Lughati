@@ -190,6 +190,7 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
             attemptedAt: now().toISOString(),
             result: { correct: result.correct, total: result.total },
             completed: passed,
+            kind: 'lesson',
           };
           const prior = await attemptsFor(userId, lesson.targetLanguage);
           const attempts = [...prior, attempt].slice(-MAX_ATTEMPTS_PER_RECORD);
@@ -255,6 +256,7 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
             attemptedAt: now().toISOString(),
             result: { correct: result.correct, total: result.total },
             completed,
+            kind: options?.kind ?? 'lesson',
           };
           const prior = await attemptsFor(userId, lesson.targetLanguage);
           const attempts = [...prior, attempt].slice(-MAX_ATTEMPTS_PER_RECORD);

@@ -269,6 +269,15 @@ export const en: Translation = {
     version: 'Version: {{version}}',
     aboutText: 'A language-learning app for Arabic speakers.',
   },
+  listening: {
+    play: 'Listening practice',
+    instruction: 'Listen and pick the word you hear',
+    listen: 'Listen',
+    listenAgain: 'Listen again',
+    wordWas: 'The word: {{term}} ({{meaning}})',
+    summaryTitle: 'Listening practice complete',
+    summaryScore: 'You recognised {{correct}} of {{total}} by ear',
+  },
   speech: {
     listen: 'Listen to {{term}}',
   },

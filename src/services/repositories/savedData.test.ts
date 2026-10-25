@@ -196,6 +196,10 @@ describe('new records: attempts, activity and review states', () => {
     expect(isSavedAttemptList([validAttempt(), validAttempt({ id: 'a2', lessonId: 'de-a1-2', completed: false, result: { correct: 4, total: 12 } })])).toBe(true);
 
     expect(isSavedAttemptList([])).toBe(false);
+    // The run kind is optional (older saves have none) but must be a known one.
+    expect(isSavedAttemptList([validAttempt({ kind: 'practice' })])).toBe(true);
+    expect(isSavedAttemptList([validAttempt({ kind: 'lesson' })])).toBe(true);
+    expect(isSavedAttemptList([validAttempt({ kind: 'quiz' as never })])).toBe(false);
     expect(isSavedAttemptList('array-not')).toBe(false);
     expect(isSavedAttemptList([validAttempt({ lessonId: 'fr-a1-1' })])).toBe(false); // lesson of another language
     expect(isSavedAttemptList([validAttempt({ targetLanguage: 'xx' as unknown as LanguageCode })])).toBe(false);
