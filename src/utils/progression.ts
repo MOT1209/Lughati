@@ -23,6 +23,17 @@ function takeOrder(lessons: Lesson[], levels: Level[]): Lesson[] {
 }
 
 /**
+ * The first lesson, in take order, that is not completed and sits at or below `levelId`; null when
+ * there is none. Also used on read: a learner who finished everything before new lessons shipped
+ * resumes at the first new one instead of having no current lesson.
+ */
+export function nextLessonId(completedIds: string[], levelId: LevelId, lessons: Lesson[], levels: Level[]): string | null {
+  const rank = (id: LevelId) => levels.findIndex((level) => level.id === id);
+  const ceiling = rank(levelId);
+  return takeOrder(lessons, levels).find((l) => !completedIds.includes(l.id) && rank(l.levelId) <= ceiling)?.id ?? null;
+}
+
+/**
  * Pure progression rules. A run below PASS_RATIO changes nothing structural: the lesson stays
  * current and its words are not counted; its XP and study time still count. Replaying a lesson
  * also changes nothing structural and adds no new words; its XP and study time still count.
@@ -59,14 +70,11 @@ export function applyLessonCompletion(
   const here = atLevel(levelIndex);
   const done = here.filter((l) => completed.includes(l.id)).length;
 
-  const rankOfLevel = (id: LevelId) => levels.findIndex((level) => level.id === id);
-  const next = ordered.find((l) => !completed.includes(l.id) && rankOfLevel(l.levelId) <= levelIndex);
-
   return {
     ...progress,
     levelId,
     completedLessonIds: completed,
-    currentLessonId: next?.id ?? null,
+    currentLessonId: nextLessonId(completed, levelId, languageLessons, levels),
     levelProgress: here.length === 0 ? 0 : Math.round((done / here.length) * 100) / 100,
     ...studied,
     wordsLearned: progress.wordsLearned + (isReplay ? 0 : wordCount),
