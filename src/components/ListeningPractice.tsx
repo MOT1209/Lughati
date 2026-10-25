@@ -25,6 +25,7 @@ interface ListeningPracticeProps {
 /**
  * "Hear it, pick the written word": one question per lesson word, read by the device's voice.
  * Nothing plays on its own (the learner presses Listen), so it never talks over a screen reader.
+ * The options unlock once the word has been played, so a question cannot be answered unheard.
  * A practice run: it records an attempt, never a lesson completion.
  */
 export function ListeningPractice({ lessonId, words, source = null, onFinish, onExit }: ListeningPracticeProps) {
@@ -113,7 +114,7 @@ export function ListeningPractice({ lessonId, words, source = null, onFinish, on
   };
 
   const onSelect = (id: string) => {
-    if (answered) return;
+    if (answered || !heard) return;
     setSelectedId(id);
     if (id === exercise.answer) setCorrect((n) => n + 1);
   };
@@ -138,6 +139,8 @@ export function ListeningPractice({ lessonId, words, source = null, onFinish, on
       void finalize({ correct, total });
       return;
     }
+    // The next question starts silent: a word still being read must not carry over.
+    if (ownsSpeech.current) getSpeechService().stop();
     setSelectedId(null);
     setHeard(false);
     setIndex((i) => i + 1);
@@ -162,6 +165,11 @@ export function ListeningPractice({ lessonId, words, source = null, onFinish, on
           icon={speaking ? 'volume-high' : 'volume-high-outline'}
           onPress={listen}
         />
+        {heard ? null : (
+          <Text variant="caption" color="textSecondary">
+            {t('listening.listenFirst')}
+          </Text>
+        )}
       </Card>
 
       <View style={{ gap: spacing.sm }}>
@@ -171,7 +179,7 @@ export function ListeningPractice({ lessonId, words, source = null, onFinish, on
             text={label(id)}
             accessibilityLabel={t('lesson.option', { text: label(id) })}
             state={stateOf(id)}
-            disabled={answered}
+            disabled={answered || !heard}
             onPress={() => onSelect(id)}
           />
         ))}

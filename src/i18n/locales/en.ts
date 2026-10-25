@@ -275,6 +275,7 @@ export const en: Translation = {
     instruction: 'Listen and pick the word you hear',
     listen: 'Listen',
     listenAgain: 'Listen again',
+    listenFirst: 'Press Listen first',
     wordWas: 'The word: {{term}} ({{meaning}})',
     summaryTitle: 'Listening practice complete',
     summaryScore: 'You recognised {{correct}} of {{total}} by ear',
