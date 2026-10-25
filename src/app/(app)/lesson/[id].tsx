@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { LessonQuiz } from '@/components/LessonQuiz';
 import { MIN_MATCH_WORDS, VocabularyMatchGame } from '@/components/VocabularyMatchGame';
+import { PronounceButton } from '@/components/PronounceButton';
 import { ScreenHero } from '@/components/ScreenHero';
 import { Button, Card, EmptyState, ErrorState, LoadingState, Screen, Text } from '@/components/ui';
 import { useAsyncData } from '@/hooks/useAsyncData';
@@ -193,15 +194,21 @@ export default function LessonScreen() {
                 styles.word,
                 { gap: spacing.md, paddingTop: i === 0 ? 0 : spacing.sm, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: colors.border },
               ]}
-              accessible
-              accessibilityLabel={`${word.term}: ${meaningOf(word, source)}`}
             >
-              <Text variant="bodyStrong" style={styles.flex}>
-                {isolateTerm(word)}
-              </Text>
-              <Text variant="small" color="textSecondary" style={styles.flex}>
-                {meaningOf(word, source)}
-              </Text>
+              {/* Word and meaning are read as one item; the listen button stays its own control. */}
+              <View
+                style={[styles.word, styles.flex, { gap: spacing.md }]}
+                accessible
+                accessibilityLabel={`${word.term}: ${meaningOf(word, source)}`}
+              >
+                <Text variant="bodyStrong" style={styles.flex}>
+                  {isolateTerm(word)}
+                </Text>
+                <Text variant="small" color="textSecondary" style={styles.flex}>
+                  {meaningOf(word, source)}
+                </Text>
+              </View>
+              <PronounceButton text={word.term} language={word.targetLanguage} />
             </View>
           ))}
         </Card>
