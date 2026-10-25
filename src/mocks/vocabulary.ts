@@ -82,7 +82,8 @@ const termsA1: Record<TargetCode, string[][]> = {
 };
 
 // A2: same layout as A1 (lesson i of mocks/lessons.ts a2Templates, word j). Verbs are listed in
-// their dictionary form (Arabic: present tense, third person).
+// their dictionary form (Arabic: present tense, third person). Where a language says "I am hungry"
+// with a verb (fr avoir faim, es tener hambre), the word is that phrase, not a rarer adjective.
 const arabicA2: string[][] = [
   ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'عطلة نهاية الأسبوع'],
   ['شمس', 'مطر', 'ثلج', 'رياح', 'حار', 'بارد'],
@@ -131,7 +132,7 @@ const termsA2: Record<TargetCode, string[][]> = {
     ['el deporte', 'la música', 'la lectura', 'la natación', 'la película', 'el dibujo'],
     ['el aeropuerto', 'el hotel', 'el pasaporte', 'la maleta', 'el tren', 'el viaje'],
     ['comer', 'beber', 'dormir', 'trabajar', 'leer', 'escribir'],
-    ['feliz', 'triste', 'cansado', 'hambriento', 'grande', 'pequeño'],
+    ['feliz', 'triste', 'cansado', 'tener hambre', 'grande', 'pequeño'],
   ],
   fr: [
     ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'le week-end'],
@@ -143,13 +144,13 @@ const termsA2: Record<TargetCode, string[][]> = {
     ['le sport', 'la musique', 'la lecture', 'la natation', 'le film', 'le dessin'],
     ["l'aéroport", "l'hôtel", 'le passeport', 'la valise', 'le train', 'le voyage'],
     ['manger', 'boire', 'dormir', 'travailler', 'lire', 'écrire'],
-    ['heureux', 'triste', 'fatigué', 'affamé', 'grand', 'petit'],
+    ['heureux', 'triste', 'fatigué', 'avoir faim', 'grand', 'petit'],
   ],
   tr: [
     ['pazartesi', 'salı', 'çarşamba', 'perşembe', 'cuma', 'hafta sonu'],
     ['güneş', 'yağmur', 'kar', 'rüzgâr', 'sıcak', 'soğuk'],
     ['baş', 'el', 'göz', 'doktor', 'ilaç', 'hasta'],
-    ['gömlek', 'ayakkabı', 'mont', 'fiyat', 'ucuz', 'pahalı'],
+    ['gömlek', 'ayakkabı', 'palto', 'fiyat', 'ucuz', 'pahalı'],
     ['mutfak', 'yatak odası', 'banyo', 'kapı', 'pencere', 'yatak'],
     ['iş', 'ofis', 'öğretmen', 'öğrenci', 'kitap', 'toplantı'],
     ['spor', 'müzik', 'okuma', 'yüzme', 'film', 'resim'],
