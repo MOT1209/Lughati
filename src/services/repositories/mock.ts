@@ -314,10 +314,12 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
       },
       getDue: async (userId, language, dueUpTo = now()) => {
         const reviews = await readReviews(storage);
-        const limit = dueUpTo.toISOString();
+        // Due from the start of its local calendar day, not the exact hour: a word scheduled for
+        // "tomorrow" by a lesson at 22:00 is offered tomorrow morning, matching the day shown.
+        const today = dayOf(dueUpTo);
         return Object.entries(reviews)
           .filter(([name, state]) => name === reviewStateKey(state) && state.userId === userId && state.targetLanguage === language)
-          .filter(([, state]) => state.nextReviewAt <= limit)
+          .filter(([, state]) => dayOf(new Date(state.nextReviewAt)) <= today)
           .map(([, state]) => state)
           .sort((a, b) => a.nextReviewAt.localeCompare(b.nextReviewAt));
       },
