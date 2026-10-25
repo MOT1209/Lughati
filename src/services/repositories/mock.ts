@@ -14,7 +14,7 @@ import type {
   VocabularyReviewState,
 } from '@/types';
 import { buildExercises } from '@/utils/exercises';
-import { addStudyMinutes, applyLessonCompletion, isPassed, lessonXp } from '@/utils/progression';
+import { addStudyMinutes, applyLessonCompletion, isPassed, lessonXp, nextLessonId } from '@/utils/progression';
 import { computeStreakStats } from '@/utils/streaks';
 import { initialReviewState, scheduleReview } from '@/utils/srs';
 
@@ -90,8 +90,14 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
     return run;
   };
 
-  const readProgress = async (userId: string, language: LanguageCode) =>
-    (await load()).progress[key(userId, language)] ?? getMockProgress(userId, language);
+  const readProgress = async (userId: string, language: LanguageCode) => {
+    const saved = (await load()).progress[key(userId, language)];
+    if (!saved) return getMockProgress(userId, language);
+    if (saved.currentLessonId !== null) return saved;
+    // Saved with nothing left to take; lessons added since then become the next step.
+    const own = lessons.filter((l) => l.targetLanguage === language);
+    return { ...saved, currentLessonId: nextLessonId(saved.completedLessonIds, saved.levelId, own, levels) };
+  };
 
   const readPlan = async (userId: string, language: LanguageCode): Promise<LearningPlan> => {
     const entry = (await load()).plans[key(userId, language)];

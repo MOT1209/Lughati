@@ -274,6 +274,7 @@ export const ar = {
     instruction: 'استمع واختر الكلمة التي تسمعها',
     listen: 'استمع',
     listenAgain: 'استمع مجدداً',
+    listenFirst: 'اضغط «استمع» أولاً',
     wordWas: 'الكلمة: {{term}} ({{meaning}})',
     summaryTitle: 'انتهى تدريب الاستماع',
     summaryScore: 'عرفت {{correct}} من {{total}} بالسمع',
