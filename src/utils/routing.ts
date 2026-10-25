@@ -8,9 +8,7 @@ export const ROUTES = {
   setupLanguages: '/setup-languages',
   settings: '/settings',
   learn: '/learn',
-  lesson: (id: string) => `/lesson/${id}` as const,
-  // Expo Router typed routes require an object with pathname + params.
-  // Keep the string form for legacy usage, but prefer this helper for navigation.
+  // Expo Router typed routes require an object with pathname + params for dynamic routes.
   lessonRoute: (id: string) => ({ pathname: '/lesson/[id]' as const, params: { id } } as const),
   review: '/review',
 } as const;

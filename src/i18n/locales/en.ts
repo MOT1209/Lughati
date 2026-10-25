@@ -141,6 +141,7 @@ export const en: Translation = {
     correctAnswerWas: 'Correct answer: {{answer}}',
     next: 'Next',
     finish: 'Finish',
+    finishTitle: 'Finish the lesson',
     finishConfirmation: 'Are you sure you want to finish the lesson?',
     cancel: 'Cancel',
     summaryTitle: 'Well done! Lesson complete',

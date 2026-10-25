@@ -50,7 +50,7 @@ export function LessonQuiz({ exercises, words, source, onFinish }: LessonQuizPro
     if (isLast) {
       // Confirm before finishing the lesson; RN has no window.confirm, so use Alert.alert.
       Alert.alert(
-        t('lesson.summaryTitle'),
+        t('lesson.finishTitle'),
         t('lesson.finishConfirmation'),
         [
           { text: t('lesson.cancel'), style: 'cancel' },

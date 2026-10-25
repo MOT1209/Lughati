@@ -140,6 +140,7 @@ export const ar = {
     correctAnswerWas: 'الإجابة الصحيحة: {{answer}}',
     next: 'التالي',
     finish: 'إنهاء',
+    finishTitle: 'إنهاء الدرس',
     finishConfirmation: 'هل تريد إنهاء الدرس؟',
     cancel: 'إلغاء',
     summaryTitle: 'أحسنت! أنهيت الدرس',
