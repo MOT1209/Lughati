@@ -8,7 +8,26 @@ import { isolate, isolateLtr } from './bidi';
 import { isolateTerm, meaningLanguage, meaningOf } from './meaning';
 import { buildExercises, OPTIONS_PER_EXERCISE } from './exercises';
 import { answer, initialSession, isFinished, next } from './lessonSession';
-import { applyLessonCompletion, isPassed, lessonXp, PASS_RATIO, XP_LESSON_BONUS, XP_PER_CORRECT_ANSWER } from './progression';
+import {
+  applyLessonCompletion,
+  isPassed,
+  lessonXp,
+  MAX_RUN_MINUTES,
+  PASS_RATIO,
+  studyMinutesOf,
+  XP_LESSON_BONUS,
+  XP_PER_CORRECT_ANSWER,
+} from './progression';
+
+describe('studyMinutesOf', () => {
+  it('rounds the real run time to whole minutes, at least 1 and at most MAX_RUN_MINUTES', () => {
+    expect(studyMinutesOf(2 * 60_000)).toBe(2);
+    expect(studyMinutesOf(100_000)).toBe(2);
+    expect(studyMinutesOf(10_000)).toBe(1);
+    expect(studyMinutesOf(-5)).toBe(1);
+    expect(studyMinutesOf(5 * 60 * 60_000)).toBe(MAX_RUN_MINUTES);
+  });
+});
 
 const wordsOf = (lessonId: string) => vocabulary.filter((w) => w.lessonId === lessonId);
 const targets = languages.filter((l) => l.roles.includes('target')).map((l) => l.code);
@@ -176,7 +195,7 @@ describe('applyLessonCompletion', () => {
   };
   const perfect = { correct: 12, total: 12 };
   const complete = (progress: Progress, id: string, result = perfect) =>
-    applyLessonCompletion(progress, german.find((l) => l.id === id)!, german, levels, result, 6);
+    applyLessonCompletion(progress, german.find((l) => l.id === id)!, german, levels, result, 6, 3);
 
   it('marks the lesson done, moves to the next one and updates counters', () => {
     const after = complete(base, 'de-a1-1');
@@ -186,7 +205,7 @@ describe('applyLessonCompletion', () => {
     expect(after.levelProgress).toBeCloseTo(0.1, 2);
     expect(after.totalXp).toBe(100 + 12 * XP_PER_CORRECT_ANSWER + XP_LESSON_BONUS);
     expect(after.wordsLearned).toBe(16);
-    expect(after.minutesLearned).toBe(20 + german[0]!.estimatedMinutes);
+    expect(after.minutesLearned).toBe(20 + 3);
   });
 
   it('raises the level and clears the current lesson when the last lesson of a level is done', () => {
@@ -213,7 +232,7 @@ describe('applyLessonCompletion', () => {
     expect(after.levelProgress).toBe(0);
     expect(after.wordsLearned).toBe(base.wordsLearned);
     expect(after.totalXp).toBe(base.totalXp);
-    expect(after.minutesLearned).toBe(20 + german[0]!.estimatedMinutes);
+    expect(after.minutesLearned).toBe(20 + 3);
 
     const close = complete(base, 'de-a1-1', { correct: 8, total: 12 }); // 67%
     expect(close.completedLessonIds).toEqual([]);

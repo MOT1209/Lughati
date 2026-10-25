@@ -16,6 +16,15 @@ export function lessonXp(result: LessonResult): number {
   return result.correct * XP_PER_CORRECT_ANSWER + (isPassed(result) ? XP_LESSON_BONUS : 0);
 }
 
+/** Upper bound on the study time one run can credit, so a quiz left open does not inflate the total. */
+export const MAX_RUN_MINUTES = 30;
+
+/** Whole minutes actually spent on a run: at least 1, at most MAX_RUN_MINUTES. */
+export function studyMinutesOf(elapsedMs: number): number {
+  const minutes = Math.round(Math.max(0, elapsedMs) / 60_000);
+  return Math.min(Math.max(minutes, 1), MAX_RUN_MINUTES);
+}
+
 /** Lessons of a language ordered the way they are taken: by level, then by order. */
 function takeOrder(lessons: Lesson[], levels: Level[]): Lesson[] {
   const rank = (id: LevelId) => levels.findIndex((level) => level.id === id);
@@ -37,11 +46,12 @@ export function applyLessonCompletion(
   levels: Level[],
   result: LessonResult,
   wordCount: number,
+  minutes: number,
 ): Progress {
   const isReplay = progress.completedLessonIds.includes(lesson.id);
   const studied = {
     totalXp: progress.totalXp + lessonXp(result),
-    minutesLearned: progress.minutesLearned + lesson.estimatedMinutes,
+    minutesLearned: progress.minutesLearned + minutes,
   };
   if (!isPassed(result)) return { ...progress, ...studied };
 

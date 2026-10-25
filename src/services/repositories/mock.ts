@@ -167,20 +167,21 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
         const stats = computeStreakStats(days, todayOf());
         return { userId, days: stats.current, best: stats.best };
       },
-      completeLesson: (userId, lessonId, result) =>
+      completeLesson: (userId, lessonId, result, options) =>
         exclusive(async () => {
           const lesson = lessonOf(lessonId);
           if (!lesson) throw new Error(`Unknown lesson "${lessonId}"`);
+          const minutes = options?.minutes ?? lesson.estimatedMinutes;
           const current = await readProgress(userId, lesson.targetLanguage);
           if (!current) throw new Error(`No progress for ${lesson.targetLanguage}`);
 
           const own = lessons.filter((l) => l.targetLanguage === lesson.targetLanguage);
           const wordCount = vocabulary.filter((w) => w.lessonId === lessonId).length;
-          const updated = applyLessonCompletion(current, lesson, own, levels, result, wordCount);
+          const updated = applyLessonCompletion(current, lesson, own, levels, result, wordCount, minutes);
           const passed = isPassed(result);
           const countedAsCompletion = passed && !current.completedLessonIds.includes(lessonId);
           const xpDelta = lessonXp(result);
-          const plan = addStudyMinutes(await readPlan(userId, lesson.targetLanguage), lesson.estimatedMinutes);
+          const plan = addStudyMinutes(await readPlan(userId, lesson.targetLanguage), minutes);
 
           const attempt: LessonAttempt = {
             id: `${userId}:${lesson.targetLanguage}:${lessonId}:${now().toISOString()}`,
@@ -221,7 +222,7 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
           }
 
           const { saved, next: withActivity } = await recordActivity(userId, {
-            minutes: lesson.estimatedMinutes,
+            minutes,
             xp: xpDelta,
             lessonsCompleted: countedAsCompletion ? 1 : 0,
             correctAnswers: result.correct,

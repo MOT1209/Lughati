@@ -17,7 +17,7 @@ import { useLearningStore } from '@/store/learningStore';
 import type { LessonResult } from '@/types';
 import { localize } from '@/utils/localize';
 import { isolateTerm, meaningOf } from '@/utils/meaning';
-import { isPassed, lessonXp, PASS_RATIO } from '@/utils/progression';
+import { isPassed, lessonXp, PASS_RATIO, studyMinutesOf } from '@/utils/progression';
 
 type Step = 'intro' | 'quiz' | 'practice' | 'summary';
 
@@ -34,7 +34,12 @@ export default function LessonScreen() {
   const [saveFailed, setSaveFailed] = useState(false);
   const [quizRun, setQuizRun] = useState(0); // a new run remounts the quiz with a fresh session
   const saving = useRef(false); // a double tap on the last button must not record the lesson twice
+  const quizStartedAt = useRef(0); // study time is what the run really took, not the lesson's estimate
   const navigation = useNavigation();
+
+  useEffect(() => {
+    if (step === 'quiz') quizStartedAt.current = Date.now();
+  }, [step, quizRun]);
 
   // Leaving mid-quiz (header back, Android back, a swipe) would drop every answer given so far,
   // so ask first. Other steps have nothing unsaved and leave without a prompt.
@@ -89,7 +94,8 @@ export default function LessonScreen() {
     setSaveFailed(false);
     setResult(final);
     try {
-      await getRepositories().progress.completeLesson(userId, lesson.id, final);
+      const minutes = studyMinutesOf(Date.now() - quizStartedAt.current);
+      await getRepositories().progress.completeLesson(userId, lesson.id, final, { minutes });
       notifyProgressChanged();
       setStep('summary');
     } catch {

@@ -145,6 +145,16 @@ describe('lesson content and completion', () => {
     expect((await other.progress.get('u1', 'de'))!.completedLessonIds).not.toContain('de-a1-3');
   });
 
+  it('completeLesson credits the measured minutes, not the lesson estimate', async () => {
+    const repos = createMockRepositories();
+    const planBefore = await repos.plans.get('u1', 'de');
+
+    const updated = await repos.progress.completeLesson('u1', 'de-a1-3', { correct: 8, total: 10 }, { minutes: 2 });
+
+    expect(updated.minutesLearned).toBe(2);
+    expect((await repos.plans.get('u1', 'de')).minutesToday).toBe(planBefore.minutesToday + 2);
+  });
+
   it('rejects an unknown lesson', async () => {
     const repos = createMockRepositories();
     await expect(repos.progress.completeLesson('u1', 'nope', { correct: 1, total: 1 })).rejects.toThrow();

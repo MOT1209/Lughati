@@ -45,9 +45,10 @@ export interface ProgressRepository {
   /**
    * Records a finished lesson run and returns the updated progress (also adds study time to the
    * plan). The lesson only counts as completed when the run passes (PASS_RATIO); a failed run still
-   * earns its XP and minutes and leaves the lesson current.
+   * earns its XP and minutes and leaves the lesson current. `minutes` is the time the run really
+   * took (the lesson screen measures it); without it the lesson's estimate is used.
    */
-  completeLesson(userId: string, lessonId: string, result: LessonResult): Promise<Progress>;
+  completeLesson(userId: string, lessonId: string, result: LessonResult, options?: { minutes?: number }): Promise<Progress>;
   /** Every recorded run for the pair, oldest first, even runs that did not complete the lesson. */
   getAttempts(userId: string, language: LanguageCode): Promise<LessonAttempt[]>;
   /**
