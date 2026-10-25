@@ -467,6 +467,16 @@ describe('a passed lesson feeds the vocabulary review', () => {
     expect(await repos.reviews.getDue('u2', 'de', tomorrow())).toEqual([]); // per user
   });
 
+  it('a word is due from the start of its local day, not the hour of the lesson', async () => {
+    clock = new Date(2026, 9, 15, 22, 0); // lesson late in the evening
+    const repos = createMockRepositories({ now });
+    await repos.progress.completeLesson('u1', 'de-a1-1', { correct: 12, total: 12 });
+
+    expect(await repos.reviews.getDue('u1', 'de', new Date(2026, 9, 15, 23, 59))).toEqual([]); // still the same day
+    expect(await repos.reviews.getDue('u1', 'de', new Date(2026, 9, 16, 0, 5))).toHaveLength(6); // just after local midnight
+    expect(await repos.reviews.getDue('u1', 'de', new Date(2026, 9, 16, 7, 0))).toHaveLength(6); // next morning
+  });
+
   it('getDue follows the injected clock by default', async () => {
     const repos = createMockRepositories({ now });
     await repos.progress.completeLesson('u1', 'de-a1-1', { correct: 12, total: 12 });

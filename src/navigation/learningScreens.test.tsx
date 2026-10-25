@@ -1,4 +1,5 @@
 import { act, fireEvent } from '@testing-library/react-native';
+import { router, Tabs } from 'expo-router';
 import { renderRouter, screen } from 'expo-router/testing-library';
 
 import HomeScreen from '@/app/(app)/(tabs)/home';
@@ -178,6 +179,47 @@ describe('Review screen', () => {
     registerRepositories({ ...repos, reviews: { ...repos.reviews, getDue: async () => [] } });
     renderRouter({ review: ReviewScreen }, { initialUrl: '/review' });
     expect(await screen.findByText('Nothing to review right now')).toBeTruthy();
+  }, SLOW_TEST_TIMEOUT);
+
+  // Real tabs, as in the app: switching tabs keeps the review screen mounted.
+  const tabRoutes = { _layout: () => <Tabs />, review: ReviewScreen, other: () => null };
+
+  it('re-reads the due words when the tab comes back into view', async () => {
+    // Tabs stay mounted: words that fell due (or were added by a lesson) while the learner was
+    // elsewhere must show up when they return, not only after an app restart.
+    let due: VocabularyReviewState[] = [];
+    const repos = createMockRepositories();
+    registerRepositories({ ...repos, reviews: { ...repos.reviews, getDue: async () => due } });
+    renderRouter(tabRoutes, { initialUrl: '/review' });
+    expect(await screen.findByText('Nothing to review right now')).toBeTruthy();
+
+    act(() => router.navigate('/other'));
+    due = [dueState];
+    act(() => router.navigate('/review'));
+    expect(await screen.findByText(isolateLtr('Hallo'))).toBeTruthy();
+    expect(screen.getByText('1 of 1')).toBeTruthy();
+  }, SLOW_TEST_TIMEOUT);
+
+  it('starts a fresh session after a finished one when the tab is shown again', async () => {
+    let due: VocabularyReviewState[] = [dueState];
+    const repos = createMockRepositories();
+    registerRepositories({ ...repos, reviews: { ...repos.reviews, getDue: async () => due } });
+    renderRouter(tabRoutes, { initialUrl: '/review' });
+
+    fireEvent.press(await screen.findByRole('button', { name: 'Show meaning' }));
+    await act(async () => {
+      fireEvent.press(screen.getByRole('button', { name: /^Again, / }));
+    });
+    fireEvent.press(await screen.findByRole('button', { name: 'Finish' }));
+    expect(await screen.findByText('Review session complete')).toBeTruthy();
+
+    // "Again" makes the word due immediately: coming back offers it again from the start.
+    act(() => router.navigate('/other'));
+    due = [{ ...dueState, wordId: 'de-a1-1-w2' }];
+    act(() => router.navigate('/review'));
+    expect(await screen.findByRole('button', { name: 'Show meaning' })).toBeTruthy();
+    expect(screen.queryByText('Review session complete')).toBeNull();
+    expect(screen.getByText('1 of 1')).toBeTruthy();
   }, SLOW_TEST_TIMEOUT);
 
   it('asks for a language instead of guessing when there is no session', async () => {

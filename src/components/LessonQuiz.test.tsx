@@ -69,6 +69,8 @@ describe('LessonQuiz', () => {
       fireEvent.press(screen.getByRole('button', { name: index === exercises.length - 1 ? 'Finish' : 'Next' }));
     });
     expect(alertSpy).toHaveBeenCalledTimes(1);
+    // The score is not known yet (3 of 12 fails), so the confirmation must not congratulate.
+    expect(alertSpy.mock.calls[0]![0]).toBe('Finish the lesson');
     expect(onFinish).toHaveBeenCalledTimes(1);
     expect(onFinish).toHaveBeenCalledWith({ correct: 3, total: 12 });
     alertSpy.mockRestore();

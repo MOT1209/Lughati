@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import { useRef, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -13,7 +13,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { getRepositories } from '@/services/repositories';
 import { getVocabularyById } from '@/services/vocabulary';
 import { useLearningStore } from '@/store/learningStore';
-import type { ReviewOutcome, Vocabulary, VocabularyReviewState } from '@/types';
+import type { LanguageCode, ReviewOutcome, Vocabulary, VocabularyReviewState } from '@/types';
 import { dayOf } from '@/utils/day';
 import { scheduleReview } from '@/utils/srs';
 import { isolateTerm, meaningOf } from '@/utils/meaning';
@@ -36,18 +36,23 @@ function localDay(iso: string | null): string {
 
 export default function Review() {
   const { t } = useTranslation();
-  const { spacing } = useTheme();
   const learning = useCurrentLearning();
-  const source = useLearningStore((s) => s.profile?.source ?? null);
-  const notifyProgressChanged = useLearningStore((s) => s.notifyProgressChanged);
   const userId = learning.user?.id ?? '';
   const code = learning.code;
-  const [index, setIndex] = useState(0);
-  const [revealed, setRevealed] = useState(false);
-  const [saved, setSaved] = useState<VocabularyReviewState | null>(null);
-  const [pendingOutcome, setPendingOutcome] = useState<ReviewOutcome | null>(null);
-  const [saveFailed, setSaveFailed] = useState(false);
-  const saving = useRef(false); // a double tap must not record the same review twice
+  // Tabs stay mounted, so the due list is re-read each time the tab comes back into view: words
+  // fall due while the app is open and lessons add new ones. Not on progressVersion: a review
+  // itself bumps it, and reloading mid-session would shift the list under the current index.
+  const [visit, setVisit] = useState(0);
+  const firstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (firstFocus.current) {
+        firstFocus.current = false;
+        return;
+      }
+      setVisit((n) => n + 1);
+    }, []),
+  );
 
   const data = useAsyncData(async () => {
     const [due, byId] = await Promise.all([
@@ -59,8 +64,8 @@ export default function Review() {
       const word = byId.get(state.wordId);
       if (word) items.push({ word, state });
     }
-    return { items };
-  }, [userId, code]);
+    return { items, visit };
+  }, [userId, code, visit]);
 
   if (learning.status === 'loading' || data.status === 'loading') {
     return (
@@ -91,7 +96,23 @@ export default function Review() {
     );
   }
 
-  const items = data.data.items;
+  // A new list starts a new session (index, revealed answer and save state reset with the key).
+  // The previous list stays on screen until the new one has loaded (see useAsyncData).
+  return <ReviewSession key={data.data.visit} items={data.data.items} userId={userId} code={code} />;
+}
+
+function ReviewSession({ items, userId, code }: { items: DueWord[]; userId: string; code: LanguageCode }) {
+  const { t } = useTranslation();
+  const { spacing } = useTheme();
+  const source = useLearningStore((s) => s.profile?.source ?? null);
+  const notifyProgressChanged = useLearningStore((s) => s.notifyProgressChanged);
+  const [index, setIndex] = useState(0);
+  const [revealed, setRevealed] = useState(false);
+  const [saved, setSaved] = useState<VocabularyReviewState | null>(null);
+  const [pendingOutcome, setPendingOutcome] = useState<ReviewOutcome | null>(null);
+  const [saveFailed, setSaveFailed] = useState(false);
+  const saving = useRef(false); // a double tap must not record the same review twice
+
   const current = items[index];
   const allDone = items.length > 0 && !current;
 

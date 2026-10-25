@@ -13,6 +13,9 @@ import type { ReviewOutcome, VocabularyReviewState } from '@/types';
  *  - 'easy'       -> advance one rung first and use the *next* rung's interval (a small jump).
  * The ladder never extends beyond its last rung (90 days).
  *
+ * A word is due from the start of the local calendar day of `nextReviewAt` (see reviews.getDue),
+ * so the hour a lesson was taken does not delay the next day's review.
+ *
  * Known limitations, kept honest: no ease factor, no learner-specific customization, no intraday
  * spacing beyond the immediate 'again', and no claim of scientific effectiveness. It is a study
  * schedule, nothing more. Change it only here so intervals never diverge between screens.

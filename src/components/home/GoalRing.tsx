@@ -3,7 +3,7 @@ import Svg, { Circle } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 
 import { Text } from '@/components/ui';
-import { goalRingGeometry, RING_SIZE as SIZE, RING_STROKE as STROKE } from '@/components/home/goalRing';
+import { goalRingGeometry, RING_SIZE as SIZE, RING_STROKE as STROKE } from '@/components/home/goalRingGeometry';
 import { useTheme } from '@/hooks/useTheme';
 
 interface GoalRingProps {
