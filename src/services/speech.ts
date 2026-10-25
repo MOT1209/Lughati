@@ -1,4 +1,5 @@
 import * as Speech from 'expo-speech';
+import { AppState } from 'react-native';
 
 import type { LanguageCode } from '@/types';
 
@@ -45,13 +46,24 @@ export class DeviceSpeechService implements SpeechService {
   private voices: Promise<string[] | null> | null = null;
   private ending: (() => void) | null = null;
 
+  constructor() {
+    // A voice installed in the system settings meanwhile counts once the learner is back.
+    AppState.addEventListener('change', (state) => {
+      if (state === 'active') this.voices = null;
+    });
+  }
+
   supports(language: LanguageCode): Promise<boolean | null> {
-    // An empty or failed list means "unknown" (some engines report voices late), never "no".
-    this.voices ??= Speech.getAvailableVoicesAsync().then(
+    // An empty or failed list means "unknown" (some engines report voices late), never "no",
+    // and is not kept: the next question asks the device again.
+    const pending = (this.voices ??= Speech.getAvailableVoicesAsync().then(
       (voices) => (voices.length > 0 ? voices.map((v) => v.language) : null),
       () => null,
-    );
-    return this.voices.then((list) => (list ? list.some((tag) => voiceMatches(tag, language)) : null));
+    ));
+    return pending.then((list) => {
+      if (!list && this.voices === pending) this.voices = null;
+      return list ? list.some((tag) => voiceMatches(tag, language)) : null;
+    });
   }
 
   speak(text: string, language: LanguageCode, callbacks?: SpeakCallbacks): void {
