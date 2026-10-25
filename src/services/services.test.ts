@@ -83,7 +83,9 @@ describe('mock repositories', () => {
 
   it.each(['ar', 'de'] as const)('returns lessons in order for %s', async (code) => {
     const lessons = await repos.lessons.getByLanguage(code);
-    expect(lessons.map((l) => l.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    // Taken by level, then position: A1 1–10, then A2 1–10 (never interleaved).
+    const positions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    expect(lessons.map((l) => `${l.levelId}-${l.order}`)).toEqual([...positions.map((n) => `A1-${n}`), ...positions.map((n) => `A2-${n}`)]);
     expect(lessons.every((l) => l.targetLanguage === code)).toBe(true);
   });
 

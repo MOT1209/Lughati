@@ -117,6 +117,7 @@ export const ar = {
   learn: {
     badgeCurrent: 'الحالي',
     progressCount: '{{done}} / {{total}}',
+    levelSection: '{{level}} · {{title}}',
     levelProgress: '{{percent}}% من المستوى {{level}}',
     title: 'تعلّم',
     subtitle: 'دروس {{language}}',
