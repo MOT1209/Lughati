@@ -6,7 +6,7 @@ import type { Progress } from '@/types';
 
 import { isolate, isolateLtr } from './bidi';
 import { isolateTerm, meaningLanguage, meaningOf } from './meaning';
-import { buildExercises, OPTIONS_PER_EXERCISE } from './exercises';
+import { buildExercises, buildListeningExercises, OPTIONS_PER_EXERCISE } from './exercises';
 import { answer, initialSession, isFinished, next } from './lessonSession';
 import { applyLessonCompletion, isPassed, lessonXp, PASS_RATIO, XP_LESSON_BONUS, XP_PER_CORRECT_ANSWER } from './progression';
 
@@ -136,6 +136,34 @@ describe('buildExercises', () => {
   it('has unique ids and returns nothing when there are too few words', () => {
     expect(new Set(exercises.map((e) => e.id)).size).toBe(exercises.length);
     expect(buildExercises('x', words.slice(0, 3))).toEqual([]);
+  });
+});
+
+describe('buildListeningExercises', () => {
+  const words = wordsOf('de-a1-1');
+  const exercises = buildListeningExercises('de-a1-1', words);
+
+  it('asks every word once, by ear, with distinct options that contain the answer', () => {
+    expect(exercises).toHaveLength(words.length);
+    expect(exercises.map((e) => e.subjectId)).toEqual(words.map((w) => w.id));
+    for (const exercise of exercises) {
+      expect(exercise.type).toBe('listen');
+      expect(exercise.options).toHaveLength(OPTIONS_PER_EXERCISE);
+      expect(new Set(exercise.options).size).toBe(OPTIONS_PER_EXERCISE);
+      expect(exercise.options).toContain(exercise.answer);
+    }
+  });
+
+  it('is deterministic, varies the answer position and has its own ids', () => {
+    expect(buildListeningExercises('de-a1-1', words)).toEqual(exercises);
+    const all = lessons.flatMap((lesson) => buildListeningExercises(lesson.id, wordsOf(lesson.id)));
+    expect(new Set(all.map((e) => e.options.indexOf(e.answer))).size).toBe(OPTIONS_PER_EXERCISE);
+    const quizIds = new Set(buildExercises('de-a1-1', words).map((e) => e.id));
+    expect(exercises.every((e) => !quizIds.has(e.id))).toBe(true);
+  });
+
+  it('returns nothing when there are too few words', () => {
+    expect(buildListeningExercises('x', words.slice(0, 3))).toEqual([]);
   });
 });
 

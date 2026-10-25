@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Icon } from '@/components/ui';
 import { MIN_TOUCH_TARGET } from '@/constants/app';
-import { useAsyncData } from '@/hooks/useAsyncData';
+import { useSpeechSupport } from '@/hooks/useSpeechSupport';
 import { useTheme } from '@/hooks/useTheme';
 import { getSpeechService } from '@/services/speech';
 import type { LanguageCode } from '@/types';
@@ -25,7 +25,7 @@ export function PronounceButton({ text, language }: PronounceButtonProps) {
   const [speaking, setSpeaking] = useState(false);
   const mounted = useRef(true);
   const ownsSpeech = useRef(false); // this button started the word being read right now
-  const supported = useAsyncData(() => getSpeechService().supports(language), [language]);
+  const supported = useSpeechSupport(language);
 
   // Leaving the screen (or the word) stops a word this button is still reading.
   useEffect(() => {
@@ -36,7 +36,7 @@ export function PronounceButton({ text, language }: PronounceButtonProps) {
     };
   }, []);
 
-  if (supported.status === 'success' && supported.data === false) return null;
+  if (!supported) return null;
 
   const onPress = () => {
     ownsSpeech.current = true;

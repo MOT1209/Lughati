@@ -176,6 +176,8 @@ export interface LessonAttempt {
   result: LessonResult;
   /** True only when this run completed the lesson (the progression recorded it). */
   completed: boolean;
+  /** 'practice': a match or listening run, never a lesson score. Missing (older saves) = 'lesson'. */
+  kind?: 'lesson' | 'practice';
 }
 
 /** What the learner did on one local calendar day, across all languages they learn. */

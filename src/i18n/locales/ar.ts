@@ -268,6 +268,15 @@ export const ar = {
     version: 'الإصدار: {{version}}',
     aboutText: 'تطبيق لتعلّم اللغات للناطقين بالعربية.',
   },
+  listening: {
+    play: 'تدريب الاستماع',
+    instruction: 'استمع واختر الكلمة التي تسمعها',
+    listen: 'استمع',
+    listenAgain: 'استمع مجدداً',
+    wordWas: 'الكلمة: {{term}} ({{meaning}})',
+    summaryTitle: 'انتهى تدريب الاستماع',
+    summaryScore: 'عرفت {{correct}} من {{total}} بالسمع',
+  },
   speech: {
     listen: 'استمع إلى نطق {{term}}',
   },

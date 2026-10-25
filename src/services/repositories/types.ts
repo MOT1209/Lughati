@@ -53,12 +53,13 @@ export interface ProgressRepository {
   /**
    * Records a lesson run without touching completion or progression (an aborted or manual run).
    * Attempted runs must be distinguishable from completed ones; `completed: false` is the default.
+   * `kind: 'practice'` marks a practice run (match, listening), which never counts as a lesson score.
    */
   recordAttempt(
     userId: string,
     lessonId: string,
     result: LessonResult,
-    options?: { completed?: boolean },
+    options?: { completed?: boolean; kind?: 'lesson' | 'practice' },
   ): Promise<LessonAttempt>;
 }
 
