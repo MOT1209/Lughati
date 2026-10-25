@@ -32,8 +32,17 @@ export default function Learn() {
     );
   }
 
-  const { language, lessons, progress } = list.data;
+  const { language, lessons, progress, levels } = list.data;
   const completed = progress?.completedLessonIds ?? [];
+  // The hero counts the learner's current level, like the level progress bar under it; once past
+  // the last level with lessons, it counts the whole course.
+  const atLevel = lessons.filter((lesson) => lesson.levelId === progress?.levelId);
+  const counted = atLevel.length > 0 ? atLevel : lessons;
+  const doneCount = counted.filter((lesson) => completed.includes(lesson.id)).length;
+  // One section per level that has lessons, in course order.
+  const sections = levels
+    .map((level) => ({ level, lessons: lessons.filter((lesson) => lesson.levelId === level.id) }))
+    .filter((section) => section.lessons.length > 0);
   const levelProgress = progress?.levelProgress ?? 0;
   const percent = Math.round(Math.min(1, Math.max(0, Number.isFinite(levelProgress) ? levelProgress : 0)) * 100);
 
@@ -43,9 +52,9 @@ export default function Learn() {
         eyebrow={t('tabs.learn')}
         title={t('learn.subtitle', { language: language ? localize(language.name, locale) : '' })}
         trailing={
-          <View accessible accessibilityLabel={t('learn.progressCount', { done: completed.length, total: lessons.length })}>
+          <View accessible accessibilityLabel={t('learn.progressCount', { done: doneCount, total: counted.length })}>
             <Text variant="title" color="heroGold">
-              {t('learn.progressCount', { done: completed.length, total: lessons.length })}
+              {t('learn.progressCount', { done: doneCount, total: counted.length })}
             </Text>
           </View>
         }
@@ -59,18 +68,25 @@ export default function Learn() {
       {lessons.length === 0 ? (
         <EmptyState icon="book-outline" title={t('learn.title')} message={t('learn.noLessons')} />
       ) : (
-        <View style={{ padding: spacing.lg, gap: spacing.sm }}>
-          {lessons.map((lesson, index) => (
-            <LessonRow
-              key={lesson.id}
-              index={index + 1}
-              title={localize(lesson.title, locale)}
-              summary={localize(lesson.summary, locale)}
-              level={lesson.levelId}
-              minutes={lesson.estimatedMinutes}
-              state={completed.includes(lesson.id) ? 'done' : progress?.currentLessonId === lesson.id ? 'current' : 'todo'}
-              onPress={() => router.push({ pathname: '/lesson/[id]', params: { id: lesson.id } })}
-            />
+        <View style={{ padding: spacing.lg, gap: spacing.lg }}>
+          {sections.map((section) => (
+            <View key={section.level.id} style={{ gap: spacing.sm }}>
+              <Text variant="subheading" accessibilityRole="header">
+                {t('learn.levelSection', { level: section.level.id, title: localize(section.level.title, locale) })}
+              </Text>
+              {section.lessons.map((lesson, index) => (
+                <LessonRow
+                  key={lesson.id}
+                  index={index + 1}
+                  title={localize(lesson.title, locale)}
+                  summary={localize(lesson.summary, locale)}
+                  level={lesson.levelId}
+                  minutes={lesson.estimatedMinutes}
+                  state={completed.includes(lesson.id) ? 'done' : progress?.currentLessonId === lesson.id ? 'current' : 'todo'}
+                  onPress={() => router.push({ pathname: '/lesson/[id]', params: { id: lesson.id } })}
+                />
+              ))}
+            </View>
           ))}
         </View>
       )}

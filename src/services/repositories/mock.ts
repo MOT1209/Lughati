@@ -10,6 +10,7 @@ import type {
   LearningPlan,
   LearningProfile,
   LessonAttempt,
+  LevelId,
   VocabularyReviewState,
 } from '@/types';
 import { buildExercises } from '@/utils/exercises';
@@ -137,6 +138,7 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
   };
 
   const lessonOf = (lessonId: string) => lessons.find((l) => l.id === lessonId);
+  const levelRank = (id: LevelId) => levels.findIndex((level) => level.id === id);
 
   return {
     languages: {
@@ -150,8 +152,11 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
       getById: async (id) => levels.find((l) => l.id === id) ?? null,
     },
     lessons: {
+      // The order they are taken in: by level (A1 before A2), then by position in the level.
       getByLanguage: async (language) =>
-        lessons.filter((l) => l.targetLanguage === language).sort((a, b) => a.order - b.order),
+        lessons
+          .filter((l) => l.targetLanguage === language)
+          .sort((a, b) => levelRank(a.levelId) - levelRank(b.levelId) || a.order - b.order),
       getById: async (id) => lessonOf(id) ?? null,
       getVocabulary: async (lessonId) => vocabulary.filter((w) => w.lessonId === lessonId),
       getExercises: async (lessonId) =>

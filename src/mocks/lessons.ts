@@ -1,4 +1,4 @@
-import type { Lesson, LanguageCode, Localized } from '@/types';
+import type { Lesson, LanguageCode, LevelId, Localized } from '@/types';
 
 interface LessonTemplate {
   title: Localized;
@@ -61,16 +61,78 @@ export const a1Templates: LessonTemplate[] = [
   },
 ];
 
+// The A2 outline, built the same way: words in mocks/vocabulary.ts (`a2` lists) at the same index.
+export const a2Templates: LessonTemplate[] = [
+  {
+    title: { ar: 'أيام الأسبوع', en: 'Days of the week' },
+    summary: { ar: 'سمِّ أيام العمل وعطلة نهاية الأسبوع.', en: 'Name the weekdays and the weekend.' },
+    estimatedMinutes: 8,
+  },
+  {
+    title: { ar: 'الطقس', en: 'The weather' },
+    summary: { ar: 'صِف الطقس: شمس ومطر وحرّ وبرد.', en: 'Describe the weather: sun, rain, heat and cold.' },
+    estimatedMinutes: 8,
+  },
+  {
+    title: { ar: 'الجسم والصحة', en: 'Body and health' },
+    summary: { ar: 'سمِّ أجزاء الجسم وتحدّث مع الطبيب.', en: 'Name parts of the body and talk to a doctor.' },
+    estimatedMinutes: 10,
+  },
+  {
+    title: { ar: 'الملابس والتسوّق', en: 'Clothes and shopping' },
+    summary: { ar: 'اسأل عن السعر وقل إن كان رخيصاً أو غالياً.', en: 'Ask the price and say whether it is cheap or expensive.' },
+    estimatedMinutes: 10,
+  },
+  {
+    title: { ar: 'في البيت', en: 'At home' },
+    summary: { ar: 'سمِّ غرف البيت وما فيها.', en: 'Name the rooms of a home and what is in them.' },
+    estimatedMinutes: 8,
+  },
+  {
+    title: { ar: 'العمل والدراسة', en: 'Work and study' },
+    summary: { ar: 'تحدّث عن عملك ودراستك.', en: 'Talk about your work and your studies.' },
+    estimatedMinutes: 10,
+  },
+  {
+    title: { ar: 'وقت الفراغ', en: 'Free time' },
+    summary: { ar: 'قل ما تحب أن تفعله في وقت فراغك.', en: 'Say what you like doing in your free time.' },
+    estimatedMinutes: 8,
+  },
+  {
+    title: { ar: 'السفر', en: 'Travel' },
+    summary: { ar: 'استعد لرحلة: المطار والفندق والقطار.', en: 'Get ready for a trip: airport, hotel and train.' },
+    estimatedMinutes: 10,
+  },
+  {
+    title: { ar: 'أفعال يومية', en: 'Everyday verbs' },
+    summary: { ar: 'تعلّم أفعالاً تستخدمها كل يوم.', en: 'Learn verbs you use every day.' },
+    estimatedMinutes: 10,
+  },
+  {
+    title: { ar: 'المشاعر والصفات', en: 'Feelings and descriptions' },
+    summary: { ar: 'قل كيف تشعر وصِف الأشياء.', en: 'Say how you feel and describe things.' },
+    estimatedMinutes: 8,
+  },
+];
+
 const targetCodes: LanguageCode[] = ['ar', 'de', 'en', 'es', 'fr', 'tr'];
 
+/** Course outlines in the order they are taken; lesson ids are `<language>-<level>-<n>`. */
+const courses: { levelId: LevelId; templates: LessonTemplate[] }[] = [
+  { levelId: 'A1', templates: a1Templates },
+  { levelId: 'A2', templates: a2Templates },
+];
+
 export const lessons: Lesson[] = targetCodes.flatMap((code) =>
-  a1Templates.map((template, index) => ({
-    id: `${code}-a1-${index + 1}`,
-    targetLanguage: code,
-    levelId: 'A1' as const,
-    title: template.title,
-    summary: template.summary,
-    order: index + 1,
-    estimatedMinutes: template.estimatedMinutes,
-  })),
+  courses.flatMap(({ levelId, templates }) =>
+    templates.map((template, index) => ({
+      id: `${code}-${levelId.toLowerCase()}-${index + 1}`,
+      targetLanguage: code,
+      levelId,
+      title: template.title,
+      summary: template.summary,
+      order: index + 1,
+      estimatedMinutes: template.estimatedMinutes,
+    })),
+  ),
 );

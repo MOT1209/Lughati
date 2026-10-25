@@ -118,6 +118,7 @@ export const en: Translation = {
   learn: {
     badgeCurrent: 'Current',
     progressCount: '{{done}} / {{total}}',
+    levelSection: '{{level}} · {{title}}',
     levelProgress: '{{percent}}% of level {{level}}',
     title: 'Learn',
     subtitle: '{{language}} lessons',
