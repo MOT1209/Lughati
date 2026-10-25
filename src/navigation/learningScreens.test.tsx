@@ -147,6 +147,7 @@ describe('Review screen', () => {
 
     expect(await screen.findByText(isolateLtr('Hallo'))).toBeTruthy();
     expect(screen.getByText('1 of 1')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Listen to Hallo' })).toBeTruthy();
 
     fireEvent.press(screen.getByRole('button', { name: 'Show meaning' }));
     expect(screen.getByText('مرحباً')).toBeTruthy();
@@ -233,6 +234,12 @@ describe('Review screen', () => {
 
 describe('Lesson practice entry', () => {
   const routes = { 'lesson/[id]': LessonScreen };
+
+  it('offers a listen button for every word of the lesson', async () => {
+    renderRouter(routes, { initialUrl: '/lesson/de-a1-1' });
+    expect(await screen.findByRole('button', { name: 'Listen to Hallo' })).toBeTruthy();
+    expect(screen.getAllByRole('button', { name: /^Listen to / })).toHaveLength(6);
+  }, SLOW_TEST_TIMEOUT);
 
   it('offers the matching practice and opens it', async () => {
     renderRouter(routes, { initialUrl: '/lesson/de-a1-1' });

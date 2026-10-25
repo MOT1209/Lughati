@@ -269,4 +269,7 @@ export const en: Translation = {
     version: 'Version: {{version}}',
     aboutText: 'A language-learning app for Arabic speakers.',
   },
+  speech: {
+    listen: 'Listen to {{term}}',
+  },
 };

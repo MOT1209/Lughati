@@ -3,6 +3,7 @@ import { Alert, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { OptionButton, type OptionState } from '@/components/OptionButton';
+import { PronounceButton } from '@/components/PronounceButton';
 import { ProgressBar } from '@/components/ProgressBar';
 import { Button, Card, Text } from '@/components/ui';
 import { useTheme } from '@/hooks/useTheme';
@@ -79,6 +80,8 @@ export function LessonQuiz({ exercises, words, source, onFinish }: LessonQuizPro
         <Text variant="display" accessibilityRole="header" style={{ textAlign: 'center' }}>
           {prompt}
         </Text>
+        {/* Only the word being asked about is spoken: reading a translate option would give it away. */}
+        {askMeaning && subject ? <PronounceButton key={subject.id} text={subject.term} language={subject.targetLanguage} /> : null}
       </Card>
 
       <View style={{ gap: spacing.sm }}>

@@ -268,4 +268,7 @@ export const ar = {
     version: 'الإصدار: {{version}}',
     aboutText: 'تطبيق لتعلّم اللغات للناطقين بالعربية.',
   },
+  speech: {
+    listen: 'استمع إلى نطق {{term}}',
+  },
 } as const;

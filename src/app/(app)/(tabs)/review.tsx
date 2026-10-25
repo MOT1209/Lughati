@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { HeroProgress } from '@/components/HeroProgress';
+import { PronounceButton } from '@/components/PronounceButton';
 import { ReviewOutcomeButton } from '@/components/ReviewOutcomeButton';
 import { ScreenHero } from '@/components/ScreenHero';
 import { Button, Card, EmptyState, ErrorState, LoadingState, Screen, Text } from '@/components/ui';
@@ -202,6 +203,7 @@ function ReviewSession({ items, userId, code }: { items: DueWord[]; userId: stri
           <Text variant="display" accessibilityRole="header" style={{ textAlign: 'center' }}>
             {term}
           </Text>
+          <PronounceButton key={current.word.id} text={current.word.term} language={current.word.targetLanguage} />
 
           {revealed || answered ? (
             <View style={{ gap: spacing.xs, alignItems: 'center' }} accessibilityLiveRegion="polite">

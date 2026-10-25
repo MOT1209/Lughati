@@ -6,6 +6,7 @@
 - Does your app collect or share any of the required user data types? **No**
   (Google defines "collect" as transmitting data off the device. Data that stays on the device is not "collected".)
 - Is all user data encrypted in transit? **Not applicable** (no data leaves the device).
+- Pronunciation (`expo-speech`) hands built-in lesson words to the device's system text-to-speech engine; no user data is passed and the app makes no request of its own, so the answer above stays **No**.
 - Do you provide a way for users to request deletion? Data is on-device only; uninstalling or clearing app storage deletes it (state this in the privacy policy, which already does).
 
 ## App content

@@ -23,7 +23,15 @@ describe('LessonQuiz', () => {
     render(<LessonQuiz exercises={exercises} words={words} onFinish={() => {}} />);
     expect(screen.getByText(isolateLtr('Hallo'))).toBeTruthy();
     expect(screen.getByText('Question 1 of 12')).toBeTruthy();
-    expect(screen.getAllByRole('button')).toHaveLength(4);
+    expect(screen.getAllByRole('button')).toHaveLength(5); // four options + listen to the word
+    expect(screen.getByRole('button', { name: 'Listen to Hallo' })).toBeTruthy();
+  });
+
+  it('does not read the answer aloud when the options are target words (translate)', () => {
+    const translate = exercises.filter((e) => e.type === 'translate');
+    expect(translate.length).toBeGreaterThan(0);
+    render(<LessonQuiz exercises={translate} words={words} onFinish={() => {}} />);
+    expect(screen.queryByRole('button', { name: /^Listen to / })).toBeNull();
   });
 
   it('gives feedback on a correct answer and locks the other options', () => {

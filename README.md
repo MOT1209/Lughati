@@ -14,7 +14,7 @@
 <a href="#-التقنيات"><img alt="Expo SDK 57" src="https://img.shields.io/badge/Expo_SDK-57-000020?logo=expo&logoColor=white"></a>
 <a href="#-التقنيات"><img alt="React Native 0.86" src="https://img.shields.io/badge/React_Native-0.86-61DAFB?logo=react&logoColor=black"></a>
 <a href="#-التقنيات"><img alt="TypeScript strict" src="https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white"></a>
-<a href="#-الجودة"><img alt="Tests" src="https://img.shields.io/badge/Jest-29_suites_·_490_tests-99425B?logo=jest&logoColor=white"></a>
+<a href="#-الجودة"><img alt="Tests" src="https://img.shields.io/badge/Jest-31_suites_·_507_tests-99425B?logo=jest&logoColor=white"></a>
 <a href="#-التقنيات"><img alt="i18n ar · en" src="https://img.shields.io/badge/i18n-ar_·_en-EA580C"></a>
 <a href="#-الميزات"><img alt="RTL" src="https://img.shields.io/badge/واجهة-RTL-0F766E"></a>
 
@@ -44,6 +44,7 @@
 | :--- | :--- |
 | 📚 **مناهج A1** | 10 دروس لكل لغة (تحيات، أرقام، ألوان، طعام، أماكن…) — **60 كلمة/عبارة** لكل لغة |
 | ✍️ **تمارين تفاعلية** | **12 تمريناً** يُولَّد تلقائياً لكل درس (اختيار المعنى + اختيار الكلمة) بلا عشوائية قابلة للكسر |
+| 🔊 **نطق الكلمات** | زر استماع بجانب كل كلمة في الدرس والاختبار والمراجعة، بصوت الجهاز للغة الكلمة (`expo-speech`، بلا خادم) |
 | 🎮 **لعبة المطابقة** | تمرين عملي داخل الدرس يقارن الكلمة بمعناها، مع نتيجة ومراجعة وإعادة — دون التأثير على إكمال الدرس |
 | 🔁 **مراجعة بالتكرار المتباعد (SRS)** | محرّك جدولة (١، ٣، ٧، ١٤، ٣٠، ٩٠ يوماً) + شاشة مراجعة للكلمات المستحقّة |
 | 🏠 **لوحة التعلّم** | الرئيسية (الهدف اليومي + «واصل التعلّم») · الدروس · المراجعة · التقدّم · الحساب |
@@ -114,7 +115,7 @@ bunx expo start
 | :--- | :--- |
 | `npm run typecheck` | فحص الأنواع (`tsc --noEmit`) |
 | `npm run lint` | ESLint بإعداد Expo |
-| `npm test` | اختبارات Jest (29 suite · 490 اختبار عبر `jest-expo`) |
+| `npm test` | اختبارات Jest (31 suite · 507 اختبار عبر `jest-expo`) |
 | `npx expo-doctor` | فحص سليم الاعتماديات والإعدادات |
 | `npx expo export --platform android` | التأكد أن الحزمة تُبنى |
 | `node scripts/render-icons.js` | توليد الأيقونة وصور المتجر من `assets/icon-src` |
@@ -175,7 +176,7 @@ registerAIProvider(provider)     // مزوّد ذكاء اصطناعي
 | :--- | :--- |
 | الأنواع (`tsc --noEmit`) | نظيف |
 | ESLint | 0 أخطاء |
-| الاختبارات | 29 ملف · 490 اختبار ناجح |
+| الاختبارات | 31 ملف · 507 اختبار ناجح |
 | CI | typecheck + lint + test + `expo export` على `main` وعند كل PR |
 
 سُلاسل الاختبار تغطّي: التنقّل والحراسة، شاشات التعلّم، الاختبارات واللعبة، التدويل (تكافؤ المفاتيح
@@ -187,7 +188,7 @@ registerAIProvider(provider)     // مزوّد ذكاء اصطناعي
 - [x] **الهوية والنشر:** أيقونة وتصميم موحّد لكل الشاشات · موقع · ملفات المتجر (البناء والرفع على Google Play بيدك)
 - [ ] **المرحلة 2 — الشبكة:** ربط مصادقة وتخزين وبيانات حقيقية عبر المُسجِّلات
 - [ ] **المرحلة 3 — الذكاء الاصطناعي:** مزوّد AI للتوليد والتقييم والتصحيح
-- [ ] **المرحلة 4 — أصوات ومحتوى:** نطق، استماع، ومحتوى أوسع (A2 وما بعدها)
+- [ ] **المرحلة 4 — أصوات ومحتوى:** ~~نطق~~ (أُنجز بصوت الجهاز)، تمارين استماع، ومحتوى أوسع (A2 وما بعدها)
 
 ## 📝 التوثيق الإضافي
 
