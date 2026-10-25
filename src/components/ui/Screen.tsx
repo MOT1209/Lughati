@@ -1,3 +1,5 @@
+import { StatusBar } from 'expo-status-bar';
+import { useIsFocused } from 'expo-router';
 import type { ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
@@ -21,6 +23,7 @@ export function Screen({ children, scroll = true, edges = ['top', 'bottom'], con
 
   return (
     <SafeAreaView edges={edges} style={[styles.fill, { backgroundColor: colors.background }]}>
+      {edges.includes('top') ? <ThemedStatusBar /> : null}
       <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         {scroll ? (
           <ScrollView
@@ -35,6 +38,16 @@ export function Screen({ children, scroll = true, edges = ['top', 'bottom'], con
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
+}
+
+/**
+ * Status bar icons for a screen whose own background reaches the top edge (a loading, error or
+ * empty state). The app default is light icons for the hero colour (app/_layout.tsx). Only while
+ * focused: tabs stay mounted, and an unfocused one must not override the screen in front.
+ */
+function ThemedStatusBar() {
+  const { isDark } = useTheme();
+  return useIsFocused() ? <StatusBar style={isDark ? 'light' : 'dark'} /> : null;
 }
 
 const styles = StyleSheet.create({

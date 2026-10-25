@@ -7,7 +7,6 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { useTheme } from '@/hooks/useTheme';
 import { RootNavigator } from '@/navigation/RootNavigator';
 import { applyLanguagePreference } from '@/services/appLanguage';
 import { useAuthStore } from '@/store/authStore';
@@ -22,7 +21,6 @@ export default function RootLayout() {
   const authInitialized = useAuthStore((s) => s.initialized);
   const initAuth = useAuthStore((s) => s.init);
   const [localeApplied, setLocaleApplied] = useState(false);
-  const { isDark } = useTheme();
 
   useEffect(() => {
     void initAuth();
@@ -50,7 +48,9 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      {/* Every screen opens on the hero colour (same in light and dark) or a native header in it;
+          a Screen whose plain background reaches the top sets themed icons itself. */}
+      <StatusBar style="light" />
       <RootNavigator />
     </SafeAreaProvider>
   );
