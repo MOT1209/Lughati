@@ -149,6 +149,8 @@ function fakeStore(models: RegistryModel[], routes: Partial<Record<Feature, Part
     recs: [] as unknown[],
     reserved: 0,
     limit: 100,
+    limits: new Map<string, number>(),
+    banned: new Set<string>(),
   };
   (['tutor', 'speaking', 'writing', 'quiz', 'pronunciation', 'planner'] as Feature[]).forEach((f) => s.routes.set(f, { task: f, primaryModel: 'a', fallbackModel: 'b', allowPaid: false, maxOutputTokens: 600, ...routes[f] }));
   const store: Store = {
@@ -179,6 +181,11 @@ function fakeStore(models: RegistryModel[], routes: Partial<Record<Feature, Part
     cachePut: async (k, _c, content) => void s.cache.set(k, content),
     upsertModel: async (p: AdminModelPatch, verifiedAt) => { const m = s.models.get(p.id) ?? model(p.id, { enabled: false, verifiedAt: null, pricingTier: 'unknown' }); s.models.set(p.id, { ...m, ...(p.pricingTier ? { pricingTier: p.pricingTier } : {}), ...(p.enabled !== undefined ? { enabled: p.enabled } : {}), ...(verifiedAt ? { verifiedAt } : {}) }); },
     setRoute: async (p: AdminRoutePatch) => void s.routes.set(p.task, { ...s.routes.get(p.task)!, ...p } as TaskRoute),
+    usageOverview: async () => ({ totalUsers: 3, activeUsers7d: 2, requests24h: s.logs.length, requests7d: s.logs.length, byStatus24h: {}, byModel7d: {}, byFeature7d: {}, truncated: false }),
+    recentUsage: async (limit) => s.logs.slice(-limit).map((l) => ({ id: l.id, userId: l.user, feature: l.feature, modelId: l.model ?? null, pricingTier: l.tier ?? null, status: l.status, errorCode: null, inputTokens: l.inT ?? 0, outputTokens: l.outT ?? 0, durationMs: null, createdAt: NOW.toISOString() })),
+    listUsers: async () => [],
+    setUserLimit: async (id, n) => void (n === null ? s.limits.delete(id) : s.limits.set(id, n)),
+    setUserBanned: async (id, banned) => void (banned ? s.banned.add(id) : s.banned.delete(id)),
   };
   return { s, store };
 }
@@ -388,7 +395,7 @@ describe('gateway: administration', () => {
   const adminCaller = { id: OTHER, role: 'admin' };
   it('is closed to ordinary users', async () => {
     const { store } = fakeStore([model('a')]);
-    for (const admin of ['models.list', 'models.upsert', 'routing.set', 'models.refresh']) {
+    for (const admin of ['models.list', 'models.upsert', 'routing.set', 'models.refresh', 'whoami', 'overview', 'usage.recent', 'users.list', 'users.setLimit', 'users.setBanned']) {
       expect((await handleRequest({ body: { admin }, caller }, deps(store, () => ({})).d)).status).toBe(403);
     }
   });
@@ -411,5 +418,36 @@ describe('gateway: administration', () => {
     expect(refreshed.status).toBe(200);
     expect(s.models.get('a')).toMatchObject({ healthStatus: 'ok' });
     expect(s.models.get('b')).toMatchObject({ healthStatus: 'down', pricingTier: 'unknown', verifiedAt: null });
+  });
+  it('whoami and overview answer admins only', async () => {
+    const { store } = fakeStore([model('a')]);
+    const d = deps(store, () => ({})).d;
+    expect((await handleRequest({ body: { admin: 'whoami' }, caller: adminCaller }, d)).body).toMatchObject({ admin: true });
+    expect((await handleRequest({ body: { admin: 'overview' }, caller: adminCaller }, d)).status).toBe(200);
+    expect((await handleRequest({ body: { admin: 'overview' }, caller: { id: OTHER, role: null } }, d)).status).toBe(403);
+  });
+  it('sets and clears a per-user daily limit, validating the id and the number', async () => {
+    const { s, store } = fakeStore([model('a')]);
+    const d = deps(store, () => ({})).d;
+    const user = '11111111-1111-4111-8111-111111111111';
+    expect((await handleRequest({ body: { admin: 'users.setLimit', userId: user, dailyRequests: 5 }, caller: adminCaller }, d)).status).toBe(200);
+    expect(s.limits.get(user)).toBe(5);
+    expect((await handleRequest({ body: { admin: 'users.setLimit', userId: user, dailyRequests: null }, caller: adminCaller }, d)).status).toBe(200);
+    expect(s.limits.has(user)).toBe(false);
+    for (const bad of [{ userId: 'nope', dailyRequests: 5 }, { userId: user, dailyRequests: -1 }, { userId: user, dailyRequests: 10_001 }, { userId: user, dailyRequests: 1.5 }, { userId: user }]) {
+      expect((await handleRequest({ body: { admin: 'users.setLimit', ...bad }, caller: adminCaller }, d)).status).toBe(400);
+    }
+  });
+  it('bans and unbans other users but never the calling admin', async () => {
+    const { s, store } = fakeStore([model('a')]);
+    const d = deps(store, () => ({})).d;
+    const user = '33333333-3333-4333-8333-333333333333';
+    expect((await handleRequest({ body: { admin: 'users.setBanned', userId: user, banned: true }, caller: adminCaller }, d)).status).toBe(200);
+    expect(s.banned.has(user)).toBe(true);
+    expect((await handleRequest({ body: { admin: 'users.setBanned', userId: user, banned: false }, caller: adminCaller }, d)).status).toBe(200);
+    expect(s.banned.has(user)).toBe(false);
+    const self = await handleRequest({ body: { admin: 'users.setBanned', userId: adminCaller.id, banned: true }, caller: adminCaller }, d);
+    expect(self).toMatchObject({ status: 400, body: { error: 'cannot_ban_self' } });
+    expect((await handleRequest({ body: { admin: 'users.setBanned', userId: user, banned: 'yes' }, caller: adminCaller }, d)).status).toBe(400);
   });
 });

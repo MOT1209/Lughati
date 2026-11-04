@@ -27,6 +27,43 @@ export interface AdminRoutePatch {
   maxOutputTokens?: number;
 }
 
+export interface UsageOverview {
+  totalUsers: number;
+  activeUsers7d: number;
+  requests24h: number;
+  requests7d: number;
+  byStatus24h: Record<string, number>;
+  byModel7d: Record<string, { requests: number; inputTokens: number; outputTokens: number }>;
+  byFeature7d: Record<string, number>;
+  /** True when the 7-day window held more rows than the aggregation cap, so the figures are a lower bound. */
+  truncated: boolean;
+}
+
+export interface UsageRow {
+  id: number;
+  userId: string;
+  feature: string;
+  modelId: string | null;
+  pricingTier: string | null;
+  status: string;
+  errorCode: string | null;
+  inputTokens: number;
+  outputTokens: number;
+  durationMs: number | null;
+  createdAt: string;
+}
+
+export interface AdminUser {
+  id: string;
+  email: string | null;
+  createdAt: string;
+  lastSignInAt: string | null;
+  banned: boolean;
+  isAdmin: boolean;
+  requests24h: number;
+  dailyLimit: number | null;
+}
+
 /** Everything the gateway needs from the database; the Supabase implementation lives in supabaseStore.ts. */
 export interface Store {
   listModels(): Promise<RegistryModel[]>;
@@ -48,4 +85,10 @@ export interface Store {
   listRouting(): Promise<TaskRoute[]>;
   upsertModel(patch: AdminModelPatch, verifiedAt: string | null): Promise<void>;
   setRoute(patch: AdminRoutePatch): Promise<void>;
+  usageOverview(now: Date): Promise<UsageOverview>;
+  recentUsage(limit: number): Promise<UsageRow[]>;
+  listUsers(page: number, perPage: number, now: Date): Promise<AdminUser[]>;
+  /** null removes the per-user override (the global default applies again). */
+  setUserLimit(userId: string, dailyRequests: number | null): Promise<void>;
+  setUserBanned(userId: string, banned: boolean): Promise<void>;
 }

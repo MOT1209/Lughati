@@ -67,6 +67,10 @@ export default function AppLayout() {
       <Stack.Protected guard={access.canSeeLearning}>
         <Stack.Screen name="settings" options={{ title: t('settings.title') }} />
       </Stack.Protected>
+      {/* Reachable only from the admin button on Profile; the server re-checks the admin role on every call. */}
+      <Stack.Protected guard={access.canSeeLearning}>
+        <Stack.Screen name="admin" options={{ title: t('admin.title') }} />
+      </Stack.Protected>
     </Stack>
   );
 }
