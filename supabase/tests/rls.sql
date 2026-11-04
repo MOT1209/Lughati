@@ -63,7 +63,8 @@ select pg_temp.must_fail('alice inserts progress for Bob', $s$insert into public
 select pg_temp.must_affect('alice cannot update Bob progress', $s$update public.user_progress set total_xp = 9999999 where user_id = 'bbbbbbbb-0000-4000-8000-000000000002'$s$, 0);
 select pg_temp.must_affect('alice cannot delete Bob attempts', $s$delete from public.quiz_attempts where user_id = 'bbbbbbbb-0000-4000-8000-000000000002'$s$, 0);
 select pg_temp.must_affect('alice cannot rewrite Bob profile', $s$update public.profiles set display_name = 'hacked' where id = 'bbbbbbbb-0000-4000-8000-000000000002'$s$, 0);
-select pg_temp.must_fail('alice cannot move her row to Bob (update user_id)', $s$update public.user_progress set user_id = 'bbbbbbbb-0000-4000-8000-000000000002' where user_id = 'aaaaaaaa-0000-4000-8000-000000000001'$s$);
+select pg_temp.must_affect('alice inserts her own progress', $s$insert into public.user_progress (user_id, language_code) values ('aaaaaaaa-0000-4000-8000-000000000001','fr')$s$, 1);
+select pg_temp.must_fail('alice cannot move her row to Bob (update user_id)', $s$update public.user_progress set user_id = 'bbbbbbbb-0000-4000-8000-000000000002' where user_id = 'aaaaaaaa-0000-4000-8000-000000000001' and language_code = 'fr'$s$);
 -- data validation constraints hold even for the owner
 select pg_temp.must_fail('correct > total rejected', $s$insert into public.quiz_attempts (user_id, id, lesson_id, language_code, correct, total, attempted_at) values ('aaaaaaaa-0000-4000-8000-000000000001','bad','de-a1-1','de',9,6,now())$s$);
 select pg_temp.must_fail('unknown lesson rejected (FK)', $s$insert into public.lesson_completions (user_id, lesson_id, language_code) values ('aaaaaaaa-0000-4000-8000-000000000001','nope-1','de')$s$);
