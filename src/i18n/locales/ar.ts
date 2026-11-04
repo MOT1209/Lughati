@@ -117,6 +117,7 @@ export const ar = {
   learn: {
     badgeCurrent: 'الحالي',
     progressCount: '{{done}} / {{total}}',
+    levelSection: '{{level}} · {{title}}',
     levelProgress: '{{percent}}% من المستوى {{level}}',
     title: 'تعلّم',
     subtitle: 'دروس {{language}}',
@@ -140,6 +141,7 @@ export const ar = {
     correctAnswerWas: 'الإجابة الصحيحة: {{answer}}',
     next: 'التالي',
     finish: 'إنهاء',
+    finishTitle: 'إنهاء الدرس',
     finishConfirmation: 'هل تريد إنهاء الدرس؟',
     cancel: 'إلغاء',
     summaryTitle: 'أحسنت! أنهيت الدرس',
@@ -266,5 +268,17 @@ export const ar = {
     about: 'حول التطبيق',
     version: 'الإصدار: {{version}}',
     aboutText: 'تطبيق لتعلّم اللغات للناطقين بالعربية.',
+  },
+  listening: {
+    play: 'تدريب الاستماع',
+    instruction: 'استمع واختر الكلمة التي تسمعها',
+    listen: 'استمع',
+    listenAgain: 'استمع مجدداً',
+    wordWas: 'الكلمة: {{term}} ({{meaning}})',
+    summaryTitle: 'انتهى تدريب الاستماع',
+    summaryScore: 'عرفت {{correct}} من {{total}} بالسمع',
+  },
+  speech: {
+    listen: 'استمع إلى نطق {{term}}',
   },
 } as const;

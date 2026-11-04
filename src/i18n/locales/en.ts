@@ -118,6 +118,7 @@ export const en: Translation = {
   learn: {
     badgeCurrent: 'Current',
     progressCount: '{{done}} / {{total}}',
+    levelSection: '{{level}} · {{title}}',
     levelProgress: '{{percent}}% of level {{level}}',
     title: 'Learn',
     subtitle: '{{language}} lessons',
@@ -141,6 +142,7 @@ export const en: Translation = {
     correctAnswerWas: 'Correct answer: {{answer}}',
     next: 'Next',
     finish: 'Finish',
+    finishTitle: 'Finish the lesson',
     finishConfirmation: 'Are you sure you want to finish the lesson?',
     cancel: 'Cancel',
     summaryTitle: 'Well done! Lesson complete',
@@ -267,5 +269,17 @@ export const en: Translation = {
     about: 'About',
     version: 'Version: {{version}}',
     aboutText: 'A language-learning app for Arabic speakers.',
+  },
+  listening: {
+    play: 'Listening practice',
+    instruction: 'Listen and pick the word you hear',
+    listen: 'Listen',
+    listenAgain: 'Listen again',
+    wordWas: 'The word: {{term}} ({{meaning}})',
+    summaryTitle: 'Listening practice complete',
+    summaryScore: 'You recognised {{correct}} of {{total}} by ear',
+  },
+  speech: {
+    listen: 'Listen to {{term}}',
   },
 };

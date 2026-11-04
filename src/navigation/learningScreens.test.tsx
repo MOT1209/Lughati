@@ -1,4 +1,5 @@
 import { act, fireEvent } from '@testing-library/react-native';
+import { router, Tabs } from 'expo-router';
 import { renderRouter, screen } from 'expo-router/testing-library';
 
 import HomeScreen from '@/app/(app)/(tabs)/home';
@@ -9,6 +10,7 @@ import LessonScreen from '@/app/(app)/lesson/[id]';
 import { setUiLocale } from '@/i18n';
 import { registerRepositories } from '@/services/repositories';
 import { createMockRepositories } from '@/services/repositories/mock';
+import { getSpeechService, registerSpeechService } from '@/services/speech';
 import { useAuthStore } from '@/store/authStore';
 import { useLearningStore } from '@/store/learningStore';
 import type { VocabularyReviewState } from '@/types';
@@ -146,6 +148,7 @@ describe('Review screen', () => {
 
     expect(await screen.findByText(isolateLtr('Hallo'))).toBeTruthy();
     expect(screen.getByText('1 of 1')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Listen to Hallo' })).toBeTruthy();
 
     fireEvent.press(screen.getByRole('button', { name: 'Show meaning' }));
     expect(screen.getByText('مرحباً')).toBeTruthy();
@@ -180,6 +183,47 @@ describe('Review screen', () => {
     expect(await screen.findByText('Nothing to review right now')).toBeTruthy();
   }, SLOW_TEST_TIMEOUT);
 
+  // Real tabs, as in the app: switching tabs keeps the review screen mounted.
+  const tabRoutes = { _layout: () => <Tabs />, review: ReviewScreen, other: () => null };
+
+  it('re-reads the due words when the tab comes back into view', async () => {
+    // Tabs stay mounted: words that fell due (or were added by a lesson) while the learner was
+    // elsewhere must show up when they return, not only after an app restart.
+    let due: VocabularyReviewState[] = [];
+    const repos = createMockRepositories();
+    registerRepositories({ ...repos, reviews: { ...repos.reviews, getDue: async () => due } });
+    renderRouter(tabRoutes, { initialUrl: '/review' });
+    expect(await screen.findByText('Nothing to review right now')).toBeTruthy();
+
+    act(() => router.navigate('/other'));
+    due = [dueState];
+    act(() => router.navigate('/review'));
+    expect(await screen.findByText(isolateLtr('Hallo'))).toBeTruthy();
+    expect(screen.getByText('1 of 1')).toBeTruthy();
+  }, SLOW_TEST_TIMEOUT);
+
+  it('starts a fresh session after a finished one when the tab is shown again', async () => {
+    let due: VocabularyReviewState[] = [dueState];
+    const repos = createMockRepositories();
+    registerRepositories({ ...repos, reviews: { ...repos.reviews, getDue: async () => due } });
+    renderRouter(tabRoutes, { initialUrl: '/review' });
+
+    fireEvent.press(await screen.findByRole('button', { name: 'Show meaning' }));
+    await act(async () => {
+      fireEvent.press(screen.getByRole('button', { name: /^Again, / }));
+    });
+    fireEvent.press(await screen.findByRole('button', { name: 'Finish' }));
+    expect(await screen.findByText('Review session complete')).toBeTruthy();
+
+    // "Again" makes the word due immediately: coming back offers it again from the start.
+    act(() => router.navigate('/other'));
+    due = [{ ...dueState, wordId: 'de-a1-1-w2' }];
+    act(() => router.navigate('/review'));
+    expect(await screen.findByRole('button', { name: 'Show meaning' })).toBeTruthy();
+    expect(screen.queryByText('Review session complete')).toBeNull();
+    expect(screen.getByText('1 of 1')).toBeTruthy();
+  }, SLOW_TEST_TIMEOUT);
+
   it('asks for a language instead of guessing when there is no session', async () => {
     act(() => {
       useAuthStore.setState({ session: null });
@@ -192,10 +236,52 @@ describe('Review screen', () => {
 describe('Lesson practice entry', () => {
   const routes = { 'lesson/[id]': LessonScreen };
 
+  it('offers a listen button for every word of the lesson', async () => {
+    renderRouter(routes, { initialUrl: '/lesson/de-a1-1' });
+    expect(await screen.findByRole('button', { name: 'Listen to Hallo' })).toBeTruthy();
+    expect(screen.getAllByRole('button', { name: /^Listen to / })).toHaveLength(6);
+  }, SLOW_TEST_TIMEOUT);
+
   it('offers the matching practice and opens it', async () => {
     renderRouter(routes, { initialUrl: '/lesson/de-a1-1' });
     fireEvent.press(await screen.findByRole('button', { name: 'Play matching practice' }));
     expect(await screen.findByText('What does this word mean?')).toBeTruthy();
+  }, SLOW_TEST_TIMEOUT);
+
+  it('opens the listening practice, whose run is an attempt, not a completion', async () => {
+    const repos = createMockRepositories();
+    registerRepositories(repos);
+    renderRouter(routes, { initialUrl: '/lesson/de-a1-1' });
+    fireEvent.press(await screen.findByRole('button', { name: 'Listening practice' }));
+    expect(await screen.findByText('Listen and pick the word you hear')).toBeTruthy();
+
+    for (let i = 0; i < 6; i += 1) {
+      fireEvent.press(screen.getAllByRole('button', { name: /^Option: / })[0]!);
+      await act(async () => {
+        fireEvent.press(screen.getByRole('button', { name: i === 5 ? 'Finish' : 'Next' }));
+      });
+    }
+    expect(await screen.findByText('Listening practice complete')).toBeTruthy();
+    const attempts = await repos.progress.getAttempts('u1', 'de');
+    expect(attempts).toEqual([expect.objectContaining({ lessonId: 'de-a1-1', completed: false, kind: 'practice', result: expect.objectContaining({ total: 6 }) })]);
+    expect((await repos.progress.get('u1', 'de'))?.completedLessonIds ?? []).not.toContain('de-a1-1');
+
+    fireEvent.press(screen.getByRole('button', { name: 'Continue' }));
+    expect(await screen.findByRole('button', { name: 'Listening practice' })).toBeTruthy();
+  }, SLOW_TEST_TIMEOUT);
+
+  it('hides the listening practice and the listen buttons when the device has no voice for the language', async () => {
+    const original = getSpeechService();
+    registerSpeechService({ supports: async () => false, speak: () => {}, stop: () => {} });
+    try {
+      renderRouter(routes, { initialUrl: '/lesson/de-a1-1' });
+      await screen.findByRole('button', { name: 'Play matching practice' });
+      await act(async () => {});
+      expect(screen.queryByRole('button', { name: 'Listening practice' })).toBeNull();
+      expect(screen.queryByRole('button', { name: /^Listen to / })).toBeNull();
+    } finally {
+      registerSpeechService(original);
+    }
   }, SLOW_TEST_TIMEOUT);
 
   it('hides the practice when the lesson has too few words', async () => {
@@ -210,5 +296,6 @@ describe('Lesson practice entry', () => {
     renderRouter(routes, { initialUrl: '/lesson/de-a1-1' });
     await screen.findByText(isolateLtr('Hallo'));
     expect(screen.queryByRole('button', { name: 'Play matching practice' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Listening practice' })).toBeNull();
   }, SLOW_TEST_TIMEOUT);
 });

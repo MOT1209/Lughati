@@ -82,6 +82,17 @@ it('due vocabulary is recommended below the daily goal and weighted by the count
   expect(many[0]!.reason).toContain('40');
 });
 
+it('a practice run (match, listening) is not the lesson score: it neither asks for nor hides a retry', () => {
+  const base = { progress: progressWith(), dueVocabulary: 0, plan: planWith({ minutesToday: 15 }) };
+  const weakPractice = attempt({ id: 'p1', result: { correct: 1, total: 6 }, completed: false, kind: 'practice' });
+  expect(kinds({ ...base, attempts: [attempt(), weakPractice] })).not.toContain('retry-lesson');
+
+  const failedRun = attempt({ result: { correct: 5, total: 12 }, completed: false, kind: 'lesson' });
+  const strongPractice = attempt({ id: 'p2', result: { correct: 6, total: 6 }, completed: false, kind: 'practice' });
+  const retry = getRecommendations({ ...base, attempts: [failedRun, strongPractice] });
+  expect(retry.find((r) => r.kind === 'retry-lesson')!.params).toEqual({ percent: 42 });
+});
+
 it('a low-scoring last attempt produces a retry recommendation', () => {
   const input = {
     progress: progressWith(),

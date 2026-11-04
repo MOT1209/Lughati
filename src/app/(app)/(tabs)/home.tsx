@@ -80,13 +80,15 @@ export default function Home() {
     router.push(ROUTES.learn);
   };
 
-  const lessonIndex = lesson ? lessons.findIndex((l) => l.id === lesson.id) : -1;
+  // "Lesson 3 of 10" counts within the lesson's level (the meta line already names the level).
+  const levelLessons = lesson ? lessons.filter((l) => l.levelId === lesson.levelId) : [];
+  const lessonIndex = lesson ? levelLessons.findIndex((l) => l.id === lesson.id) : -1;
   const continueLesson =
     lesson && progress
       ? {
           title: localize(lesson.title, locale),
           meta: t('home.lessonMeta', { level: lesson.levelId, count: lesson.estimatedMinutes }),
-          position: lessonIndex >= 0 ? t('home.lessonPosition', { current: lessonIndex + 1, total: lessons.length }) : null,
+          position: lessonIndex >= 0 ? t('home.lessonPosition', { current: lessonIndex + 1, total: levelLessons.length }) : null,
           levelProgress: progress.levelProgress,
         }
       : null;

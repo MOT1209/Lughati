@@ -5,10 +5,13 @@ import { Alert, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { LessonQuiz } from '@/components/LessonQuiz';
+import { ListeningPractice } from '@/components/ListeningPractice';
 import { MIN_MATCH_WORDS, VocabularyMatchGame } from '@/components/VocabularyMatchGame';
+import { PronounceButton } from '@/components/PronounceButton';
 import { ScreenHero } from '@/components/ScreenHero';
 import { Button, Card, EmptyState, ErrorState, LoadingState, Screen, Text } from '@/components/ui';
 import { useAsyncData } from '@/hooks/useAsyncData';
+import { useSpeechSupport } from '@/hooks/useSpeechSupport';
 import { useTheme } from '@/hooks/useTheme';
 import { useUiLocale } from '@/hooks/useUiLocale';
 import { getRepositories } from '@/services/repositories';
@@ -17,9 +20,10 @@ import { useLearningStore } from '@/store/learningStore';
 import type { LessonResult } from '@/types';
 import { localize } from '@/utils/localize';
 import { isolateTerm, meaningOf } from '@/utils/meaning';
+import { OPTIONS_PER_EXERCISE } from '@/utils/exercises';
 import { isPassed, lessonXp, PASS_RATIO, studyMinutesOf } from '@/utils/progression';
 
-type Step = 'intro' | 'quiz' | 'practice' | 'summary';
+type Step = 'intro' | 'quiz' | 'practice' | 'listening' | 'summary';
 
 export default function LessonScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -63,6 +67,8 @@ export default function LessonScreen() {
     ]);
     return { lesson, words, exercises };
   }, [id]);
+  // Listening practice needs a voice for the lesson's language (hidden when the device has none).
+  const canListen = useSpeechSupport(data.status === 'success' ? (data.data.lesson?.targetLanguage ?? null) : null);
 
   if (data.status === 'loading') {
     return (
@@ -107,7 +113,7 @@ export default function LessonScreen() {
 
   // Practice records an attempt (not a completion): the lesson's progression stays untouched.
   const persistPractice = async (practice: LessonResult) => {
-    await getRepositories().progress.recordAttempt(userId, lesson.id, practice, { completed: false });
+    await getRepositories().progress.recordAttempt(userId, lesson.id, practice, { completed: false, kind: 'practice' });
     notifyProgressChanged();
   };
 
@@ -115,6 +121,20 @@ export default function LessonScreen() {
     return (
       <Screen edges={['bottom']}>
         <VocabularyMatchGame
+          words={words}
+          source={source}
+          onFinish={persistPractice}
+          onExit={() => setStep('intro')}
+        />
+      </Screen>
+    );
+  }
+
+  if (step === 'listening') {
+    return (
+      <Screen edges={['bottom']}>
+        <ListeningPractice
+          lessonId={lesson.id}
           words={words}
           source={source}
           onFinish={persistPractice}
@@ -199,15 +219,21 @@ export default function LessonScreen() {
                 styles.word,
                 { gap: spacing.md, paddingTop: i === 0 ? 0 : spacing.sm, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: colors.border },
               ]}
-              accessible
-              accessibilityLabel={`${word.term}: ${meaningOf(word, source)}`}
             >
-              <Text variant="bodyStrong" style={styles.flex}>
-                {isolateTerm(word)}
-              </Text>
-              <Text variant="small" color="textSecondary" style={styles.flex}>
-                {meaningOf(word, source)}
-              </Text>
+              {/* Word and meaning are read as one item; the listen button stays its own control. */}
+              <View
+                style={[styles.word, styles.flex, { gap: spacing.md }]}
+                accessible
+                accessibilityLabel={`${word.term}: ${meaningOf(word, source)}`}
+              >
+                <Text variant="bodyStrong" style={styles.flex}>
+                  {isolateTerm(word)}
+                </Text>
+                <Text variant="small" color="textSecondary" style={styles.flex}>
+                  {meaningOf(word, source)}
+                </Text>
+              </View>
+              <PronounceButton text={word.term} language={word.targetLanguage} />
             </View>
           ))}
         </Card>
@@ -225,6 +251,10 @@ export default function LessonScreen() {
             icon="game-controller-outline"
             onPress={() => setStep('practice')}
           />
+        ) : null}
+
+        {canListen && words.length >= OPTIONS_PER_EXERCISE ? (
+          <Button title={t('listening.play')} variant="secondary" icon="headset-outline" onPress={() => setStep('listening')} />
         ) : null}
       </View>
     </Screen>

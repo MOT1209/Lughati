@@ -68,7 +68,7 @@ describe('isSavedProgress', () => {
     for (const code of ['ar', 'de', 'en', 'es', 'fr', 'tr'] as const) {
       expect(isSavedProgress(getMockProgress('u1', code))).toBe(true);
     }
-    const finished = { ...validProgress(), completedLessonIds: lessons.filter((l) => l.targetLanguage === 'de').map((l) => l.id), currentLessonId: null, levelProgress: 1, wordsLearned: 60 };
+    const finished = { ...validProgress(), completedLessonIds: lessons.filter((l) => l.targetLanguage === 'de').map((l) => l.id), currentLessonId: null, levelProgress: 0, levelId: 'B1', wordsLearned: 120 };
     expect(isSavedProgress(finished)).toBe(true);
   });
 
@@ -78,7 +78,7 @@ describe('isSavedProgress', () => {
     ['XP above the sanity ceiling', (p) => (p.totalXp = 1e12)],
     ['negative minutes learned', (p) => (p.minutesLearned = -1)],
     ['negative word count', (p) => (p.wordsLearned = -3)],
-    ['more words than the course has', (p) => (p.wordsLearned = 61)],
+    ['more words than the course has', (p) => (p.wordsLearned = 121)], // 20 lessons × 6 words
     ['non-numeric counter', (p) => (p.totalXp = '300')],
     ['null counter (what JSON makes of NaN/Infinity)', (p) => (p.minutesLearned = null)],
     ['levelProgress below 0', (p) => (p.levelProgress = -0.1)],
@@ -186,7 +186,8 @@ describe('repositories with a partly corrupt store', () => {
     const progress = await reloaded.progress.get('u1', 'de');
     expect(progress?.completedLessonIds).toEqual(ids);
     expect(progress?.currentLessonId).toBeNull();
-    expect(progress?.wordsLearned).toBe(60);
+    expect(progress?.levelId).toBe('B1'); // past A1 and A2
+    expect(progress?.wordsLearned).toBe(120);
   });
 });
 
@@ -196,6 +197,10 @@ describe('new records: attempts, activity and review states', () => {
     expect(isSavedAttemptList([validAttempt(), validAttempt({ id: 'a2', lessonId: 'de-a1-2', completed: false, result: { correct: 4, total: 12 } })])).toBe(true);
 
     expect(isSavedAttemptList([])).toBe(false);
+    // The run kind is optional (older saves have none) but must be a known one.
+    expect(isSavedAttemptList([validAttempt({ kind: 'practice' })])).toBe(true);
+    expect(isSavedAttemptList([validAttempt({ kind: 'lesson' })])).toBe(true);
+    expect(isSavedAttemptList([validAttempt({ kind: 'quiz' as never })])).toBe(false);
     expect(isSavedAttemptList('array-not')).toBe(false);
     expect(isSavedAttemptList([validAttempt({ lessonId: 'fr-a1-1' })])).toBe(false); // lesson of another language
     expect(isSavedAttemptList([validAttempt({ targetLanguage: 'xx' as unknown as LanguageCode })])).toBe(false);

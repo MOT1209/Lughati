@@ -58,7 +58,10 @@ export function getRecommendations(input: RecommendationInput): Recommendation[]
   }
 
   const currentLessonId = progress.currentLessonId;
-  const attemptsOfCurrent = currentLessonId ? attempts.filter((a) => a.lessonId === currentLessonId) : [];
+  // Lesson runs only: a practice score (match, listening) is not the lesson's score.
+  const attemptsOfCurrent = currentLessonId
+    ? attempts.filter((a) => a.lessonId === currentLessonId && a.kind !== 'practice')
+    : [];
   const lastAttempt = attemptsOfCurrent.length > 0 ? attemptsOfCurrent[attemptsOfCurrent.length - 1]! : null;
 
   if (currentLessonId && lastAttempt && scoreRatio(lastAttempt.result) < RETRY_SCORE_THRESHOLD) {

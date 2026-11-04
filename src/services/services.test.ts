@@ -83,7 +83,9 @@ describe('mock repositories', () => {
 
   it.each(['ar', 'de'] as const)('returns lessons in order for %s', async (code) => {
     const lessons = await repos.lessons.getByLanguage(code);
-    expect(lessons.map((l) => l.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    // Taken by level, then position: A1 1–10, then A2 1–10 (never interleaved).
+    const positions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    expect(lessons.map((l) => `${l.levelId}-${l.order}`)).toEqual([...positions.map((n) => `A1-${n}`), ...positions.map((n) => `A2-${n}`)]);
     expect(lessons.every((l) => l.targetLanguage === code)).toBe(true);
   });
 
@@ -475,6 +477,16 @@ describe('a passed lesson feeds the vocabulary review', () => {
     expect(due[0]).toMatchObject({ userId: 'u1', targetLanguage: 'de', step: 0, lastReviewedAt: null, correctCount: 0, wrongCount: 0 });
     expect(due.every((state) => state.wordId.startsWith('de-a1-1'))).toBe(true);
     expect(await repos.reviews.getDue('u2', 'de', tomorrow())).toEqual([]); // per user
+  });
+
+  it('a word is due from the start of its local day, not the hour of the lesson', async () => {
+    clock = new Date(2026, 9, 15, 22, 0); // lesson late in the evening
+    const repos = createMockRepositories({ now });
+    await repos.progress.completeLesson('u1', 'de-a1-1', { correct: 12, total: 12 });
+
+    expect(await repos.reviews.getDue('u1', 'de', new Date(2026, 9, 15, 23, 59))).toEqual([]); // still the same day
+    expect(await repos.reviews.getDue('u1', 'de', new Date(2026, 9, 16, 0, 5))).toHaveLength(6); // just after local midnight
+    expect(await repos.reviews.getDue('u1', 'de', new Date(2026, 9, 16, 7, 0))).toHaveLength(6); // next morning
   });
 
   it('getDue follows the injected clock by default', async () => {

@@ -1,6 +1,6 @@
 # سياسة الخصوصية — لغتي (Lughati)
 
-آخر تحديث: 2026-10-17
+آخر تحديث: 2026-10-25
 
 ## العربية
 
@@ -12,6 +12,8 @@
 - إعداداتك: المظهر ولغة الواجهة.
 
 **ما لا يحدث:** لا يرسل التطبيق أي بيانات إلى خادم، ولا يستخدم إعلانات، ولا أدوات تحليل أو تتبّع، ولا يشارك بياناتك مع أي جهة.
+
+**نطق الكلمات:** زر الاستماع يقرأ كلمات الدروس بمحرّك تحويل النص إلى كلام الموجود في جهازك (مثل محرّك Google للنطق على أندرويد). التطبيق نفسه لا يرسل شيئاً؛ لا يُمرَّر إلى المحرّك إلا كلمة الدرس، لا اسمك ولا بريدك ولا تقدّمك. بعض المحرّكات قد تستخدم الإنترنت لأصوات معيّنة، ويخضع ذلك لإعدادات جهازك وسياسة مزوّد المحرّك.
 
 **حذف البيانات:** تسجيل الخروج يحذف الجلسة. حذف التطبيق أو مسح بياناته من إعدادات الجهاز يحذف كل ما سبق نهائياً.
 
@@ -31,6 +33,8 @@ Lughati currently works **fully offline**.
 - Your settings: theme and interface language.
 
 **What does not happen:** the app sends no data to any server, shows no ads, uses no analytics or tracking, and shares nothing with third parties.
+
+**Word pronunciation:** the listen button reads lesson words with your device's own text-to-speech engine (for example Google's speech engine on Android). The app itself sends nothing; only the lesson word is passed to the engine, never your name, email or progress. Some engines may use the internet for certain voices; that is governed by your device settings and the engine provider's policy.
 
 **Deleting data:** signing out removes the session. Uninstalling the app or clearing its storage in the device settings deletes all of the above permanently.
 

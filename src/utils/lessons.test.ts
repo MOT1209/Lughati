@@ -6,7 +6,7 @@ import type { Progress } from '@/types';
 
 import { isolate, isolateLtr } from './bidi';
 import { isolateTerm, meaningLanguage, meaningOf } from './meaning';
-import { buildExercises, OPTIONS_PER_EXERCISE } from './exercises';
+import { buildExercises, buildListeningExercises, OPTIONS_PER_EXERCISE } from './exercises';
 import { answer, initialSession, isFinished, next } from './lessonSession';
 import {
   applyLessonCompletion,
@@ -44,13 +44,32 @@ describe('vocabulary data', () => {
     }
   });
 
-  it('every language has the same shape: 10 lessons of 6 items matching the Arabic meanings', () => {
-    expect(arabicMeanings).toHaveLength(10);
+  it.each(['a1', 'a2'] as const)('every language has the same %s shape: 10 lessons of 6 items matching the Arabic meanings', (level) => {
+    expect(arabicMeanings[level]).toHaveLength(10);
     for (const code of targets) {
-      for (const [index, meanings] of arabicMeanings.entries()) {
-        const words = wordsOf(`${code}-a1-${index + 1}`);
+      for (const [index, meanings] of arabicMeanings[level].entries()) {
+        expect(meanings).toHaveLength(6);
+        const words = wordsOf(`${code}-${level}-${index + 1}`);
         // The Arabic course lists the Arabic words themselves; everyone else lists Arabic meanings.
         expect(words.map((w) => (code === 'ar' ? w.term : (w.translations.ar ?? '')))).toEqual(meanings);
+      }
+    }
+  });
+
+  it('every language has 10 A1 and 10 A2 lessons, A1 taken first', () => {
+    for (const code of targets) {
+      const own = lessons.filter((l) => l.targetLanguage === code);
+      expect(own.filter((l) => l.levelId === 'A1')).toHaveLength(10);
+      expect(own.filter((l) => l.levelId === 'A2')).toHaveLength(10);
+    }
+  });
+
+  it('within a lesson, meanings are distinct in every source language (no two identical options)', () => {
+    for (const lesson of lessons) {
+      const words = wordsOf(lesson.id);
+      for (const source of targets.filter((code) => code !== lesson.targetLanguage)) {
+        const meanings = words.map((w) => meaningOf(w, source));
+        expect({ lesson: lesson.id, source, distinct: new Set(meanings).size }).toEqual({ lesson: lesson.id, source, distinct: words.length });
       }
     }
   });
@@ -158,6 +177,34 @@ describe('buildExercises', () => {
   });
 });
 
+describe('buildListeningExercises', () => {
+  const words = wordsOf('de-a1-1');
+  const exercises = buildListeningExercises('de-a1-1', words);
+
+  it('asks every word once, by ear, with distinct options that contain the answer', () => {
+    expect(exercises).toHaveLength(words.length);
+    expect(exercises.map((e) => e.subjectId)).toEqual(words.map((w) => w.id));
+    for (const exercise of exercises) {
+      expect(exercise.type).toBe('listen');
+      expect(exercise.options).toHaveLength(OPTIONS_PER_EXERCISE);
+      expect(new Set(exercise.options).size).toBe(OPTIONS_PER_EXERCISE);
+      expect(exercise.options).toContain(exercise.answer);
+    }
+  });
+
+  it('is deterministic, varies the answer position and has its own ids', () => {
+    expect(buildListeningExercises('de-a1-1', words)).toEqual(exercises);
+    const all = lessons.flatMap((lesson) => buildListeningExercises(lesson.id, wordsOf(lesson.id)));
+    expect(new Set(all.map((e) => e.options.indexOf(e.answer))).size).toBe(OPTIONS_PER_EXERCISE);
+    const quizIds = new Set(buildExercises('de-a1-1', words).map((e) => e.id));
+    expect(exercises.every((e) => !quizIds.has(e.id))).toBe(true);
+  });
+
+  it('returns nothing when there are too few words', () => {
+    expect(buildListeningExercises('x', words.slice(0, 3))).toEqual([]);
+  });
+});
+
 describe('lesson session', () => {
   const exercise = buildExercises('de-a1-1', wordsOf('de-a1-1'))[0]!;
   const wrong = exercise.options.find((id) => id !== exercise.answer)!;
@@ -208,12 +255,34 @@ describe('applyLessonCompletion', () => {
     expect(after.minutesLearned).toBe(20 + 3);
   });
 
-  it('raises the level and clears the current lesson when the last lesson of a level is done', () => {
+  it('raises the level to A2 and moves on to its first lesson when the last A1 lesson is done', () => {
     const almost = { ...base, completedLessonIds: german.slice(0, 9).map((l) => l.id), currentLessonId: 'de-a1-10' };
     const after = complete(almost, 'de-a1-10');
     expect(after.levelId).toBe('A2');
-    expect(after.currentLessonId).toBeNull(); // no A2 lessons exist yet
+    expect(after.currentLessonId).toBe('de-a2-1');
     expect(after.levelProgress).toBe(0);
+  });
+
+  it('counts A2 progress on its own lessons, and clears the current lesson once A2 is done', () => {
+    const a1 = german.filter((l) => l.levelId === 'A1').map((l) => l.id);
+    const a2 = german.filter((l) => l.levelId === 'A2').map((l) => l.id);
+    const atA2 = { ...base, levelId: 'A2' as const, completedLessonIds: a1, currentLessonId: 'de-a2-1' };
+    const first = complete(atA2, 'de-a2-1');
+    expect(first.currentLessonId).toBe('de-a2-2');
+    expect(first.levelProgress).toBeCloseTo(0.1, 2);
+
+    const almost = { ...atA2, completedLessonIds: [...a1, ...a2.slice(0, 9)], currentLessonId: 'de-a2-10' };
+    const done = complete(almost, 'de-a2-10');
+    expect(done.levelId).toBe('B1');
+    expect(done.currentLessonId).toBeNull(); // no B1 lessons exist yet
+    expect(done.levelProgress).toBe(0);
+  });
+
+  it('an A2 lesson taken early does not raise the level or become current before A1 is done', () => {
+    const after = complete(base, 'de-a2-1');
+    expect(after.completedLessonIds).toContain('de-a2-1');
+    expect(after.levelId).toBe('A1');
+    expect(after.currentLessonId).toBe('de-a1-1');
   });
 
   it('is structurally idempotent on replay: no new words, XP still counts', () => {

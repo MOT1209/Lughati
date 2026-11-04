@@ -10,6 +10,7 @@ import type {
   LearningPlan,
   LearningProfile,
   LessonAttempt,
+  LevelId,
   VocabularyReviewState,
 } from '@/types';
 import { buildExercises } from '@/utils/exercises';
@@ -137,6 +138,7 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
   };
 
   const lessonOf = (lessonId: string) => lessons.find((l) => l.id === lessonId);
+  const levelRank = (id: LevelId) => levels.findIndex((level) => level.id === id);
 
   return {
     languages: {
@@ -150,8 +152,11 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
       getById: async (id) => levels.find((l) => l.id === id) ?? null,
     },
     lessons: {
+      // The order they are taken in: by level (A1 before A2), then by position in the level.
       getByLanguage: async (language) =>
-        lessons.filter((l) => l.targetLanguage === language).sort((a, b) => a.order - b.order),
+        lessons
+          .filter((l) => l.targetLanguage === language)
+          .sort((a, b) => levelRank(a.levelId) - levelRank(b.levelId) || a.order - b.order),
       getById: async (id) => lessonOf(id) ?? null,
       getVocabulary: async (lessonId) => vocabulary.filter((w) => w.lessonId === lessonId),
       getExercises: async (lessonId) =>
@@ -191,6 +196,7 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
             attemptedAt: now().toISOString(),
             result: { correct: result.correct, total: result.total },
             completed: passed,
+            kind: 'lesson',
           };
           const prior = await attemptsFor(userId, lesson.targetLanguage);
           const attempts = [...prior, attempt].slice(-MAX_ATTEMPTS_PER_RECORD);
@@ -256,6 +262,7 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
             attemptedAt: now().toISOString(),
             result: { correct: result.correct, total: result.total },
             completed,
+            kind: options?.kind ?? 'lesson',
           };
           const prior = await attemptsFor(userId, lesson.targetLanguage);
           const attempts = [...prior, attempt].slice(-MAX_ATTEMPTS_PER_RECORD);
@@ -315,10 +322,12 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
       },
       getDue: async (userId, language, dueUpTo = now()) => {
         const reviews = await readReviews(storage);
-        const limit = dueUpTo.toISOString();
+        // Due from the start of its local calendar day, not the exact hour: a word scheduled for
+        // "tomorrow" by a lesson at 22:00 is offered tomorrow morning, matching the day shown.
+        const today = dayOf(dueUpTo);
         return Object.entries(reviews)
           .filter(([name, state]) => name === reviewStateKey(state) && state.userId === userId && state.targetLanguage === language)
-          .filter(([, state]) => state.nextReviewAt <= limit)
+          .filter(([, state]) => dayOf(new Date(state.nextReviewAt)) <= today)
           .map(([, state]) => state)
           .sort((a, b) => a.nextReviewAt.localeCompare(b.nextReviewAt));
       },

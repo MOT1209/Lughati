@@ -2,10 +2,10 @@ import type { LanguageCode, Vocabulary } from '@/types';
 
 type TargetCode = Exclude<LanguageCode, 'ar'>;
 
-// The Arabic course list, one list per lesson, six items each.
+// The Arabic course lists, one list per lesson, six items each.
 // Every target language below lists its terms in exactly the same order, so index i of a lesson
 // in any language means the same thing as index i here. vocabulary.test checks the shape.
-const arabic: string[][] = [
+const arabicA1: string[][] = [
   ['مرحباً', 'مع السلامة', 'شكراً', 'من فضلك', 'أهلاً بك', 'آسف'],
   ['اسمي…', 'ما اسمك؟', 'تشرفت بمعرفتك', 'كيف حالك؟', 'أنا بخير', 'من أين أنت؟'],
   ['واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'عشرة'],
@@ -18,7 +18,7 @@ const arabic: string[][] = [
   ['يسار', 'يمين', 'مباشرة', 'قريب', 'بعيد', 'تذكرة'],
 ];
 
-const terms: Record<TargetCode, string[][]> = {
+const termsA1: Record<TargetCode, string[][]> = {
   de: [
     ['Hallo', 'Tschüss', 'Danke', 'Bitte', 'Willkommen', 'Entschuldigung'],
     ['Ich heiße…', 'Wie heißt du?', 'Freut mich', "Wie geht's?", 'Mir geht es gut', 'Woher kommst du?'],
@@ -81,16 +81,100 @@ const terms: Record<TargetCode, string[][]> = {
   ],
 };
 
+// A2: same layout as A1 (lesson i of mocks/lessons.ts a2Templates, word j). Verbs are listed in
+// their dictionary form (Arabic: present tense, third person).
+const arabicA2: string[][] = [
+  ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'عطلة نهاية الأسبوع'],
+  ['شمس', 'مطر', 'ثلج', 'رياح', 'حار', 'بارد'],
+  ['رأس', 'يد', 'عين', 'طبيب', 'دواء', 'مريض'],
+  ['قميص', 'حذاء', 'معطف', 'سعر', 'رخيص', 'غالٍ'],
+  ['مطبخ', 'غرفة نوم', 'حمّام', 'باب', 'نافذة', 'سرير'],
+  ['عمل', 'مكتب', 'معلّم', 'طالب', 'كتاب', 'اجتماع'],
+  ['رياضة', 'موسيقى', 'قراءة', 'سباحة', 'فيلم', 'رسم'],
+  ['مطار', 'فندق', 'جواز سفر', 'حقيبة سفر', 'قطار', 'رحلة'],
+  ['يأكل', 'يشرب', 'ينام', 'يعمل', 'يقرأ', 'يكتب'],
+  ['سعيد', 'حزين', 'متعب', 'جائع', 'كبير', 'صغير'],
+];
+
+const termsA2: Record<TargetCode, string[][]> = {
+  de: [
+    ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'das Wochenende'],
+    ['die Sonne', 'der Regen', 'der Schnee', 'der Wind', 'heiß', 'kalt'],
+    ['der Kopf', 'die Hand', 'das Auge', 'der Arzt', 'das Medikament', 'krank'],
+    ['das Hemd', 'die Schuhe', 'der Mantel', 'der Preis', 'billig', 'teuer'],
+    ['die Küche', 'das Schlafzimmer', 'das Badezimmer', 'die Tür', 'das Fenster', 'das Bett'],
+    ['die Arbeit', 'das Büro', 'der Lehrer', 'der Student', 'das Buch', 'die Besprechung'],
+    ['der Sport', 'die Musik', 'das Lesen', 'das Schwimmen', 'der Film', 'das Zeichnen'],
+    ['der Flughafen', 'das Hotel', 'der Reisepass', 'der Koffer', 'der Zug', 'die Reise'],
+    ['essen', 'trinken', 'schlafen', 'arbeiten', 'lesen', 'schreiben'],
+    ['glücklich', 'traurig', 'müde', 'hungrig', 'groß', 'klein'],
+  ],
+  en: [
+    ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'the weekend'],
+    ['sun', 'rain', 'snow', 'wind', 'hot', 'cold'],
+    ['head', 'hand', 'eye', 'doctor', 'medicine', 'sick'],
+    ['shirt', 'shoes', 'coat', 'price', 'cheap', 'expensive'],
+    ['kitchen', 'bedroom', 'bathroom', 'door', 'window', 'bed'],
+    ['work', 'office', 'teacher', 'student', 'book', 'meeting'],
+    ['sport', 'music', 'reading', 'swimming', 'film', 'drawing'],
+    ['airport', 'hotel', 'passport', 'suitcase', 'train', 'trip'],
+    ['to eat', 'to drink', 'to sleep', 'to work', 'to read', 'to write'],
+    ['happy', 'sad', 'tired', 'hungry', 'big', 'small'],
+  ],
+  es: [
+    ['el lunes', 'el martes', 'el miércoles', 'el jueves', 'el viernes', 'el fin de semana'],
+    ['el sol', 'la lluvia', 'la nieve', 'el viento', 'caluroso', 'frío'],
+    ['la cabeza', 'la mano', 'el ojo', 'el médico', 'el medicamento', 'enfermo'],
+    ['la camisa', 'los zapatos', 'el abrigo', 'el precio', 'barato', 'caro'],
+    ['la cocina', 'el dormitorio', 'el baño', 'la puerta', 'la ventana', 'la cama'],
+    ['el trabajo', 'la oficina', 'el profesor', 'el estudiante', 'el libro', 'la reunión'],
+    ['el deporte', 'la música', 'la lectura', 'la natación', 'la película', 'el dibujo'],
+    ['el aeropuerto', 'el hotel', 'el pasaporte', 'la maleta', 'el tren', 'el viaje'],
+    ['comer', 'beber', 'dormir', 'trabajar', 'leer', 'escribir'],
+    ['feliz', 'triste', 'cansado', 'hambriento', 'grande', 'pequeño'],
+  ],
+  fr: [
+    ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'le week-end'],
+    ['le soleil', 'la pluie', 'la neige', 'le vent', 'chaud', 'froid'],
+    ['la tête', 'la main', "l'œil", 'le médecin', 'le médicament', 'malade'],
+    ['la chemise', 'les chaussures', 'le manteau', 'le prix', 'bon marché', 'cher'],
+    ['la cuisine', 'la chambre', 'la salle de bain', 'la porte', 'la fenêtre', 'le lit'],
+    ['le travail', 'le bureau', 'le professeur', "l'étudiant", 'le livre', 'la réunion'],
+    ['le sport', 'la musique', 'la lecture', 'la natation', 'le film', 'le dessin'],
+    ["l'aéroport", "l'hôtel", 'le passeport', 'la valise', 'le train', 'le voyage'],
+    ['manger', 'boire', 'dormir', 'travailler', 'lire', 'écrire'],
+    ['heureux', 'triste', 'fatigué', 'affamé', 'grand', 'petit'],
+  ],
+  tr: [
+    ['pazartesi', 'salı', 'çarşamba', 'perşembe', 'cuma', 'hafta sonu'],
+    ['güneş', 'yağmur', 'kar', 'rüzgâr', 'sıcak', 'soğuk'],
+    ['baş', 'el', 'göz', 'doktor', 'ilaç', 'hasta'],
+    ['gömlek', 'ayakkabı', 'mont', 'fiyat', 'ucuz', 'pahalı'],
+    ['mutfak', 'yatak odası', 'banyo', 'kapı', 'pencere', 'yatak'],
+    ['iş', 'ofis', 'öğretmen', 'öğrenci', 'kitap', 'toplantı'],
+    ['spor', 'müzik', 'okuma', 'yüzme', 'film', 'resim'],
+    ['havalimanı', 'otel', 'pasaport', 'bavul', 'tren', 'yolculuk'],
+    ['yemek', 'içmek', 'uyumak', 'çalışmak', 'okumak', 'yazmak'],
+    ['mutlu', 'üzgün', 'yorgun', 'aç', 'büyük', 'küçük'],
+  ],
+};
+
+type CourseLevel = 'a1' | 'a2';
+
 // Index i of a lesson means the same thing in every language, so each word gets its meaning in
 // every other course language and the learner sees it in their own (source) language.
-const lists: Record<LanguageCode, string[][]> = { ar: arabic, ...terms };
-const codes = Object.keys(lists) as LanguageCode[];
+const courses: Record<CourseLevel, Record<LanguageCode, string[][]>> = {
+  a1: { ar: arabicA1, ...termsA1 },
+  a2: { ar: arabicA2, ...termsA2 },
+};
+const codes = Object.keys(courses.a1) as LanguageCode[];
 
-const build = (code: LanguageCode): Vocabulary[] =>
-  lists[code].flatMap((lessonTerms, lessonIndex) =>
+const build = (code: LanguageCode, level: CourseLevel): Vocabulary[] => {
+  const lists = courses[level];
+  return lists[code].flatMap((lessonTerms, lessonIndex) =>
     lessonTerms.map((term, wordIndex) => ({
-      id: `${code}-a1-${lessonIndex + 1}-w${wordIndex + 1}`,
-      lessonId: `${code}-a1-${lessonIndex + 1}`,
+      id: `${code}-${level}-${lessonIndex + 1}-w${wordIndex + 1}`,
+      lessonId: `${code}-${level}-${lessonIndex + 1}`,
       targetLanguage: code,
       term,
       translations: Object.fromEntries(
@@ -98,8 +182,9 @@ const build = (code: LanguageCode): Vocabulary[] =>
       ),
     })),
   );
+};
 
-export const vocabulary: Vocabulary[] = codes.flatMap(build);
+export const vocabulary: Vocabulary[] = codes.flatMap((code) => [...build(code, 'a1'), ...build(code, 'a2')]);
 
-/** Exposed so tests can check every language lists the same shape as the Arabic list. */
-export const arabicMeanings = arabic;
+/** Exposed so tests can check every language lists the same shape as the Arabic lists. */
+export const arabicMeanings: Record<CourseLevel, string[][]> = { a1: arabicA1, a2: arabicA2 };

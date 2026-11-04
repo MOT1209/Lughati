@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 
-import { Icon, Text, type IconName } from '@/components/ui';
+import { Icon, type IconName } from './Icon';
+import { Text } from './Text';
 import { useTheme } from '@/hooks/useTheme';
 
 interface StatTileProps {

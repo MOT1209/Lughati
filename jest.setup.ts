@@ -9,3 +9,12 @@ jest.mock('@expo/vector-icons/Ionicons', () => {
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
+
+// expo-speech talks to the device's text-to-speech engine; tests only need the calls. The voice
+// list never settles by default ("unknown": listen buttons are shown and no late update causes
+// act() noise); tests of voice support resolve it themselves.
+jest.mock('expo-speech', () => ({
+  speak: jest.fn(),
+  stop: jest.fn(() => Promise.resolve()),
+  getAvailableVoicesAsync: jest.fn(() => new Promise(() => {})),
+}));

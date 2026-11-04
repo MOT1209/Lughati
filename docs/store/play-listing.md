@@ -14,7 +14,7 @@
 اختر لغتك واللغة التي تريد تعلّمها: العربية، الألمانية، الإنجليزية، الإسبانية، الفرنسية أو التركية.
 
 ماذا ستجد:
-• عشرة دروس للمستوى A1 في كل لغة، بكلمات وعبارات يومية.
+• عشرون درساً في كل لغة للمستويين A1 وA2، بكلمات وعبارات يومية.
 • تمارين قصيرة بعد كل درس، وتقدّم محفوظ على جهازك.
 • مراجعة الكلمات في الوقت المناسب حتى لا تنساها.
 • سلسلة أيام متتالية تشجّعك على التعلّم كل يوم.
@@ -34,7 +34,7 @@ Lughati is a language-learning app built for Arabic speakers first, and it teach
 Pick your language and the one you want to learn: Arabic, German, English, Spanish, French or Turkish.
 
 What you get:
-• Ten A1 lessons per language with everyday words and phrases.
+• Twenty lessons per language for levels A1 and A2, with everyday words and phrases.
 • Short exercises after each lesson, with progress saved on your device.
 • Word review at the right moment so you keep what you learned.
 • A daily streak that keeps you coming back.

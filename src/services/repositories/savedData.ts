@@ -202,6 +202,7 @@ export function isSavedAttemptList(value: unknown): value is LessonAttempt[] {
     const { correct, total } = result as Record<string, unknown>;
     if (!isCount(correct) || !isCount(total) || correct > total) return false;
     if (completed !== true && completed !== false) return false;
+    if (entry.kind !== undefined && entry.kind !== 'lesson' && entry.kind !== 'practice') return false;
   }
   return true;
 }

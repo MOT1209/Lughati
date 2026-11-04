@@ -38,7 +38,13 @@ afterEach(() => jest.restoreAllMocks());
 describe('Learn screen', () => {
   it('lists the lessons of the current language with their status', async () => {
     renderRouter({ learn: LearnScreen }, { initialUrl: '/learn' });
-    expect(await screen.findAllByRole('button')).toHaveLength(10);
+    expect(await screen.findAllByRole('button')).toHaveLength(20); // 10 A1 + 10 A2
+    // Lessons are grouped under a header per level, in course order.
+    const headers = screen.getAllByRole('header').map((h) => h.props.children);
+    expect(headers).toEqual(expect.arrayContaining(['A1 · Beginner', 'A2 · Elementary']));
+    expect(headers.indexOf('A1 · Beginner')).toBeLessThan(headers.indexOf('A2 · Elementary'));
+    expect(screen.getByRole('button', { name: 'Days of the week, Not started' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Feelings and descriptions, Not started' })).toBeTruthy();
     // A new learner starts at the first lesson with nothing completed.
     expect(screen.getByRole('button', { name: 'Greetings and politeness, Current lesson' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Introducing yourself, Not started' })).toBeTruthy();

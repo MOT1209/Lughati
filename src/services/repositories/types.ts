@@ -54,12 +54,13 @@ export interface ProgressRepository {
   /**
    * Records a lesson run without touching completion or progression (an aborted or manual run).
    * Attempted runs must be distinguishable from completed ones; `completed: false` is the default.
+   * `kind: 'practice'` marks a practice run (match, listening), which never counts as a lesson score.
    */
   recordAttempt(
     userId: string,
     lessonId: string,
     result: LessonResult,
-    options?: { completed?: boolean },
+    options?: { completed?: boolean; kind?: 'lesson' | 'practice' },
   ): Promise<LessonAttempt>;
 }
 
@@ -80,7 +81,7 @@ export interface ActivityRepository {
 /** Vocabulary spaced-repetition states. Scheduling lives in src/utils/srs.ts alone. */
 export interface VocabularyReviewRepository {
   get(userId: string, wordId: string): Promise<VocabularyReviewState | null>;
-  /** States of the language due at or before `now`, oldest due first. */
+  /** States of the language due on or before the local calendar day of `now` (from the start of that day), oldest due first. */
   getDue(userId: string, language: LanguageCode, now?: Date): Promise<VocabularyReviewState[]>;
   recordReview(userId: string, language: LanguageCode, wordId: string, outcome: ReviewOutcome): Promise<VocabularyReviewState>;
 }
