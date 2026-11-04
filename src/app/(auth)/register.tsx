@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { BrandHero } from '@/components/BrandHero';
 import { Button, Input, Screen, Text } from '@/components/ui';
 import { useTheme } from '@/hooks/useTheme';
-import { AuthError } from '@/services/auth';
+import { AuthError, isRealAuth } from '@/services/auth';
+import { isolateLtr } from '@/utils/bidi';
 import { useAuthStore } from '@/store/authStore';
 import { ROUTES } from '@/utils/routing';
 import { validateRegister, type FieldError } from '@/utils/validation';
@@ -21,6 +22,7 @@ export default function Register() {
   const [errors, setErrors] = useState<Partial<Record<Field, FieldError>>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [verifyEmail, setVerifyEmail] = useState<string | null>(null);
 
   const set = (field: Field) => (text: string) => setValues((prev) => ({ ...prev, [field]: text }));
   const fieldText = (field: Field) => {
@@ -36,13 +38,30 @@ export default function Register() {
 
     setLoading(true);
     try {
-      await signUp({ method: 'password', name: values.name.trim(), email: values.email.trim(), password: values.password });
+      const outcome = await signUp({ method: 'password', name: values.name.trim(), email: values.email.trim(), password: values.password });
+      if (outcome.needsEmailVerification) {
+        setVerifyEmail(values.email.trim());
+        setLoading(false);
+        return;
+      }
       router.replace(ROUTES.splash);
     } catch (error) {
       setSubmitError(t(`auth.errors.${error instanceof AuthError ? error.code : 'unknown'}`));
       setLoading(false);
     }
   };
+
+  if (verifyEmail) {
+    return (
+      <Screen edges={[]} contentStyle={{ padding: 0, gap: 0 }}>
+        <BrandHero title={t('auth.verify.title')} subtitle={t('auth.verify.subtitle')} />
+        <View style={{ padding: spacing.lg, gap: spacing.lg }} accessibilityLiveRegion="polite">
+          <Text>{t('auth.verify.body', { email: isolateLtr(verifyEmail) })}</Text>
+          <Button title={t('auth.verify.backToLogin')} onPress={() => router.replace(ROUTES.login)} />
+        </View>
+      </Screen>
+    );
+  }
 
   return (
     <Screen edges={[]} contentStyle={{ padding: 0, gap: 0 }}>
@@ -71,9 +90,11 @@ export default function Register() {
           </Text>
         ) : null}
 
-        <Text variant="caption" color="textSecondary">
-          {t('auth.demoNotice')}
-        </Text>
+        {isRealAuth() ? null : (
+          <Text variant="caption" color="textSecondary">
+            {t('auth.demoNotice')}
+          </Text>
+        )}
 
         <Button title={t('auth.register.submit')} onPress={onSubmit} loading={loading} />
 

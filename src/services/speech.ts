@@ -1,4 +1,5 @@
 import * as Speech from 'expo-speech';
+import { AppState } from 'react-native';
 
 import type { LanguageCode } from '@/types';
 
@@ -37,21 +38,57 @@ export function voiceMatches(voiceLanguage: string, language: LanguageCode): boo
   return voiceLanguage.toLowerCase().split(/[-_]/)[0] === language;
 }
 
+interface VoiceInfo {
+  identifier: string;
+  language: string;
+  quality?: string;
+}
+
+const norm = (tag: string) => tag.toLowerCase().replace('_', '-');
+
+/**
+ * Chooses the device voice for the exact course tag (e.g. de-DE before de-AT), preferring enhanced
+ * quality. Returns undefined when nothing matches exactly: the engine then uses its own default for
+ * the language tag, never a voice of another language.
+ */
+export function pickVoice(voices: readonly VoiceInfo[], language: LanguageCode): string | undefined {
+  const exact = voices.filter((v) => norm(v.language) === norm(SPEECH_LANGUAGE_TAGS[language]));
+  const enhanced = exact.find((v) => v.quality === 'Enhanced');
+  return (enhanced ?? exact[0])?.identifier;
+}
+
 /**
  * The device's own text-to-speech (expo-speech: Android TextToSpeech, iOS AVSpeechSynthesizer).
  * The app sends no request of its own; the system engine reads lesson words, nothing else.
  */
 export class DeviceSpeechService implements SpeechService {
   private voices: Promise<string[] | null> | null = null;
+  private voiceList: VoiceInfo[] = [];
   private ending: (() => void) | null = null;
 
+  constructor() {
+    AppState.addEventListener('change', (state) => {
+      // A voice installed in the system settings meanwhile counts once the learner is back.
+      if (state === 'active') this.voices = null;
+      // Nothing keeps talking once the app is in the background.
+      else this.stop();
+    });
+  }
+
   supports(language: LanguageCode): Promise<boolean | null> {
-    // An empty or failed list means "unknown" (some engines report voices late), never "no".
-    this.voices ??= Speech.getAvailableVoicesAsync().then(
-      (voices) => (voices.length > 0 ? voices.map((v) => v.language) : null),
+    // An empty or failed list means "unknown" (some engines report voices late), never "no",
+    // and is not kept: the next question asks the device again.
+    const pending = (this.voices ??= Speech.getAvailableVoicesAsync().then(
+      (voices) => {
+        this.voiceList = voices;
+        return voices.length > 0 ? voices.map((v) => v.language) : null;
+      },
       () => null,
-    );
-    return this.voices.then((list) => (list ? list.some((tag) => voiceMatches(tag, language)) : null));
+    ));
+    return pending.then((list) => {
+      if (!list && this.voices === pending) this.voices = null;
+      return list ? list.some((tag) => voiceMatches(tag, language)) : null;
+    });
   }
 
   speak(text: string, language: LanguageCode, callbacks?: SpeakCallbacks): void {
@@ -65,8 +102,10 @@ export class DeviceSpeechService implements SpeechService {
     };
     this.ending = end;
     Speech.stop().catch(() => undefined);
+    const voice = pickVoice(this.voiceList, language);
     Speech.speak(text, {
       language: SPEECH_LANGUAGE_TAGS[language],
+      ...(voice ? { voice } : {}),
       rate: SPEECH_RATE,
       onDone: end,
       onStopped: end,

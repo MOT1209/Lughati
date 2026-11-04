@@ -1,6 +1,7 @@
 import * as Speech from 'expo-speech';
+import { AppState, type AppStateStatus } from 'react-native';
 
-import { DeviceSpeechService, SPEECH_LANGUAGE_TAGS, SPEECH_RATE, voiceMatches } from './speech';
+import { DeviceSpeechService, pickVoice, SPEECH_LANGUAGE_TAGS, SPEECH_RATE, voiceMatches } from './speech';
 
 const speak = Speech.speak as jest.Mock;
 const voices = Speech.getAvailableVoicesAsync as jest.Mock;
@@ -79,5 +80,65 @@ describe('DeviceSpeechService', () => {
     expect(await new DeviceSpeechService().supports('de')).toBeNull();
     voices.mockRejectedValueOnce(new Error('engine not ready'));
     expect(await new DeviceSpeechService().supports('de')).toBeNull();
+  });
+
+  const voice = (language: string) => ({ identifier: language, name: language, quality: 'Default', language });
+
+  it('asks again after an unknown answer: the engine may report its voices late', async () => {
+    voices.mockClear();
+    voices.mockResolvedValueOnce([]).mockResolvedValueOnce([voice('de-DE')]);
+    const service = new DeviceSpeechService();
+    expect(await service.supports('de')).toBeNull();
+    expect(await service.supports('de')).toBe(true);
+    expect(voices).toHaveBeenCalledTimes(2);
+  });
+
+  it('reads the voices again when the app returns to the foreground (a voice installed meanwhile)', async () => {
+    const listeners: ((state: AppStateStatus) => void)[] = [];
+    const spy = jest.spyOn(AppState, 'addEventListener').mockImplementation((_type, listener) => {
+      listeners.push(listener as (state: AppStateStatus) => void);
+      return { remove: jest.fn() };
+    });
+    voices.mockClear();
+    voices.mockResolvedValueOnce([voice('en-US')]).mockResolvedValueOnce([voice('en-US'), voice('de-DE')]);
+    const service = new DeviceSpeechService();
+    expect(await service.supports('de')).toBe(false);
+
+    listeners.forEach((listener) => listener('background'));
+    expect(await service.supports('de')).toBe(false); // nothing re-read while away
+    listeners.forEach((listener) => listener('active'));
+    expect(await service.supports('de')).toBe(true);
+    expect(voices).toHaveBeenCalledTimes(2);
+    spy.mockRestore();
+  });
+});
+
+describe('pickVoice', () => {
+  const v = (identifier: string, language: string, quality?: string) => ({ identifier, language, quality });
+  it('prefers the exact regional voice, then enhanced quality', () => {
+    expect(pickVoice([v('at', 'de-AT'), v('de', 'de-DE'), v('de-hq', 'de_DE', 'Enhanced')], 'de')).toBe('de-hq');
+    expect(pickVoice([v('at', 'de-AT'), v('de', 'de-DE')], 'de')).toBe('de');
+  });
+  it('never returns a voice of another region or language (engine default is used instead)', () => {
+    expect(pickVoice([v('at', 'de-AT'), v('en', 'en-US')], 'de')).toBeUndefined();
+    expect(pickVoice([], 'ar')).toBeUndefined();
+  });
+});
+
+describe('speech and the app lifecycle', () => {
+  it('stops talking when the app goes to the background', () => {
+    const listeners: ((state: AppStateStatus) => void)[] = [];
+    const spy = jest.spyOn(AppState, 'addEventListener').mockImplementation((_type, listener) => {
+      listeners.push(listener as (state: AppStateStatus) => void);
+      return { remove: jest.fn() };
+    });
+    const service = new DeviceSpeechService();
+    const onEnd = jest.fn();
+    service.speak('Hallo', 'de', { onEnd });
+    (Speech.stop as jest.Mock).mockClear();
+    listeners.forEach((listener) => listener('background'));
+    expect(Speech.stop).toHaveBeenCalled();
+    expect(onEnd).toHaveBeenCalledTimes(1);
+    spy.mockRestore();
   });
 });

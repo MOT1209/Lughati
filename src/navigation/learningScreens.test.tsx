@@ -256,6 +256,7 @@ describe('Lesson practice entry', () => {
     expect(await screen.findByText('Listen and pick the word you hear')).toBeTruthy();
 
     for (let i = 0; i < 6; i += 1) {
+      fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
       fireEvent.press(screen.getAllByRole('button', { name: /^Option: / })[0]!);
       await act(async () => {
         fireEvent.press(screen.getByRole('button', { name: i === 5 ? 'Finish' : 'Next' }));

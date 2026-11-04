@@ -3,10 +3,12 @@ export const ROUTES = {
   onboarding: '/onboarding',
   login: '/login',
   register: '/register',
+  forgotPassword: '/forgot-password',
   home: '/home',
   languageSelection: '/language-selection',
   setupLanguages: '/setup-languages',
   settings: '/settings',
+  aiTutor: '/ai-tutor',
   learn: '/learn',
   // Expo Router typed routes require an object with pathname + params for dynamic routes.
   lessonRoute: (id: string) => ({ pathname: '/lesson/[id]' as const, params: { id } } as const),

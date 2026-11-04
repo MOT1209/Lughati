@@ -1,3 +1,4 @@
+import type { Snapshot } from '../sync/types';
 import type {
   ActivityDay,
   Exercise,
@@ -103,7 +104,14 @@ export interface ContentSource {
   lessons: LessonRepository;
 }
 
+/** Device-storage export/import used only by the sync engine (see services/sync). */
+export interface SnapshotStore {
+  exportSnapshot(userId: string): Promise<Snapshot>;
+  importSnapshot(userId: string, snapshot: Snapshot): Promise<void>;
+}
+
 export interface Repositories extends ContentSource {
+  snapshots: SnapshotStore;
   progress: ProgressRepository;
   plans: LearningPlanRepository;
   profiles: LearningProfileRepository;

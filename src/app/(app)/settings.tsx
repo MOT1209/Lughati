@@ -26,6 +26,8 @@ export default function Settings() {
   const setLanguagePreference = usePreferencesStore((s) => s.setLanguagePreference);
   const user = useAuthStore((s) => s.session?.user);
   const signOut = useAuthStore((s) => s.signOut);
+  const deleteAccount = useAuthStore((s) => s.deleteAccount);
+  const [deleting, setDeleting] = useState(false);
   const [restartNeeded, setRestartNeeded] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [restartFailed, setRestartFailed] = useState(false);
@@ -66,6 +68,26 @@ export default function Settings() {
       }
     }
     router.replace(ROUTES.splash);
+  };
+
+  const onDeleteAccount = () => {
+    Alert.alert(t('settings.deleteAccount'), t('settings.deleteConfirm'), [
+      { text: t('settings.cancel'), style: 'cancel' },
+      {
+        text: t('settings.deleteAccountAction'),
+        style: 'destructive',
+        onPress: async () => {
+          setDeleting(true);
+          try {
+            await deleteAccount();
+            router.replace(ROUTES.splash);
+          } catch (error) {
+            setDeleting(false);
+            Alert.alert(t('settings.deleteAccount'), t(`auth.errors.${error instanceof AuthError ? error.code : 'unknown'}`));
+          }
+        },
+      },
+    ]);
   };
 
   return (
@@ -125,6 +147,7 @@ export default function Settings() {
       <SettingsSection icon="person-circle-outline" title={t('settings.account')}>
         <Text color="textSecondary">{isolateLtr(user?.email ?? '')}</Text>
         <Button title={t('settings.signOut')} icon="log-out-outline" variant="danger" onPress={onSignOut} loading={signingOut} />
+        <Button title={t('settings.deleteAccount')} icon="trash-outline" variant="secondary" onPress={onDeleteAccount} loading={deleting} />
       </SettingsSection>
 
       <SettingsSection icon="information-circle-outline" title={t('settings.about')}>

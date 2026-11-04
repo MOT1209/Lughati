@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { BrandHero } from '@/components/BrandHero';
 import { Button, Input, Screen, Text } from '@/components/ui';
 import { useTheme } from '@/hooks/useTheme';
-import { AuthError } from '@/services/auth';
+import { AuthError, isRealAuth } from '@/services/auth';
 import { useAuthStore } from '@/store/authStore';
 import { ROUTES } from '@/utils/routing';
 import { validateLogin, type FieldError } from '@/utils/validation';
@@ -75,11 +75,19 @@ export default function Login() {
           </Text>
         ) : null}
 
-        <Text variant="caption" color="textSecondary">
-          {t('auth.demoNotice')}
-        </Text>
+        {isRealAuth() ? null : (
+          <Text variant="caption" color="textSecondary">
+            {t('auth.demoNotice')}
+          </Text>
+        )}
 
         <Button title={t('auth.login.submit')} onPress={onSubmit} loading={loading} />
+
+        <Link href={ROUTES.forgotPassword} accessibilityRole="link" style={{ minHeight: 48, paddingVertical: 10, alignSelf: 'center' }}>
+          <Text color="primary" variant="bodyStrong">
+            {t('auth.forgot.link')}
+          </Text>
+        </Link>
 
         <View style={{ alignItems: 'center', gap: spacing.xs }}>
           <Text color="textSecondary">{t('auth.login.noAccount')}</Text>

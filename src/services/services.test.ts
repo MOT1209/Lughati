@@ -46,8 +46,9 @@ describe('MockAuthService', () => {
 
   it('signUp keeps the chosen name', async () => {
     const auth = new MockAuthService(0, createMemoryStorage());
-    const session = await auth.signUp({ method: 'password', name: 'سارة', email: 'sara@example.com', password: 'password1' });
-    expect(session.user.name).toBe('سارة');
+    const outcome = await auth.signUp({ method: 'password', name: 'سارة', email: 'sara@example.com', password: 'password1' });
+    expect(outcome.needsEmailVerification).toBe(false);
+    expect(outcome.session?.user.name).toBe('سارة');
   });
 
   it.each([
@@ -195,6 +196,21 @@ describe('progress persistence', () => {
     expect((await nextDay.plans.get('u1', 'de')).minutesToday).toBe(0);
   });
 
+  it('resumes at the first new lesson when content is added after the learner finished everything', async () => {
+    // Saved before A2 shipped: all of A1 done, level already A2, nothing left to take back then.
+    const a1 = Array.from({ length: 10 }, (_, i) => `de-a1-${i + 1}`);
+    const saved = {
+      userId: 'u1', targetLanguage: 'de', levelId: 'A2', completedLessonIds: a1, currentLessonId: null,
+      levelProgress: 0, totalXp: 900, wordsLearned: 60, minutesLearned: 50,
+    };
+    const storage = createMemoryStorage();
+    await storage.setItem(STORAGE_KEYS.learningProgress, JSON.stringify({ progress: { 'u1:de': saved }, plans: {} }));
+
+    const progress = await createMockRepositories({ storage }).progress.get('u1', 'de');
+    expect(progress?.currentLessonId).toBe('de-a2-1');
+    expect(progress?.completedLessonIds).toEqual(a1);
+  });
+
   it('ignores a corrupt or foreign saved blob and falls back to the seed data', async () => {
     for (const blob of ['{not json', '[]', '"text"', '{"progress":1,"plans":{}}']) {
       const storage = createMemoryStorage();
@@ -247,21 +263,27 @@ describe('app wiring', () => {
 });
 
 describe('AI provider registry', () => {
+  const request = { mode: 'chat' as const, message: 'Hallo', targetLanguage: 'de' as const, explanationLanguage: 'ar' as const, level: 'A1' as const };
+
   it('registers an additional provider and lets it become the default', async () => {
-    const custom = { id: 'custom', reply: jest.fn() };
+    const custom = { id: 'custom', ask: jest.fn() };
+    const before = getAIProvider().id;
     registerAIProvider(custom);
     expect(getAIProvider('custom')).toBe(custom);
-    expect(getAIProvider().id).toBe('mock'); // registering does not change the default
+    expect(getAIProvider().id).toBe(before); // registering does not change the default
     registerAIProvider(custom, { makeDefault: true });
     expect(getAIProvider()).toBe(custom);
-    registerAIProvider(getAIProvider('mock'), { makeDefault: true }); // restore for other tests
+    registerAIProvider(getAIProvider(before), { makeDefault: true }); // restore for other tests
   });
 
-  it('resolves the default mock provider without screens importing it', async () => {
+  it('without a backend the dev default is the mock and its result says it is not real AI', async () => {
     const provider = getAIProvider();
     expect(provider.id).toBe('mock');
-    const reply = await provider.reply({ id: 'c1', userId: 'u1', targetLanguage: 'de', messages: [] }, 'Hallo');
-    expect(reply.role).toBe('assistant');
+    expect((await provider.ask(request)).source).toBe('mock');
+  });
+
+  it('the unavailable provider fails honestly instead of faking a reply', async () => {
+    await expect(getAIProvider('unavailable').ask(request)).rejects.toMatchObject({ code: 'unavailable' });
   });
 
   it('throws for an unknown provider', () => {

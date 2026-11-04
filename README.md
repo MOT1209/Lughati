@@ -14,17 +14,23 @@
 <a href="#-التقنيات"><img alt="Expo SDK 57" src="https://img.shields.io/badge/Expo_SDK-57-000020?logo=expo&logoColor=white"></a>
 <a href="#-التقنيات"><img alt="React Native 0.86" src="https://img.shields.io/badge/React_Native-0.86-61DAFB?logo=react&logoColor=black"></a>
 <a href="#-التقنيات"><img alt="TypeScript strict" src="https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white"></a>
-<a href="#-الجودة"><img alt="Tests" src="https://img.shields.io/badge/Jest-32_suites_·_585_tests-99425B?logo=jest&logoColor=white"></a>
+<a href="#-الجودة"><img alt="Tests" src="https://img.shields.io/badge/Jest-39_suites_·_707_tests-99425B?logo=jest&logoColor=white"></a>
 <a href="#-التقنيات"><img alt="i18n ar · en" src="https://img.shields.io/badge/i18n-ar_·_en-EA580C"></a>
 <a href="#-الميزات"><img alt="RTL" src="https://img.shields.io/badge/واجهة-RTL-0F766E"></a>
 
 </div>
 
 > [!NOTE]
-> **المرحلة الحالية — الأساس (Phase 1) مع هوية بصرية جديدة.** بنية، ثيم، تدويل/RTL، تنقّل، مكوّنات، بيانات وهمية، وتصميم موحّد لكل الشاشات.
-> لا شبكة ولا ذكاء اصطناعي حقيقي بعد — والاستبدال بالحقيقي جاهز عبر المُسجِّلات (انظر [المعمارية](#-المعمارية)).
-> **حدود معروفة:** لا يوجد تذكير يومي بعد (أُزيل المفتاح لأنه لم يكن يُرسل شيئاً؛ التذكير الحقيقي يحتاج `expo-notifications` وتحققاً على الجهاز)،
-> ولا توجد إنجازات (Achievements) بعد؛ التقدّم يشمل XP والكلمات والدقائق والسلسلة.
+> **الحالة:** الأساس + دروس A1/A2 دون اتصال، ومعها الآن **واجهة خلفية Supabase** (حساب حقيقي، مزامنة، ترحيل بيانات الجهاز) و**معلّم ذكي** عبر دالة خادم.
+> ما لم يُتحقق منه حياً: تسجيل/دخول فعلي، المعلّم الذكي (يحتاج مفتاحاً)، الأجهزة الحقيقية، مراجعة متحدثين أصليين. التفاصيل الدقيقة: [docs/KNOWN_ISSUES.md](./docs/KNOWN_ISSUES.md) و[docs/FINAL_ENGINEERING_REPORT.md](./docs/FINAL_ENGINEERING_REPORT.md).
+
+### إعداد سريع
+```bash
+npm ci
+cp .env.example .env.local     # ضع EXPO_PUBLIC_SUPABASE_URL و EXPO_PUBLIC_SUPABASE_ANON_KEY (عامّان فقط)
+npx expo start --lan
+```
+بلا `.env.local` يعمل وضع التطوير بمصادقة **وهمية** للتجربة فقط؛ بناء الإنتاج بلا إعداد لا يسجّل دخولاً. الإعداد الكامل للخلفية والذكاء الاصطناعي والبناء: [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md). المخطط: [docs/DATABASE_SCHEMA.md](./docs/DATABASE_SCHEMA.md). المزامنة: [docs/SYNC.md](./docs/SYNC.md). الأمن: [docs/SECURITY_AUDIT.md](./docs/SECURITY_AUDIT.md). الاختبار: [docs/TESTING.md](./docs/TESTING.md).
 
 ---
 

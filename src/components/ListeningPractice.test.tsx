@@ -38,6 +38,7 @@ afterEach(() => registerSpeechService(original));
 /** Answers every question: the first `right` correctly, the rest wrongly. */
 function answerAll(right: number) {
   exercises.forEach((exercise, index) => {
+    fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
     const id = index < right ? exercise.answer : exercise.options.find((o) => o !== exercise.answer)!;
     fireEvent.press(screen.getByRole('button', { name: optionName(id) }));
     fireEvent.press(screen.getByRole('button', { name: index === exercises.length - 1 ? 'Finish' : 'Next' }));
@@ -56,8 +57,32 @@ describe('ListeningPractice', () => {
     expect(screen.getByRole('button', { name: 'Listen again' })).toBeTruthy();
   });
 
+  it('keeps the options locked until the word has been heard', () => {
+    render(<ListeningPractice lessonId="de-a1-1" words={words} source="ar" />);
+    const first = exercises[0]!;
+    const option = () => screen.getByRole('button', { name: optionName(first.answer) });
+    expect(screen.getByText('Press Listen first')).toBeTruthy();
+    expect(option()).toBeDisabled();
+    fireEvent.press(option());
+    expect(screen.queryByText('Correct!')).toBeNull();
+
+    fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
+    expect(screen.queryByText('Press Listen first')).toBeNull();
+    expect(option()).toBeEnabled();
+  });
+
+  it('stops a word still being read when moving to the next question', () => {
+    render(<ListeningPractice lessonId="de-a1-1" words={words} source="ar" />);
+    fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
+    fireEvent.press(screen.getByRole('button', { name: optionName(exercises[0]!.answer) }));
+    fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+    expect(speech.stop).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Press Listen first')).toBeTruthy();
+  });
+
   it('after an answer tells whether it was right and shows the word with its meaning', () => {
     render(<ListeningPractice lessonId="de-a1-1" words={words} source="ar" />);
+    fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
     const first = exercises[0]!;
     fireEvent.press(screen.getByRole('button', { name: optionName(first.options.find((o) => o !== first.answer)!) }));
     expect(screen.getByText('Not quite')).toBeTruthy();

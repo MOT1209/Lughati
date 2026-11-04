@@ -14,7 +14,7 @@ import type {
   VocabularyReviewState,
 } from '@/types';
 import { buildExercises } from '@/utils/exercises';
-import { addStudyMinutes, applyLessonCompletion, isPassed, lessonXp } from '@/utils/progression';
+import { addStudyMinutes, applyLessonCompletion, isPassed, lessonXp, nextLessonId } from '@/utils/progression';
 import { computeStreakStats } from '@/utils/streaks';
 import { initialReviewState, scheduleReview } from '@/utils/srs';
 
@@ -33,6 +33,7 @@ import {
   reviewStateKey,
   type SavedLearning,
 } from './savedData';
+import type { Snapshot, ProgressRecord } from '../sync/types';
 import type { Repositories } from './types';
 
 const key = progressKey;
@@ -90,8 +91,14 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
     return run;
   };
 
-  const readProgress = async (userId: string, language: LanguageCode) =>
-    (await load()).progress[key(userId, language)] ?? getMockProgress(userId, language);
+  const readProgress = async (userId: string, language: LanguageCode) => {
+    const saved = (await load()).progress[key(userId, language)];
+    if (!saved) return getMockProgress(userId, language);
+    if (saved.currentLessonId !== null) return saved;
+    // Saved with nothing left to take; lessons added since then become the next step.
+    const own = lessons.filter((l) => l.targetLanguage === language);
+    return { ...saved, currentLessonId: nextLessonId(saved.completedLessonIds, saved.levelId, own, levels) };
+  };
 
   const readPlan = async (userId: string, language: LanguageCode): Promise<LearningPlan> => {
     const entry = (await load()).plans[key(userId, language)];
@@ -140,7 +147,98 @@ export function createMockRepositories({ storage = createMemoryStorage(), now = 
   const lessonOf = (lessonId: string) => lessons.find((l) => l.id === lessonId);
   const levelRank = (id: LevelId) => levels.findIndex((level) => level.id === id);
 
+  const lessonIds = new Set(lessons.map((l) => l.id));
+  const wordIds = new Set(vocabulary.map((w) => w.id));
+  const rank = (id: LevelId) => levels.findIndex((level) => level.id === id);
+
   return {
+    snapshots: {
+      exportSnapshot: async (userId): Promise<Snapshot> => {
+        const saved = await load();
+        const prefix = `${userId}:`;
+        const progress: Snapshot['progress'] = {};
+        const codes = new Set<LanguageCode>();
+        for (const [name, p] of Object.entries(saved.progress)) if (name.startsWith(prefix) && p.userId === userId) codes.add(p.targetLanguage);
+        for (const [name, p] of Object.entries(saved.plans)) if (name.startsWith(prefix) && p.plan.userId === userId) codes.add(p.plan.targetLanguage);
+        for (const code of codes) {
+          const p = await readProgress(userId, code);
+          const plan = await readPlan(userId, code);
+          if (!p) continue;
+          progress[code] = {
+            levelId: p.levelId,
+            totalXp: p.totalXp,
+            wordsLearned: p.wordsLearned,
+            minutesLearned: p.minutesLearned,
+            completedLessonIds: [...p.completedLessonIds],
+            dailyGoalMinutes: plan.dailyGoalMinutes,
+          };
+        }
+        const attempts = Object.entries(saved.attempts ?? {}).filter(([name]) => name.startsWith(prefix)).flatMap(([, list]) => list);
+        const activity = Object.entries(saved.activity ?? {}).filter(([name]) => name.startsWith(prefix)).map(([, a]) => a);
+        const reviews = Object.values(await readReviews(storage)).filter((r) => r.userId === userId);
+        return { profile: (await readProfiles(storage))[userId] ?? null, settings: null, progress, attempts, activity, reviews };
+      },
+
+      importSnapshot: (userId, snapshot) =>
+        exclusive(async () => {
+          const saved = await load();
+          const progressOut = { ...saved.progress };
+          const plansOut = { ...saved.plans };
+          for (const [code, rec] of Object.entries(snapshot.progress) as [LanguageCode, ProgressRecord][]) {
+            const own = lessons.filter((l) => l.targetLanguage === code);
+            const base = await readProgress(userId, code);
+            if (!base) continue;
+            const completed = [...new Set([...base.completedLessonIds, ...rec.completedLessonIds])].filter((id) => own.some((l) => l.id === id));
+            const levelId = rank(rec.levelId) > rank(base.levelId) ? rec.levelId : base.levelId;
+            const here = own.filter((l) => l.levelId === levelId);
+            const done = here.filter((l) => completed.includes(l.id)).length;
+            progressOut[key(userId, code)] = {
+              ...base,
+              levelId,
+              completedLessonIds: completed,
+              currentLessonId: nextLessonId(completed, levelId, own, levels),
+              levelProgress: here.length === 0 ? 0 : Math.round((done / here.length) * 100) / 100,
+              totalXp: Math.max(base.totalXp, rec.totalXp),
+              wordsLearned: Math.max(base.wordsLearned, rec.wordsLearned),
+              minutesLearned: Math.max(base.minutesLearned, rec.minutesLearned),
+            };
+            const plan = await readPlan(userId, code);
+            const goal = Math.min(Math.max(Math.round(rec.dailyGoalMinutes), MIN_DAILY_GOAL_MINUTES), MAX_DAILY_GOAL_MINUTES);
+            plansOut[key(userId, code)] = { plan: { ...plan, dailyGoalMinutes: goal }, day: todayOf() };
+          }
+
+          // Attempts: union by id, keep the newest MAX per language, drop lessons this build does not know.
+          const attemptsOut = { ...(saved.attempts ?? {}) };
+          const byLang = new Map<LanguageCode, LessonAttempt[]>();
+          for (const a of snapshot.attempts) {
+            if (a.userId !== userId || !lessonIds.has(a.lessonId)) continue;
+            byLang.set(a.targetLanguage, [...(byLang.get(a.targetLanguage) ?? []), a]);
+          }
+          for (const [code, incoming] of byLang) {
+            const have = attemptsOut[key(userId, code)] ?? [];
+            const ids = new Set(have.map((a) => a.id));
+            const all = [...have, ...incoming.filter((a) => !ids.has(a.id))].sort((x, y) => x.attemptedAt.localeCompare(y.attemptedAt));
+            attemptsOut[key(userId, code)] = all.slice(-MAX_ATTEMPTS_PER_RECORD);
+          }
+
+          const activityOut = { ...(saved.activity ?? {}) };
+          for (const d of snapshot.activity) if (d.userId === userId) activityOut[activityKey(userId, d.day)] = d;
+
+          const next: SavedLearning = { ...saved, progress: progressOut, plans: plansOut, attempts: attemptsOut, activity: activityOut };
+          const reviewsNow = await readReviews(storage);
+          const reviewsOut = { ...reviewsNow };
+          for (const r of snapshot.reviews) if (r.userId === userId && wordIds.has(r.wordId)) reviewsOut[reviewKeyOf(userId, r.wordId)] = r;
+          const profilesNow = await readProfiles(storage);
+
+          // Reviews and profile first, then the main blob (the memo is published only after it is saved).
+          await storage.setItem(STORAGE_KEYS.vocabReviews, JSON.stringify({ reviews: reviewsOut }));
+          if (snapshot.profile && isSavedProfile(snapshot.profile)) {
+            await storage.setItem(STORAGE_KEYS.learningProfile, JSON.stringify({ ...profilesNow, [userId]: snapshot.profile }));
+          }
+          await storage.setItem(STORAGE_KEYS.learningProgress, JSON.stringify(next));
+          loading = Promise.resolve(next);
+        }),
+    },
     languages: {
       getAll: async () => languages,
       getTargets: async () => languages.filter((l) => l.roles.includes('target')),
