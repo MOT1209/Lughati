@@ -11,9 +11,9 @@
 **ما نجمعه:**
 - **بيانات الحساب:** البريد الإلكتروني والاسم الذي تدخله، ومعرّف حساب داخلي. كلمة المرور تُرسل مباشرة إلى خدمة المصادقة عبر اتصال مشفّر ولا نراها ولا نخزّنها بنص صريح.
 - **بيانات التعلّم:** لغتك واللغة التي تتعلمها، الدروس المكتملة ونتائج الاختبارات، مواعيد مراجعة الكلمات، أيام النشاط والسلسلة، وإعداداتك (المظهر ولغة الواجهة).
-- **استخدام المعلّم الذكي:** نوع الطلب وعدد الرموز المستهلكة وتاريخها، لتطبيق حدود الاستخدام وضبط التكلفة. لا نحفظ نص رسائلك على خوادمنا.
+- **استخدام المساعدين الأذكياء:** نوع الطلب وعدد الرموز المستهلكة وتاريخها لتطبيق حدود الاستخدام وضبط التكلفة، **ونحفظ نصوص محادثاتك مع المعلّم وشريك المحادثة ونصوص الكتابة التي صحّحناها** لتعرضها لك لاحقاً. تُحذف بحذف المحادثة أو حذف حسابك.
 
-**المعلّم الذكي:** عند استخدامه يُرسل نص رسالتك وبضع رسائل سابقة من المحادثة مع لغتك ومستواك إلى خادمنا، ومنه إلى مزوّد نماذج الذكاء الاصطناعي لتوليد الرد. لا نرسل اسمك ولا بريدك ولا معرّف حسابك إلى المزوّد. لا تكتب معلومات شخصية حساسة في الرسائل. قد تحتوي الإجابات على أخطاء.
+**المساعدون الأذكياء (المعلّم، شريك المحادثة، مدرّب الكتابة، التمارين، النطق، المخطّط):** عند استخدامها يُرسل نص رسالتك وبضع رسائل سابقة من المحادثة مع لغتك ومستواك إلى خادمنا، ومنه إلى مزوّد نماذج الذكاء الاصطناعي (OpenCode Zen) لتوليد الرد. التمارين المولَّدة تُخزَّن ويُعاد استخدامها لمستخدمين آخرين دون أي بيانات شخصية. لا نرسل اسمك ولا بريدك ولا معرّف حسابك إلى المزوّد. لا تكتب معلومات شخصية حساسة في الرسائل. قد تحتوي الإجابات على أخطاء.
 
 **أين تُخزَّن البيانات:** على جهازك، وفي قاعدة بيانات سحابية (Supabase) محمية بقواعد تمنع أي مستخدم من الوصول إلى بيانات غيره. رموز الجلسة تُحفظ في التخزين الآمن للجهاز.
 
@@ -34,9 +34,9 @@ Lughati's lessons and exercises work on your device without a connection. The ac
 **What we collect:**
 - **Account data:** the email address and name you enter, and an internal account id. Your password goes straight to the authentication service over an encrypted connection; we never see it or store it in clear text.
 - **Learning data:** your own language and the language you learn, completed lessons and quiz results, word-review schedule, activity days and streak, and your settings (theme, interface language).
-- **AI tutor usage:** the request type, tokens used and date, to enforce usage limits and control cost. We do not store the text of your messages on our servers.
+- **AI helper usage:** the request type, tokens used and date, to enforce usage limits and control cost, **and we store the text of your conversations with the tutor and speaking partner and the writing you had corrected** so we can show it to you later. They are deleted when you delete the conversation or your account.
 
-**AI tutor:** when you use it, your message and a few earlier turns of the conversation, together with your language and level, are sent to our server and from there to an AI model provider to produce the reply. We do not send your name, email or account id to the provider. Do not type sensitive personal information into messages. Answers can contain mistakes.
+**AI helpers (tutor, speaking partner, writing coach, exercises, pronunciation, planner):** when you use them, your message and a few earlier turns of the conversation, together with your language and level, are sent to our server and from there to an AI model provider (OpenCode Zen) to produce the reply. Generated exercises are stored and reused for other users without any personal data. We do not send your name, email or account id to the provider. Do not type sensitive personal information into messages. Answers can contain mistakes.
 
 **Where data is stored:** on your device and in a cloud database (Supabase) protected by rules that stop any user from reaching another user's data. Session tokens are kept in the device's secure storage.
 

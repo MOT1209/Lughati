@@ -9,13 +9,7 @@
 6. Authentication → Policies: فعّل حماية كلمات المرور المسرّبة وحدّد الحد الأدنى للطول.
 
 ## 2) الذكاء الاصطناعي
-```bash
-supabase secrets set ANTHROPIC_API_KEY=...        # إلزامي
-supabase secrets set AI_MODEL=claude-haiku-5-5    # اختياري
-supabase secrets set AI_MINUTE_LIMIT=6 AI_DAILY_LIMIT=60   # اختياري
-supabase functions deploy ai-tutor                # verify_jwt مفعّل افتراضياً — لا تعطّله
-```
-بدون `ANTHROPIC_API_KEY` ترد الدالة بـ 503 والتطبيق يعرض «المعلّم الذكي غير متاح» ولا يعرض ردوداً وهمية. راقب التكلفة من جدول `ai_usage` (الرموز لكل مستخدم/يوم).
+النظام الموحّد (بوابة + سجل نماذج + ست ميزات) موثّق في `docs/AI_DEPLOYMENT.md` و`docs/AI_ARCHITECTURE.md`. الدالة `ai-gateway` تحتاج `OPENCODE_ZEN_API_KEY` و`OPENCODE_ZEN_BASE_URL` (من التوثيق الرسمي) ونموذجاً موثَّقاً ومفعّلاً بيد مشرف؛ وإلا يعرض التطبيق «غير متاح». لا يوجد أي مفتاح ذكاء اصطناعي في التطبيق.
 
 ## 3) متغيرات التطبيق
 `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` (انظر `.env.example`). للتطوير: ملف `.env.local` (مُتجاهَل في git). لبناء EAS: `eas env:create --name EXPO_PUBLIC_SUPABASE_URL --value ... --environment production --visibility plaintext` وكذلك المفتاح. **بناء الإنتاج دون هذين المتغيرين لا يسجّل دخولاً** (`not_configured`) — هذا مقصود حتى لا تُشحن مصادقة وهمية.

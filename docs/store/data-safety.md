@@ -14,7 +14,7 @@
 | Personal info → User IDs | Yes | Account management, app functionality | No | Internal account id |
 | App activity → App interactions | Yes | App functionality | No | Lesson completions, quiz results, review schedule, streak |
 | App info and performance | No | n/a | n/a | No crash reporting or analytics SDK |
-| Messages / user content | **Processed, not stored** | App functionality | Yes (AI tutor is optional) | Text typed into the AI tutor is sent to an AI model provider (service provider acting for us) to produce the reply; the server stores only counts, not the text |
+| Messages / user content | **Yes (collected and stored)** | App functionality | Yes (AI helpers are optional) | Conversations with the tutor / speaking partner and writing submitted for correction are sent to an AI model provider (service provider acting for us) and **stored** in the user's account so they can be shown again; deleted with the conversation or the account |
 | Location, contacts, photos, files, audio, health, financial | No | n/a | n/a | Pronunciation uses the system TTS and records nothing |
 
 - Data shared with third parties: **No** for advertising/marketing. The AI provider and Supabase are service providers (processors); declare them according to Google's "service provider" exemption only after confirming with the provider's terms.
