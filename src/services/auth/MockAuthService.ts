@@ -10,6 +10,7 @@ import {
   type AuthService,
   type Session,
   type SignInRequest,
+  type SignUpOutcome,
   type SignUpRequest,
 } from './types';
 
@@ -57,13 +58,29 @@ export class MockAuthService implements AuthService {
     return await this.start(createMockUser({ email: request.email }));
   }
 
-  async signUp(request: SignUpRequest): Promise<Session> {
+  async signUp(request: SignUpRequest): Promise<SignUpOutcome> {
     await wait(this.latencyMs);
     this.failIfScripted(request.email);
     if (request.email.trim().toLowerCase().startsWith('taken@')) {
       throw new AuthError('email_in_use');
     }
-    return await this.start(createMockUser({ name: request.name, email: request.email }));
+    const session = await this.start(createMockUser({ name: request.name, email: request.email }));
+    return { session, needsEmailVerification: false };
+  }
+
+  async requestPasswordReset(email: string): Promise<void> {
+    await wait(this.latencyMs);
+    this.failIfScripted(email);
+  }
+
+  async resendVerification(email: string): Promise<void> {
+    await wait(this.latencyMs);
+    this.failIfScripted(email);
+  }
+
+  async deleteAccount(): Promise<void> {
+    await wait(this.latencyMs);
+    await this.signOut();
   }
 
   async signOut(): Promise<void> {

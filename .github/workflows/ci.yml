@@ -16,7 +16,7 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       CI: "1"
       EXPO_NO_TELEMETRY: "1"
@@ -40,5 +40,38 @@ jobs:
       - name: Test
         run: npm test -- --runInBand
 
+      - name: Dependency audit (informational)
+        # Known advisories sit in Expo/Jest tooling with no patched release; see docs/audit/DEPENDENCY_AUDIT.md.
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Expo project validation
+        run: npx expo-doctor
+
       - name: Build check (Android bundle export)
         run: npx expo export --platform android --output-dir "$RUNNER_TEMP/expo-export"
+
+      - name: Guard against shipped secrets
+        run: |
+          if grep -RIl --include='*.ts' --include='*.tsx' --include='*.json' --include='*.js' -E 'SUPABASE_SERVICE_ROLE_KEY|sk-ant-[A-Za-z0-9]' src app.json eas.json; then
+            echo "A privileged key name or AI key appears in app sources"; exit 1
+          fi
+
+  database:
+    # Applies every migration + the catalog seed to a throwaway local Postgres and runs the RLS tests.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Start local Supabase (applies supabase/migrations)
+        run: supabase start -x realtime,storage-api,imgproxy,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      - name: Seed catalog
+        run: supabase db reset --local
+      - name: RLS and authorization tests
+        run: |
+          DB_URL="$(supabase status -o env | grep '^DB_URL=' | cut -d= -f2- | tr -d '"')"
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rls.sql | tee rls.out
+          grep -q 'RLS TESTS PASSED' rls.out

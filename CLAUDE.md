@@ -27,6 +27,7 @@ Expo SDK 57 postdates most model knowledge: before touching an Expo/RN API, chec
 ## Gotchas
 - **Typed routes vs `tsc`.** `experiments.typedRoutes` is on. Once `expo start` has generated the git-ignored `.expo/types/router.d.ts`, template-string hrefs such as `router.push(`/lesson/${id}`)` fail typecheck; dynamic hrefs must be `{ pathname: '/lesson/[id]', params: { id } }` (home and learn already use it). Use the object form for new dynamic links.
 - `@testing-library/react-native` is pinned to **13.3.3** and `react-test-renderer` to **19.2.3**: RNTL 14 needs React 19.3 while Expo pins 19.2.3.
+- `react-dom` is pinned to **19.2.3** (same as `react`): Expo declares it as an optional peer, and an unpinned install resolves 19.3.x, which makes `npm ci` fail on the `react` peer conflict.
 - `tsconfig.json` sets `"types": ["jest"]` because TypeScript 6 no longer auto-loads `@types/*`.
 - `jest.setup.ts` mocks AsyncStorage and the Ionicons font (async glyph loading causes `act()` noise).
 - Jest runs in **`Asia/Riyadh` (UTC+3)**, set by `jest.global-setup.js` (setting `process.env.TZ` inside a test file has no effect). Calendar days come from `utils/day.ts` `dayOf` (local), never `toISOString().slice(0, 10)` (UTC).

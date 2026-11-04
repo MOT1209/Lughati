@@ -10,6 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RootNavigator } from '@/navigation/RootNavigator';
 import { applyLanguagePreference } from '@/services/appLanguage';
 import { useAuthStore } from '@/store/authStore';
+import { useSyncTriggers } from '@/hooks/useSyncTriggers';
 import { usePreferencesStore } from '@/store/preferencesStore';
 
 void SplashScreen.preventAutoHideAsync();
@@ -21,6 +22,7 @@ export default function RootLayout() {
   const authInitialized = useAuthStore((s) => s.initialized);
   const initAuth = useAuthStore((s) => s.init);
   const [localeApplied, setLocaleApplied] = useState(false);
+  useSyncTriggers();
 
   useEffect(() => {
     void initAuth();

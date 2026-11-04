@@ -44,6 +44,9 @@ export default function AppLayout() {
         <Stack.Screen name="lesson/[id]" options={{ title: t('lesson.title') }} />
       </Stack.Protected>
       <Stack.Protected guard={access.canSeeLearning}>
+        <Stack.Screen name="ai-tutor" options={{ title: t('ai.title') }} />
+      </Stack.Protected>
+      <Stack.Protected guard={access.canSeeLearning}>
         <Stack.Screen name="settings" options={{ title: t('settings.title') }} />
       </Stack.Protected>
     </Stack>
