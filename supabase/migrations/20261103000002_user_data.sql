@@ -31,6 +31,8 @@ create table public.user_progress (
   language_code text not null references public.languages(code),
   level_id text not null references public.levels(id) default 'A1',
   total_xp integer not null default 0 check (total_xp between 0 and 10000000),
+  words_learned integer not null default 0 check (words_learned between 0 and 10000000),
+  minutes_learned integer not null default 0 check (minutes_learned between 0 and 10000000),
   daily_goal_minutes smallint not null default 15 check (daily_goal_minutes between 5 and 1440),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),

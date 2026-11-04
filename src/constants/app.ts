@@ -4,6 +4,8 @@ export const STORAGE_KEYS = {
   learningProgress: 'lughati.learning-progress.v1',
   learningProfile: 'lughati.learning-profile.v1',
   vocabReviews: 'lughati.vocab-reviews.v1',
+  syncMeta: 'lughati.sync-meta.v1',
+  deviceId: 'lughati.device-id.v1',
 } as const;
 
 export const MIN_TOUCH_TARGET = 48;

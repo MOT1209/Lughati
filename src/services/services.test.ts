@@ -46,8 +46,9 @@ describe('MockAuthService', () => {
 
   it('signUp keeps the chosen name', async () => {
     const auth = new MockAuthService(0, createMemoryStorage());
-    const session = await auth.signUp({ method: 'password', name: 'سارة', email: 'sara@example.com', password: 'password1' });
-    expect(session.user.name).toBe('سارة');
+    const outcome = await auth.signUp({ method: 'password', name: 'سارة', email: 'sara@example.com', password: 'password1' });
+    expect(outcome.needsEmailVerification).toBe(false);
+    expect(outcome.session?.user.name).toBe('سارة');
   });
 
   it.each([

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { getAuthService, type Session, type SignInRequest, type SignUpRequest } from '@/services/auth';
+import { getAuthService, type Session, type SignInRequest, type SignUpOutcome, type SignUpRequest } from '@/services/auth';
 
 import { useLearningStore } from './learningStore';
 
@@ -10,8 +10,11 @@ interface AuthState {
   initialized: boolean;
   init: () => Promise<void>;
   signIn: (request: SignInRequest) => Promise<void>;
-  signUp: (request: SignUpRequest) => Promise<void>;
+  signUp: (request: SignUpRequest) => Promise<SignUpOutcome>;
   signOut: () => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  resendVerification: (email: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 let unsubscribe: (() => void) | null = null;
@@ -43,9 +46,10 @@ export const useAuthStore = create<AuthState>()((set) => ({
   signIn: async (request) => {
     await getAuthService().signIn(request);
   },
-  signUp: async (request) => {
-    await getAuthService().signUp(request);
-  },
+  signUp: (request) => getAuthService().signUp(request),
+  requestPasswordReset: (email) => getAuthService().requestPasswordReset(email),
+  resendVerification: (email) => getAuthService().resendVerification(email),
+  deleteAccount: () => getAuthService().deleteAccount(),
   signOut: async () => {
     await getAuthService().signOut();
   },

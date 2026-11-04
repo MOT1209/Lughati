@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import { getRepositories } from '@/services/repositories';
+import { restoreBeforeLoad } from '@/services/sync';
 import type { LanguageCode, LearningProfile } from '@/types';
 
 interface LearningState {
@@ -28,6 +29,8 @@ export const useLearningStore = create<LearningState>()((set, get) => ({
   progressVersion: 0,
   loadProfile: async (userId) => {
     set({ userId, profile: null, profileLoaded: false });
+    // Signed in on a new device: let the cloud restore this account's data first (best effort, timeboxed).
+    await restoreBeforeLoad(userId);
     // An unreadable profile counts as "not chosen yet": the learner is asked again.
     const profile = await getRepositories()
       .profiles.get(userId)
