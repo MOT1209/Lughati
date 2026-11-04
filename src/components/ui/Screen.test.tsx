@@ -1,5 +1,5 @@
 import { act } from '@testing-library/react-native';
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { renderRouter, screen } from 'expo-router/testing-library';
 import { StatusBar } from 'react-native';
 
@@ -35,10 +35,12 @@ describe('Screen status bar', () => {
     expect(await screen.findByText('Hero')).toBeTruthy();
     expect(barStyles()).toEqual([]);
 
-    act(() => router.push('/plain'));
+    // 'plain' is a mock route local to this test file, not a real project route.
+    act(() => router.push('/plain' as Href));
     expect(await screen.findByText('Plain')).toBeTruthy();
     expect(barStyles()).toEqual(['dark-content']);
-    act(() => router.push('/hero'));
+    // 'hero' is a mock route local to this test file, not a real project route.
+    act(() => router.push('/hero' as Href));
     expect(await screen.findByText('Hero')).toBeTruthy();
     expect(barStyles()).toEqual([]); // the plain screen underneath is no longer focused
   });

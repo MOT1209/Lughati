@@ -1,5 +1,5 @@
 import { act, fireEvent } from '@testing-library/react-native';
-import { router, Tabs } from 'expo-router';
+import { router, Tabs, type Href } from 'expo-router';
 import { renderRouter, screen } from 'expo-router/testing-library';
 
 import HomeScreen from '@/app/(app)/(tabs)/home';
@@ -195,7 +195,8 @@ describe('Review screen', () => {
     renderRouter(tabRoutes, { initialUrl: '/review' });
     expect(await screen.findByText('Nothing to review right now')).toBeTruthy();
 
-    act(() => router.navigate('/other'));
+    // 'other' is a mock route local to this test file, not a real project route.
+    act(() => router.navigate('/other' as Href));
     due = [dueState];
     act(() => router.navigate('/review'));
     expect(await screen.findByText(isolateLtr('Hallo'))).toBeTruthy();
@@ -216,7 +217,8 @@ describe('Review screen', () => {
     expect(await screen.findByText('Review session complete')).toBeTruthy();
 
     // "Again" makes the word due immediately: coming back offers it again from the start.
-    act(() => router.navigate('/other'));
+    // 'other' is a mock route local to this test file, not a real project route.
+    act(() => router.navigate('/other' as Href));
     due = [{ ...dueState, wordId: 'de-a1-1-w2' }];
     act(() => router.navigate('/review'));
     expect(await screen.findByRole('button', { name: 'Show meaning' })).toBeTruthy();
