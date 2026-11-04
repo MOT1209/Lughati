@@ -68,7 +68,7 @@ T = {
               "review": "المراجعة", "due": "6 كلمات مستحقة", "word": "الكلمة", "meaning": "المعنى", "apfel": "التفاحة",
               "o": [("أعِد", "الآن"), ("صعبة", "بعد يوم"), ("جيدة", "بعد يوم"), ("سهلة", "بعد 3 أيام")],
               "tabs": ["الرئيسية", "تعلّم", "المراجعة", "التقدم", "حسابي"]},
-        "priv_title": "سياسة الخصوصية", "priv_desc": "ما يحفظه تطبيق لغتي، وأين، وما لا يفعله: الدروس تعمل دون إنترنت وحسابك وتقدّمك محميان سحابياً، بلا إعلانات ولا تتبّع.", "priv_back": "العودة إلى الصفحة الرئيسية", "priv_marker": "## العربية",
+        "priv_title": "سياسة الخصوصية", "priv_desc": "ما يحفظه تطبيق لغتي، وأين، وما لا يفعله: يعمل دون إنترنت وتبقى بياناتك على جهازك، بلا إعلانات ولا تتبّع.", "priv_back": "العودة إلى الصفحة الرئيسية", "priv_marker": "## العربية",
     },
     "en": {
         "lang": "en", "dir": "ltr", "base": "/en", "other": "/", "other_label": "العربية", "other_code": "ar",
@@ -105,7 +105,7 @@ T = {
               "review": "Review", "due": "6 words due", "word": "Word", "meaning": "Meaning", "apfel": "the apple",
               "o": [("Again", "Now"), ("Difficult", "in 1 day"), ("Good", "in 1 day"), ("Easy", "in 3 days")],
               "tabs": ["Home", "Learn", "Review", "Progress", "Profile"]},
-        "priv_title": "Privacy policy", "priv_desc": "What the Lughati app stores, where, and what it never does: lessons work offline, your account and progress are protected in the cloud, with no ads and no tracking.", "priv_back": "Back to home", "priv_marker": "## English",
+        "priv_title": "Privacy policy", "priv_desc": "What the Lughati app stores, where, and what it never does: it works offline, your data stays on your device, with no ads and no tracking.", "priv_back": "Back to home", "priv_marker": "## English",
     },
 }
 
