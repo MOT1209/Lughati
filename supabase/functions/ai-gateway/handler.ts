@@ -275,10 +275,41 @@ async function handleAdmin(body: Record<string, unknown>, caller: Caller, deps: 
       }
       return reply(200, { listed: [...listed].slice(0, 200) });
     }
+    case 'whoami':
+      return reply(200, { admin: true, id: caller.id });
+    case 'overview':
+      return reply(200, await store.usageOverview(deps.now()));
+    case 'usage.recent': {
+      const limit = typeof body.limit === 'number' && Number.isInteger(body.limit) ? Math.min(Math.max(body.limit, 1), 200) : 50;
+      return reply(200, { rows: await store.recentUsage(limit) });
+    }
+    case 'users.list': {
+      const page = typeof body.page === 'number' && Number.isInteger(body.page) && body.page >= 1 && body.page <= 1000 ? body.page : 1;
+      return reply(200, { page, perPage: USERS_PER_PAGE, users: await store.listUsers(page, USERS_PER_PAGE, deps.now()) });
+    }
+    case 'users.setLimit': {
+      const id = typeof body.userId === 'string' && UUID.test(body.userId) ? body.userId : null;
+      const n = body.dailyRequests;
+      const valid = n === null || (typeof n === 'number' && Number.isInteger(n) && n >= 0 && n <= 10_000);
+      if (!id || !valid) return fail(400, 'invalid_request');
+      await store.setUserLimit(id, n as number | null);
+      return reply(200, { ok: true });
+    }
+    case 'users.setBanned': {
+      const id = typeof body.userId === 'string' && UUID.test(body.userId) ? body.userId : null;
+      if (!id || typeof body.banned !== 'boolean') return fail(400, 'invalid_request');
+      // An admin cannot lock themselves out from here.
+      if (id === caller.id) return fail(400, 'cannot_ban_self');
+      await store.setUserBanned(id, body.banned);
+      return reply(200, { ok: true });
+    }
     default:
       return fail(400, 'invalid_request');
   }
 }
+
+const USERS_PER_PAGE = 50;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function listProviderModels(deps: Deps): Promise<Set<string> | null> {
   const controller = new AbortController();

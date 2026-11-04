@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>لوحة تحكم لغتي</title>
+<style>
+  :root {
+    --bg: #f6f8f7; --surface: #ffffff; --text: #14201e; --muted: #4b5d5a; --primary: #0a4e49; --on-primary: #ffffff;
+    --border: #b9c7c4; --primary-muted: #d6f0ec; --error: #b42318; --error-bg: #fde8e6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0e1615; --surface: #16211f; --text: #e8f0ee; --muted: #a9bcb8; --primary: #7fd6cc; --on-primary: #06201d; --border: #3b4f4b; --primary-muted: #143c38; --error: #ffb4ab; --error-bg: #4a1d19; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 "Cairo", system-ui, sans-serif; }
+  #app { max-width: 880px; margin: 0 auto; padding: 16px; display: grid; gap: 12px; }
+  h1 { font-size: 22px; margin: 0; } h2 { font-size: 19px; margin: 12px 0 0; } h3 { font-size: 16px; margin: 0; }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: grid; gap: 8px; }
+  .host { display: grid; gap: 12px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .muted { color: var(--muted); margin: 0; font-size: 14px; }
+  .badge { margin: 0; color: var(--primary); font-size: 13px; }
+  .btn, .chip { min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; cursor: pointer; }
+  .btn.primary { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+  .btn.danger { background: var(--error-bg); color: var(--error); border-color: var(--error-bg); }
+  .chip.on { background: var(--primary-muted); border-color: var(--primary); color: var(--primary); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  :focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+  .note { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--primary-muted); }
+  .note.err { background: var(--error-bg); color: var(--error); }
+  .kv { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; } .kv .v { font-weight: 700; text-align: end; }
+  .login { max-width: 420px; margin: 8vh auto 0; }
+  input { width: 100%; min-height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; }
+  label { font-size: 14px; color: var(--muted); }
+  .scroll { overflow-x: auto; } table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: start; padding: 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="app"><noscript>تحتاج لوحة التحكم إلى تفعيل جافاسكربت.</noscript></div>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

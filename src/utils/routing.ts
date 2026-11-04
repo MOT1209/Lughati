@@ -15,6 +15,7 @@ export const ROUTES = {
   aiQuiz: '/ai/quiz',
   aiPronunciation: '/ai/pronunciation',
   aiPlanner: '/ai/planner',
+  admin: '/admin',
   learn: '/learn',
   // Expo Router typed routes require an object with pathname + params for dynamic routes.
   lessonRoute: (id: string) => ({ pathname: '/lesson/[id]' as const, params: { id } } as const),

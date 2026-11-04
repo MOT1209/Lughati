@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { LanguageBadge } from '@/components/LanguageBadge';
 import { Button, ErrorState, LoadingState, Screen, StatTile, Text } from '@/components/ui';
 import { useCurrentLearning } from '@/hooks/useCurrentLearning';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useTheme } from '@/hooks/useTheme';
 import { useUiLocale } from '@/hooks/useUiLocale';
 import { isolate, isolateLtr } from '@/utils/bidi';
@@ -19,6 +20,7 @@ export default function Profile() {
   const { locale } = useUiLocale();
   const insets = useSafeAreaInsets();
   const learning = useCurrentLearning();
+  const isAdmin = useIsAdmin();
 
   if (learning.status === 'loading') {
     return (
@@ -102,6 +104,7 @@ export default function Profile() {
 
         <Button title={t('profile.openAi')} icon="sparkles-outline" onPress={() => router.push(ROUTES.ai)} />
         <Button title={t('profile.openSettings')} icon="settings-outline" variant="secondary" onPress={() => router.push(ROUTES.settings)} />
+        {isAdmin ? <Button title={t('profile.openAdmin')} icon="shield-checkmark-outline" variant="secondary" onPress={() => router.push(ROUTES.admin)} /> : null}
       </View>
     </Screen>
   );
