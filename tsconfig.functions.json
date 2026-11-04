@@ -1,0 +1,12 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "types": ["jest"],
+    "lib": ["esnext", "dom"]
+  },
+  "include": ["supabase/functions/ai-gateway/**/*.ts", "supabase/functions/ai-gateway/deno-shim.d.ts"],
+  "exclude": ["supabase/functions/ai-gateway/index.ts", "supabase/functions/ai-gateway/supabaseStore.ts"]
+}

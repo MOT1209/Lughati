@@ -44,7 +44,25 @@ export default function AppLayout() {
         <Stack.Screen name="lesson/[id]" options={{ title: t('lesson.title') }} />
       </Stack.Protected>
       <Stack.Protected guard={access.canSeeLearning}>
-        <Stack.Screen name="ai-tutor" options={{ title: t('ai.title') }} />
+        <Stack.Screen name="ai/index" options={{ title: t('ai.title') }} />
+      </Stack.Protected>
+      <Stack.Protected guard={access.canSeeLearning}>
+        <Stack.Screen name="ai/tutor" options={{ title: t('ai.features.tutor.title') }} />
+      </Stack.Protected>
+      <Stack.Protected guard={access.canSeeLearning}>
+        <Stack.Screen name="ai/speaking" options={{ title: t('ai.features.speaking.title') }} />
+      </Stack.Protected>
+      <Stack.Protected guard={access.canSeeLearning}>
+        <Stack.Screen name="ai/writing" options={{ title: t('ai.features.writing.title') }} />
+      </Stack.Protected>
+      <Stack.Protected guard={access.canSeeLearning}>
+        <Stack.Screen name="ai/quiz" options={{ title: t('ai.features.quiz.title') }} />
+      </Stack.Protected>
+      <Stack.Protected guard={access.canSeeLearning}>
+        <Stack.Screen name="ai/pronunciation" options={{ title: t('ai.features.pronunciation.title') }} />
+      </Stack.Protected>
+      <Stack.Protected guard={access.canSeeLearning}>
+        <Stack.Screen name="ai/planner" options={{ title: t('ai.features.planner.title') }} />
       </Stack.Protected>
       <Stack.Protected guard={access.canSeeLearning}>
         <Stack.Screen name="settings" options={{ title: t('settings.title') }} />

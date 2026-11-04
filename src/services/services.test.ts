@@ -1,4 +1,3 @@
-import { getAIProvider, registerAIProvider } from './ai';
 import { AuthError, MockAuthService, type Session } from './auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -249,35 +248,6 @@ describe('app wiring', () => {
     await getRepositories().progress.completeLesson('wired-user', 'es-a1-1', { correct: 12, total: 12 });
     const raw = await AsyncStorage.getItem(STORAGE_KEYS.learningProgress);
     expect(JSON.parse(raw!).progress['wired-user:es'].completedLessonIds).toContain('es-a1-1');
-  });
-});
-
-describe('AI provider registry', () => {
-  const request = { mode: 'chat' as const, message: 'Hallo', targetLanguage: 'de' as const, explanationLanguage: 'ar' as const, level: 'A1' as const };
-
-  it('registers an additional provider and lets it become the default', async () => {
-    const custom = { id: 'custom', ask: jest.fn() };
-    const before = getAIProvider().id;
-    registerAIProvider(custom);
-    expect(getAIProvider('custom')).toBe(custom);
-    expect(getAIProvider().id).toBe(before); // registering does not change the default
-    registerAIProvider(custom, { makeDefault: true });
-    expect(getAIProvider()).toBe(custom);
-    registerAIProvider(getAIProvider(before), { makeDefault: true }); // restore for other tests
-  });
-
-  it('without a backend the dev default is the mock and its result says it is not real AI', async () => {
-    const provider = getAIProvider();
-    expect(provider.id).toBe('mock');
-    expect((await provider.ask(request)).source).toBe('mock');
-  });
-
-  it('the unavailable provider fails honestly instead of faking a reply', async () => {
-    await expect(getAIProvider('unavailable').ask(request)).rejects.toMatchObject({ code: 'unavailable' });
-  });
-
-  it('throws for an unknown provider', () => {
-    expect(() => getAIProvider('nope')).toThrow(/not registered/);
   });
 });
 

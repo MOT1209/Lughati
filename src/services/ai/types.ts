@@ -1,35 +1,21 @@
-import type { LanguageCode, LevelId } from '@/types';
+import type { ExerciseType } from './exerciseTypes';
 
-export const AI_MODES = ['chat', 'grammar', 'vocabulary', 'correct', 'translate', 'write', 'exercises', 'recommend'] as const;
-export type AIMode = (typeof AI_MODES)[number];
+export const AI_FEATURES = ['tutor', 'speaking', 'writing', 'quiz', 'pronunciation', 'planner'] as const;
+export type AIFeature = (typeof AI_FEATURES)[number];
 
-export const AI_LIMITS = { message: 800, history: 10, historyItem: 800 } as const;
+/** Limits mirrored from supabase/functions/ai-gateway/types.ts (the server validates again). */
+export const AI_LIMITS = { message: 800, text: 1200, topic: 80, transcript: 300 } as const;
 
-export interface AIHistoryItem {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-export interface AIRequest {
-  mode: AIMode;
-  message: string;
-  /** Language being learned. */
-  targetLanguage: LanguageCode;
-  /** Language the explanations are written in (the learner's own language). */
-  explanationLanguage: LanguageCode;
-  level: LevelId;
-  /** Recent turns for chat; trimmed to AI_LIMITS.history. Never includes names or e-mails. */
-  history?: AIHistoryItem[];
-}
-
-export interface AIResult {
-  text: string;
-  /** 'ai' = produced by a real model through the server. 'mock' = canned dev reply, shown as a demo. */
-  source: 'ai' | 'mock';
-  model?: string;
-}
-
-export type AIErrorCode = 'unavailable' | 'rate_limited' | 'timeout' | 'network' | 'invalid' | 'auth' | 'unknown';
+export type AIErrorCode =
+  | 'unavailable' // no usable model, not configured, provider down
+  | 'rate_limited'
+  | 'timeout'
+  | 'network'
+  | 'invalid' // our own validation or HTTP 400
+  | 'invalid_output' // the model answered with something unusable
+  | 'auth'
+  | 'not_found'
+  | 'unknown';
 
 export class AIError extends Error {
   constructor(readonly code: AIErrorCode) {
@@ -38,7 +24,79 @@ export class AIError extends Error {
   }
 }
 
-export interface AIProvider {
-  readonly id: string;
-  ask(request: AIRequest): Promise<AIResult>;
+/** The only learner data sent to the model: languages, level and a few learning hints. Never identity. */
+export interface AIContext {
+  learningLanguage: string;
+  explanationLanguage: string;
+  level: string;
+  weakTopics?: string[];
+  goal?: string;
+}
+
+export type { ExerciseType };
+
+export interface Correction {
+  original: string;
+  corrected: string;
+  explanation: string;
+}
+export interface TutorReply {
+  text: string;
+  conversationId: string | null;
+  source: 'ai' | 'cache';
+}
+export interface SpeakingReply {
+  reply: string;
+  correction: Correction | null;
+  vocabulary: { term: string; meaning: string }[];
+  conversationId: string | null;
+}
+export interface WritingFeedback {
+  originalText: string;
+  correctedText: string;
+  language: string;
+  level: string;
+  corrections: Correction[];
+  improvedVersion: string;
+}
+export interface GeneratedExercise {
+  id: string;
+  type: ExerciseType;
+  question: string;
+  options: string[] | null;
+  answer: string;
+  explanation: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  topic: string;
+}
+export interface WordDiff {
+  matched: string[];
+  missing: string[];
+  substituted: { expected: string; heard: string }[];
+  extra: string[];
+  matchRatio: number;
+}
+export interface PronunciationAdvice {
+  diff: WordDiff;
+  tips: string[];
+  practiceWords: string[];
+  /** Always 'text_comparison_only': a transcript cannot measure how a word sounded. */
+  limitation: 'text_comparison_only';
+  adviceUnavailable: boolean;
+}
+export interface LearningPlan {
+  summary: string;
+  dailyTips: string[];
+  weeklyPlan: { day: string; focus: string; minutes: number }[];
+}
+
+export interface PlannerStats {
+  completedLessons: number;
+  totalLessons: number;
+  accuracyPercent: number | null;
+  streakDays: number;
+  dueReviews: number;
+  minutesToday: number;
+  dailyGoalMinutes: number;
+  weakTopics: string[];
 }

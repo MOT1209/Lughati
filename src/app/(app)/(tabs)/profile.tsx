@@ -100,7 +100,7 @@ export default function Profile() {
           />
         </View>
 
-        <Button title={t('profile.openAi')} icon="sparkles-outline" onPress={() => router.push(ROUTES.aiTutor)} />
+        <Button title={t('profile.openAi')} icon="sparkles-outline" onPress={() => router.push(ROUTES.ai)} />
         <Button title={t('profile.openSettings')} icon="settings-outline" variant="secondary" onPress={() => router.push(ROUTES.settings)} />
       </View>
     </Screen>

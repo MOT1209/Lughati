@@ -47,7 +47,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "lint": "expo lint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.functions.json",
     "test": "jest",
     "seed:generate": "jest --rootDir . --testMatch '<rootDir>/scripts/*.gen.ts' --config '{\"preset\":\"jest-expo\",\"moduleNameMapper\":{\"^@/(.*)$\":\"<rootDir>/src/$1\"},\"setupFiles\":[\"<rootDir>/jest.setup.ts\"],\"globalSetup\":\"<rootDir>/jest.global-setup.js\",\"transformIgnorePatterns\":[\"/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo))\"]}'"
   },
@@ -55,7 +55,8 @@
     "preset": "jest-expo",
     "testMatch": [
       "<rootDir>/src/**/*.test.ts",
-      "<rootDir>/src/**/*.test.tsx"
+      "<rootDir>/src/**/*.test.tsx",
+      "<rootDir>/supabase/functions/**/*.test.ts"
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
