@@ -253,21 +253,27 @@ describe('app wiring', () => {
 });
 
 describe('AI provider registry', () => {
+  const request = { mode: 'chat' as const, message: 'Hallo', targetLanguage: 'de' as const, explanationLanguage: 'ar' as const, level: 'A1' as const };
+
   it('registers an additional provider and lets it become the default', async () => {
-    const custom = { id: 'custom', reply: jest.fn() };
+    const custom = { id: 'custom', ask: jest.fn() };
+    const before = getAIProvider().id;
     registerAIProvider(custom);
     expect(getAIProvider('custom')).toBe(custom);
-    expect(getAIProvider().id).toBe('mock'); // registering does not change the default
+    expect(getAIProvider().id).toBe(before); // registering does not change the default
     registerAIProvider(custom, { makeDefault: true });
     expect(getAIProvider()).toBe(custom);
-    registerAIProvider(getAIProvider('mock'), { makeDefault: true }); // restore for other tests
+    registerAIProvider(getAIProvider(before), { makeDefault: true }); // restore for other tests
   });
 
-  it('resolves the default mock provider without screens importing it', async () => {
+  it('without a backend the dev default is the mock and its result says it is not real AI', async () => {
     const provider = getAIProvider();
     expect(provider.id).toBe('mock');
-    const reply = await provider.reply({ id: 'c1', userId: 'u1', targetLanguage: 'de', messages: [] }, 'Hallo');
-    expect(reply.role).toBe('assistant');
+    expect((await provider.ask(request)).source).toBe('mock');
+  });
+
+  it('the unavailable provider fails honestly instead of faking a reply', async () => {
+    await expect(getAIProvider('unavailable').ask(request)).rejects.toMatchObject({ code: 'unavailable' });
   });
 
   it('throws for an unknown provider', () => {

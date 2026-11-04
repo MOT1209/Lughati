@@ -1,26 +1,29 @@
-import type { AIConversation, AIMessage } from '@/types';
+import { getSupabase } from '../backend/client';
+import { RemoteAIProvider } from './RemoteAIProvider';
+import { AIError, type AIProvider, type AIRequest, type AIResult } from './types';
 
-export interface AIProvider {
-  readonly id: string;
-  /** Produces the assistant's reply to the latest user message of the conversation. */
-  reply(conversation: AIConversation, userMessage: string): Promise<AIMessage>;
-}
+export * from './types';
+export { validateAIRequest } from './validate';
+export { RemoteAIProvider } from './RemoteAIProvider';
 
+/** Development-only stand-in. Its result says `source: 'mock'` so a screen can never pass it off as AI. */
 export class MockAIProvider implements AIProvider {
   readonly id = 'mock';
+  async ask(request: AIRequest): Promise<AIResult> {
+    return { text: `(demo) ${request.message}`, source: 'mock' };
+  }
+}
 
-  async reply(_conversation: AIConversation, userMessage: string): Promise<AIMessage> {
-    return {
-      id: `mock-${Date.now()}`,
-      role: 'assistant',
-      content: `(mock) ${userMessage}`,
-      createdAt: new Date().toISOString(),
-    };
+/** Used when no AI backend exists (release build without configuration): always honest about it. */
+export class UnavailableAIProvider implements AIProvider {
+  readonly id = 'unavailable';
+  async ask(_request: AIRequest): Promise<AIResult> {
+    throw new AIError('unavailable');
   }
 }
 
 const providers = new Map<string, AIProvider>();
-let defaultId = 'mock';
+let defaultId = 'unavailable';
 
 export function registerAIProvider(provider: AIProvider, options?: { makeDefault?: boolean }): void {
   providers.set(provider.id, provider);
@@ -34,4 +37,11 @@ export function getAIProvider(id: string = defaultId): AIProvider {
   return provider;
 }
 
+registerAIProvider(new UnavailableAIProvider());
 registerAIProvider(new MockAIProvider());
+const client = getSupabase();
+if (client) {
+  registerAIProvider(new RemoteAIProvider(client), { makeDefault: true });
+} else if (__DEV__) {
+  defaultId = 'mock';
+}

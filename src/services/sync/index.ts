@@ -80,9 +80,12 @@ export async function syncUser(userId: string): Promise<SyncResult | { status: '
  * app decides where to go (a second device must not ask for the language choice again).
  */
 export async function restoreBeforeLoad(userId: string, timeoutMs = 6000): Promise<void> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    await Promise.race([syncUser(userId), new Promise((resolve) => setTimeout(resolve, timeoutMs))]);
+    await Promise.race([syncUser(userId), new Promise((resolve) => (timer = setTimeout(resolve, timeoutMs)))]);
   } catch {
     // offline or failing: continue with local data; the background sync retries later
+  } finally {
+    clearTimeout(timer);
   }
 }
