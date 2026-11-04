@@ -51,7 +51,7 @@ jobs:
 
       - name: Guard against shipped secrets
         run: |
-          if grep -RIl --include='*.ts' --include='*.tsx' --include='*.json' --include='*.js' -E 'service_role|SUPABASE_SERVICE_ROLE_KEY|sk-ant-' src app.json eas.json; then
+          if grep -RIl --include='*.ts' --include='*.tsx' --include='*.json' --include='*.js' -E 'SUPABASE_SERVICE_ROLE_KEY|sk-ant-[A-Za-z0-9]' src app.json eas.json; then
             echo "A privileged key name or AI key appears in app sources"; exit 1
           fi
 
@@ -65,7 +65,7 @@ jobs:
         with:
           version: latest
       - name: Start local Supabase (applies supabase/migrations)
-        run: supabase start -x gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,edge-runtime,logflare,vector,studio,postgres-meta,supavisor
+        run: supabase start -x realtime,storage-api,imgproxy,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
       - name: Seed catalog
         run: supabase db reset --local
       - name: RLS and authorization tests

@@ -20,7 +20,7 @@
 • سلسلة أيام متتالية تشجّعك على التعلّم كل يوم.
 • واجهة عربية كاملة من اليمين إلى اليسار، مع وضع فاتح وداكن.
 
-يعمل دون اتصال بالإنترنت، بلا إعلانات، ولا يرسل بياناتك إلى أي خادم.
+الدروس تعمل دون اتصال، بلا إعلانات ولا تتبّع. الحساب والمزامنة والمعلّم الذكي تحتاج الإنترنت.
 
 ## English
 
@@ -40,6 +40,6 @@ What you get:
 • A daily streak that keeps you coming back.
 • A full right-to-left Arabic interface, with light and dark mode.
 
-Works offline, with no ads, and sends none of your data to any server.
+Lessons work offline, with no ads and no tracking. The account, sync and AI tutor need the internet.
 
 **Category:** Education
