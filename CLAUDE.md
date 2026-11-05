@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Lughati (لغتي) is a language-learning app for Arabic speakers: Expo SDK 57 + React Native 0.86 + TypeScript (`strict`), targeting Android first via **Expo Go** (no custom native code; iOS config exists but is untested and not released). Offline A1 and A2 lessons on the device, plus a Supabase backend (real auth, cloud sync, AI tutor through an Edge Function). Without backend configuration the app runs on the device only (see Backend). The app has a unified brand design (see Theme), a static website in `site/` and Google Play release files in `docs/store/`. The README and TESTING.md are written in Arabic.
+Lughati (لغتي) is a language-learning app for Arabic speakers: Expo SDK 58 + React Native 0.88 + TypeScript (`strict`), targeting Android first via **Expo Go** (no custom native code; iOS config exists but is untested and not released). Offline A1 and A2 lessons on the device, plus a Supabase backend (real auth, cloud sync, AI tutor through an Edge Function). Without backend configuration the app runs on the device only (see Backend). The app has a unified brand design (see Theme), a static website in `site/` and Google Play release files in `docs/store/`. The README and TESTING.md are written in Arabic.
 
 ## Commands
 
@@ -22,12 +22,12 @@ python3 scripts/build-site.py               # regenerates site/ (ar + en); the p
 
 Always add packages with `npx expo install <pkg>` (resolves SDK-compatible versions). Without access to Expo's API (cloud sandbox) it fails; then install the exact version listed in `node_modules/expo/bundledNativeModules.json`. Run typecheck + lint + tests before calling work done.
 
-Expo SDK 57 postdates most model knowledge: before touching an Expo/RN API, check `https://docs.expo.dev/versions/v57.0.0/` (index: `https://docs.expo.dev/llms.txt`). Some doc pages (RTL, `Stack.Protected` `redirectTo`) describe "SDK 58+" behaviour that is not available on 57.
+Expo SDK 58 postdates most model knowledge: before touching an Expo/RN API, check `https://docs.expo.dev/versions/v58.0.0/` (index: `https://docs.expo.dev/llms.txt`).
 
 ## Gotchas
 - **Typed routes vs `tsc`.** `experiments.typedRoutes` is on. Once `expo start` has generated the git-ignored `.expo/types/router.d.ts`, template-string hrefs such as `router.push(`/lesson/${id}`)` fail typecheck; dynamic hrefs must be `{ pathname: '/lesson/[id]', params: { id } }` (home and learn already use it). Use the object form for new dynamic links.
-- `@testing-library/react-native` is pinned to **13.3.3** and `react-test-renderer` to **19.2.3**: RNTL 14 needs React 19.3 while Expo pins 19.2.3.
-- `react-dom` is pinned to **19.2.3** (same as `react`): Expo declares it as an optional peer, and an unpinned install resolves 19.3.x, which makes `npm ci` fail on the `react` peer conflict.
+- `@testing-library/react-native` is **14.x** (Expo Router 58 declares it as a peer) and `react-test-renderer` is pinned to the same version as `react` (**19.3.0**). RNTL 14 is async: `await render(...)` / `await renderHook(...)`.
+- `react-dom` is pinned to the same version as `react` (**19.3.0**): Expo declares it as an optional peer, and an unpinned install can resolve a different patch, which makes `npm ci` fail on the `react` peer conflict.
 - `tsconfig.json` sets `"types": ["jest"]` because TypeScript 6 no longer auto-loads `@types/*`.
 - `jest.setup.ts` mocks AsyncStorage and the Ionicons font (async glyph loading causes `act()` noise).
 - Jest runs in **`Asia/Riyadh` (UTC+3)**, set by `jest.global-setup.js` (setting `process.env.TZ` inside a test file has no effect). Calendar days come from `utils/day.ts` `dayOf` (local), never `toISOString().slice(0, 10)` (UTC).
