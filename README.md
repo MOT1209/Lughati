@@ -11,8 +11,8 @@
 
 <br/>
 
-<a href="#-التقنيات"><img alt="Expo SDK 57" src="https://img.shields.io/badge/Expo_SDK-57-000020?logo=expo&logoColor=white"></a>
-<a href="#-التقنيات"><img alt="React Native 0.86" src="https://img.shields.io/badge/React_Native-0.86-61DAFB?logo=react&logoColor=black"></a>
+<a href="#-التقنيات"><img alt="Expo SDK 58" src="https://img.shields.io/badge/Expo_SDK-58-000020?logo=expo&logoColor=white"></a>
+<a href="#-التقنيات"><img alt="React Native 0.88" src="https://img.shields.io/badge/React_Native-0.88-61DAFB?logo=react&logoColor=black"></a>
 <a href="#-التقنيات"><img alt="TypeScript strict" src="https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white"></a>
 <a href="#-الجودة"><img alt="Tests" src="https://img.shields.io/badge/Jest-41_suites_·_763_tests-99425B?logo=jest&logoColor=white"></a>
 <a href="#-التقنيات"><img alt="i18n ar · en" src="https://img.shields.io/badge/i18n-ar_·_en-EA580C"></a>
@@ -83,7 +83,7 @@ npx expo start --lan
 
 | الطبقة | المستخدَم |
 | :--- | :--- |
-| المنصّة | Expo SDK **57** · React Native **0.86** · React **19.2** |
+| المنصّة | Expo SDK **58** · React Native **0.88** · React **19.3** |
 | التنقّل | expo-router **57** (مسارات مُنمَّطة + React Compiler) |
 | اللغة | TypeScript **~6.0** (إعداد `strict`) |
 | الحالة | Zustand **5** (الجلسة · التفضيلات · ملفّ التعلّم) |
