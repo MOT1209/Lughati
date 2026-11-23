@@ -8,8 +8,8 @@ Read `CLAUDE.md` first: it has the commands, gotchas and the architecture (servi
 - **Theme:** use `useTheme()` tokens and avoid literal colours in screens (hero overlays have tokens: `heroOverlay`, `heroOverlayStrong`, `heroGoldTint`). New colour tokens go in `src/theme/colors.ts` together with a contrast pair in `src/theme/theme.test.ts` (≥ 4.5:1 for text).
 - **Layout:** logical style props (`marginStart`, `start/end`), `Icon directional` for arrows, `utils/bidi.ts` around mixed-script text. Verify nothing depends on LTR.
 - **Design:** reuse `ScreenHero`, `BrandHero`, `HeroProgress`, `StreakChip`, `Button variant="gold"` and the `components/home/*` parts instead of new one-off styles.
-- **Seams:** screens never import a concrete auth/repository/AI implementation; register replacements via `registerAuthService` / `registerRepositories` / `registerAIProvider`.
-- **Honesty:** the app is offline with a mock sign-in; do not claim real accounts, sync, store availability or device-verified behaviour that was not verified. Say what was and was not tested.
+- **Seams:** screens never import a concrete auth/repository/AI implementation; register replacements via `registerAuthService` / `registerRepositories`; AI goes only through `getAIGateway()` (`services/ai`).
+- **Honesty:** the app has a Supabase backend (real sign-in, cloud sync, AI gateway) and a mock sign-in only in dev/tests without config; real sign-in, live AI, store availability and device behaviour are not verified yet (`docs/KNOWN_ISSUES.md`), so do not claim them. Say what was and was not tested.
 - **Git:** work on the branch the session names, never force-push, merge to `main` (PR) only when the owner asks.
 - **Generated files:** `site/*.html` (from `scripts/build-site.py`) and the icon/store PNGs (from `scripts/render-icons.js`) are generated; edit the sources.
 

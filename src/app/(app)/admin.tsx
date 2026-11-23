@@ -17,6 +17,7 @@ function describeError(t: TFunction, error: unknown): string {
   if (error instanceof AdminError) {
     if (error.detail === 'cannot_enable_unverified') return t('admin.errors.cannotEnable');
     if (error.detail === 'cannot_ban_self') return t('admin.errors.cannotBanSelf');
+    if (error.detail === 'cannot_ban_admin') return t('admin.errors.cannotBanAdmin');
     switch (error.code) {
       case 'forbidden':
         return t('admin.errors.forbidden');

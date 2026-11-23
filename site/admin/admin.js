@@ -119,6 +119,7 @@
     var code = err && err.code;
     if (code === 'cannot_enable_unverified') return 'غير مسموح: يلزم سعر معروف وتوثيق قبل تفعيل النموذج.';
     if (code === 'cannot_ban_self') return 'لا يمكنك حظر حسابك أنت.';
+    if (code === 'cannot_ban_admin') return 'لا يمكن حظر حساب مشرف من اللوحة.';
     if (err && (err.status === 401 || err.status === 403)) return 'هذا الحساب ليس مشرفاً أو انتهت الجلسة.';
     if (err && err.status === 400) return 'رفض الخادم هذا التغيير.';
     if (err && err.status === 503) return 'مزوّد الذكاء الاصطناعي غير مُهيّأ على الخادم.';

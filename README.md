@@ -14,7 +14,7 @@
 <a href="#-التقنيات"><img alt="Expo SDK 57" src="https://img.shields.io/badge/Expo_SDK-57-000020?logo=expo&logoColor=white"></a>
 <a href="#-التقنيات"><img alt="React Native 0.86" src="https://img.shields.io/badge/React_Native-0.86-61DAFB?logo=react&logoColor=black"></a>
 <a href="#-التقنيات"><img alt="TypeScript strict" src="https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white"></a>
-<a href="#-الجودة"><img alt="Tests" src="https://img.shields.io/badge/Jest-39_suites_·_707_tests-99425B?logo=jest&logoColor=white"></a>
+<a href="#-الجودة"><img alt="Tests" src="https://img.shields.io/badge/Jest-41_suites_·_763_tests-99425B?logo=jest&logoColor=white"></a>
 <a href="#-التقنيات"><img alt="i18n ar · en" src="https://img.shields.io/badge/i18n-ar_·_en-EA580C"></a>
 <a href="#-الميزات"><img alt="RTL" src="https://img.shields.io/badge/واجهة-RTL-0F766E"></a>
 
@@ -202,8 +202,8 @@ registerAIProvider(provider)     // مزوّد ذكاء اصطناعي
 | الملف | المحتوى |
 | :--- | :--- |
 | [TESTING.md](./TESTING.md) | سيناريوهات الاختبار اليدوي على الجهاز |
-| [docs/INTEGRATION_AGENT2.md](./docs/INTEGRATION_AGENT2.md) | دليل تكامل طبقة التعلّم والتقدّم (واجهات النماذج) |
-| [docs/PHASE_1_AUDIT.md](./docs/PHASE_1_AUDIT.md) | نتائج مراجعة المرحلة الأولى |
+| [docs/archive/INTEGRATION_AGENT2.md](./docs/archive/INTEGRATION_AGENT2.md) | دليل تكامل طبقة التعلّم والتقدّم (واجهات النماذج) |
+| [docs/archive/PHASE_1_AUDIT.md](./docs/archive/PHASE_1_AUDIT.md) | نتائج مراجعة المرحلة الأولى |
 | [docs/audit/DEPENDENCY_AUDIT.md](./docs/audit/DEPENDENCY_AUDIT.md) | مراجعة الاعتماديات وسجلّ `npm audit` |
 
 ## 🌐 الموقع

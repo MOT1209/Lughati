@@ -15,6 +15,8 @@ import { FEATURES, LIMITS, type Feature, type LearnerContext, type RegistryModel
 
 export interface GatewayEnv {
   baseUrl: string | null;
+  /** Full URL of the provider's model list; optional, defaults to `${baseUrl}/models`. */
+  modelsUrl?: string | null;
   apiKey: string | null;
   timeoutMs: number;
   dailyLimit: number;
@@ -38,6 +40,16 @@ export interface Deps {
 export interface Reply {
   status: number;
   body: unknown;
+}
+
+/**
+ * Turns the user returned by auth.getUser() into a Caller. A blocked account is treated as
+ * signed out: blocking does not revoke an access token that was issued before it.
+ */
+export function callerFromUser(user: { id: string; app_metadata?: unknown; banned_until?: string | null } | null | undefined, now: Date): Caller | null {
+  if (!user) return null;
+  if (user.banned_until && new Date(user.banned_until).getTime() > now.getTime()) return null;
+  return { id: user.id, role: (user.app_metadata as { role?: string } | undefined)?.role ?? null };
 }
 
 const reply = (status: number, body: unknown): Reply => ({ status, body });
@@ -300,6 +312,8 @@ async function handleAdmin(body: Record<string, unknown>, caller: Caller, deps: 
       if (!id || typeof body.banned !== 'boolean') return fail(400, 'invalid_request');
       // An admin cannot lock themselves out from here.
       if (id === caller.id) return fail(400, 'cannot_ban_self');
+      // Another admin cannot be blocked from here either (hiding the button in the UI is not a control).
+      if (body.banned && (await store.getUserRole(id)) === 'admin') return fail(400, 'cannot_ban_admin');
       await store.setUserBanned(id, body.banned);
       return reply(200, { ok: true });
     }
@@ -315,7 +329,8 @@ async function listProviderModels(deps: Deps): Promise<Set<string> | null> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), deps.env.timeoutMs);
   try {
-    const res = await deps.fetch(`${deps.env.baseUrl!.replace(/\/+$/, '')}/models`, { method: 'GET', headers: { Authorization: `Bearer ${deps.env.apiKey}` }, body: '', signal: controller.signal });
+    const url = deps.env.modelsUrl || `${deps.env.baseUrl!.replace(/\/+$/, '')}/models`;
+    const res = await deps.fetch(url, { method: 'GET', headers: { Authorization: `Bearer ${deps.env.apiKey}` }, body: '', signal: controller.signal });
     if (!res.ok) return null;
     const data = (await res.json()) as { data?: { id?: unknown }[] };
     return new Set((data.data ?? []).map((m) => m.id).filter((id): id is string => typeof id === 'string'));

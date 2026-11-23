@@ -227,5 +227,12 @@ export function createSupabaseStore(db: SupabaseClient): Store {
       const r = await db.auth.admin.updateUserById(userId, { ban_duration: banned ? '876000h' : 'none' });
       if (r.error) throw new Error('db_error');
     },
+    async getUserRole(userId: string) {
+      const r = await db.auth.admin.getUserById(userId);
+      // Fail closed: a failed lookup must not let the ban through as "not an admin".
+      if (r.error) throw new Error('db_error');
+      if (!r.data.user) return null;
+      return (r.data.user.app_metadata as { role?: string } | undefined)?.role ?? null;
+    },
   };
 }
