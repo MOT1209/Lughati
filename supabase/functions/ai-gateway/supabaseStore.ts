@@ -229,7 +229,9 @@ export function createSupabaseStore(db: SupabaseClient): Store {
     },
     async getUserRole(userId: string) {
       const r = await db.auth.admin.getUserById(userId);
-      if (r.error || !r.data.user) return null;
+      // Fail closed: a failed lookup must not let the ban through as "not an admin".
+      if (r.error) throw new Error('db_error');
+      if (!r.data.user) return null;
       return (r.data.user.app_metadata as { role?: string } | undefined)?.role ?? null;
     },
   };

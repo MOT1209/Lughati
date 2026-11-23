@@ -468,6 +468,14 @@ describe('gateway: administration', () => {
     expect(s.banned.has(otherAdmin)).toBe(false);
     expect((await handleRequest({ body: { admin: 'users.setBanned', userId: otherAdmin, banned: false }, caller: adminCaller }, d)).status).toBe(200);
   });
+  it('never bans when the target role lookup fails', async () => {
+    const { s, store } = fakeStore([model('a')]);
+    store.getUserRole = async () => { throw new Error('db_error'); };
+    const d = deps(store, () => ({})).d;
+    const user = '55555555-5555-4555-8555-555555555555';
+    await expect(handleRequest({ body: { admin: 'users.setBanned', userId: user, banned: true }, caller: adminCaller }, d)).rejects.toThrow('db_error');
+    expect(s.banned.has(user)).toBe(false);
+  });
 });
 
 describe('callerFromUser', () => {
