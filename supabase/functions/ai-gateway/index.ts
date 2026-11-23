@@ -1,11 +1,12 @@
 // Supabase Edge Function: ai-gateway. verify_jwt = true (the platform rejects unsigned callers; the
 // handler additionally resolves the user from the token and never from the request body).
 // Secrets (supabase secrets set …): OPENCODE_ZEN_API_KEY, OPENCODE_ZEN_BASE_URL (take both from
-// the provider's official docs), optional AI_DAILY_REQUEST_LIMIT, AI_MINUTE_LIMIT,
+// the provider's official docs), optional OPENCODE_ZEN_MODELS_URL (full model-list URL when it does not
+// sit under the base URL), optional AI_DAILY_REQUEST_LIMIT, AI_MINUTE_LIMIT,
 // AI_MAX_OUTPUT_TOKENS, AI_REQUEST_TIMEOUT_MS. SUPABASE_* are injected by the platform.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-import { handleRequest, type Caller, type GatewayEnv } from './handler.ts';
+import { callerFromUser, handleRequest, type GatewayEnv } from './handler.ts';
 import { LIMITS } from './types.ts';
 import { createSupabaseStore } from './supabaseStore.ts';
 
@@ -24,7 +25,7 @@ Deno.serve(async (req: Request) => {
   const url = Deno.env.get('SUPABASE_URL')!;
   const userClient = createClient(url, Deno.env.get('SUPABASE_ANON_KEY')!, { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } });
   const { data, error } = await userClient.auth.getUser();
-  const caller: Caller | null = error || !data.user ? null : { id: data.user.id, role: (data.user.app_metadata as { role?: string } | undefined)?.role ?? null };
+  const caller = error ? null : callerFromUser(data.user as never, new Date());
 
   let body: unknown = null;
   const raw = await req.text();
@@ -37,6 +38,7 @@ Deno.serve(async (req: Request) => {
 
   const env: GatewayEnv = {
     baseUrl: Deno.env.get('OPENCODE_ZEN_BASE_URL') ?? null,
+    modelsUrl: Deno.env.get('OPENCODE_ZEN_MODELS_URL') ?? null,
     apiKey: Deno.env.get('OPENCODE_ZEN_API_KEY') ?? null,
     timeoutMs: num('AI_REQUEST_TIMEOUT_MS', 20_000, 1000, 60_000),
     dailyLimit: num('AI_DAILY_REQUEST_LIMIT', 40, 1, 10_000),

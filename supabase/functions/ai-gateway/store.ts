@@ -91,4 +91,6 @@ export interface Store {
   /** null removes the per-user override (the global default applies again). */
   setUserLimit(userId: string, dailyRequests: number | null): Promise<void>;
   setUserBanned(userId: string, banned: boolean): Promise<void>;
+  /** The target account's app_metadata.role (null when unset or the account does not exist). */
+  getUserRole(userId: string): Promise<string | null>;
 }

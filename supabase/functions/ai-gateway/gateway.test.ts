@@ -1,5 +1,5 @@
 import { compareWords } from './diff.ts';
-import { handleRequest, type Deps, type GatewayEnv } from './handler.ts';
+import { callerFromUser, handleRequest, type Deps, type GatewayEnv } from './handler.ts';
 import { chat, ProviderError } from './provider.ts';
 import { isUsable, MAX_ATTEMPTS, planAttempts } from './registry.ts';
 import { parseEnvelope } from './request.ts';
@@ -151,6 +151,7 @@ function fakeStore(models: RegistryModel[], routes: Partial<Record<Feature, Part
     limit: 100,
     limits: new Map<string, number>(),
     banned: new Set<string>(),
+    roles: new Map<string, string>(),
   };
   (['tutor', 'speaking', 'writing', 'quiz', 'pronunciation', 'planner'] as Feature[]).forEach((f) => s.routes.set(f, { task: f, primaryModel: 'a', fallbackModel: 'b', allowPaid: false, maxOutputTokens: 600, ...routes[f] }));
   const store: Store = {
@@ -186,6 +187,7 @@ function fakeStore(models: RegistryModel[], routes: Partial<Record<Feature, Part
     listUsers: async () => [],
     setUserLimit: async (id, n) => void (n === null ? s.limits.delete(id) : s.limits.set(id, n)),
     setUserBanned: async (id, banned) => void (banned ? s.banned.add(id) : s.banned.delete(id)),
+    getUserRole: async (id) => s.roles.get(id) ?? null,
   };
   return { s, store };
 }
@@ -419,6 +421,12 @@ describe('gateway: administration', () => {
     expect(s.models.get('a')).toMatchObject({ healthStatus: 'ok' });
     expect(s.models.get('b')).toMatchObject({ healthStatus: 'down', pricingTier: 'unknown', verifiedAt: null });
   });
+  it('reads the model list from OPENCODE_ZEN_MODELS_URL when it is set', async () => {
+    const { store } = fakeStore([model('a')]);
+    const { d, fetchFn } = deps(store, () => ({}), { env: { ...env, modelsUrl: 'https://provider.test/other/v1/models' } });
+    expect((await handleRequest({ body: { admin: 'models.refresh' }, caller: adminCaller }, d)).status).toBe(200);
+    expect(fetchFn.mock.calls[0]![0]).toBe('https://provider.test/other/v1/models');
+  });
   it('whoami and overview answer admins only', async () => {
     const { store } = fakeStore([model('a')]);
     const d = deps(store, () => ({})).d;
@@ -449,5 +457,29 @@ describe('gateway: administration', () => {
     const self = await handleRequest({ body: { admin: 'users.setBanned', userId: adminCaller.id, banned: true }, caller: adminCaller }, d);
     expect(self).toMatchObject({ status: 400, body: { error: 'cannot_ban_self' } });
     expect((await handleRequest({ body: { admin: 'users.setBanned', userId: user, banned: 'yes' }, caller: adminCaller }, d)).status).toBe(400);
+  });
+  it('refuses to block another admin on the server, but can still unblock one', async () => {
+    const { s, store } = fakeStore([model('a')]);
+    const d = deps(store, () => ({})).d;
+    const otherAdmin = '44444444-4444-4444-8444-444444444444';
+    s.roles.set(otherAdmin, 'admin');
+    const res = await handleRequest({ body: { admin: 'users.setBanned', userId: otherAdmin, banned: true }, caller: adminCaller }, d);
+    expect(res).toMatchObject({ status: 400, body: { error: 'cannot_ban_admin' } });
+    expect(s.banned.has(otherAdmin)).toBe(false);
+    expect((await handleRequest({ body: { admin: 'users.setBanned', userId: otherAdmin, banned: false }, caller: adminCaller }, d)).status).toBe(200);
+  });
+});
+
+describe('callerFromUser', () => {
+  it('maps a user to a caller with its role', () => {
+    expect(callerFromUser({ id: 'u1', app_metadata: { role: 'admin' } }, NOW)).toEqual({ id: 'u1', role: 'admin' });
+    expect(callerFromUser({ id: 'u2', app_metadata: {} }, NOW)).toEqual({ id: 'u2', role: null });
+    expect(callerFromUser(null, NOW)).toBeNull();
+  });
+  it('treats a blocked account as signed out even with a valid token', () => {
+    const future = new Date(NOW.getTime() + 60_000).toISOString();
+    const past = new Date(NOW.getTime() - 60_000).toISOString();
+    expect(callerFromUser({ id: 'u3', banned_until: future }, NOW)).toBeNull();
+    expect(callerFromUser({ id: 'u3', banned_until: past }, NOW)).toEqual({ id: 'u3', role: null });
   });
 });

@@ -360,6 +360,7 @@ export const en: Translation = {
       unknown: 'The request failed. Try again.',
       cannotEnable: 'Not allowed: a model needs a known price and verification before it can be enabled.',
       cannotBanSelf: 'You cannot block your own account.',
+      cannotBanAdmin: 'An admin account cannot be blocked from the panel.',
       rejected: 'The server rejected this change.',
     },
   },
