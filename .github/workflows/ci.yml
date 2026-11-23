@@ -65,7 +65,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pinned: "latest" asks the GitHub API for the newest release and fails on its rate limit.
+          version: 3.3.0
       - name: Start local Supabase (applies supabase/migrations)
         run: supabase start -x realtime,storage-api,imgproxy,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
       - name: Seed catalog

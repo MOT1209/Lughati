@@ -36,103 +36,103 @@ beforeEach(() => {
 afterEach(() => registerSpeechService(original));
 
 /** Answers every question: the first `right` correctly, the rest wrongly. */
-function answerAll(right: number) {
-  exercises.forEach((exercise, index) => {
-    fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
+async function answerAll(right: number) {
+  for (const [index, exercise] of exercises.entries()) {
+    await fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
     const id = index < right ? exercise.answer : exercise.options.find((o) => o !== exercise.answer)!;
-    fireEvent.press(screen.getByRole('button', { name: optionName(id) }));
-    fireEvent.press(screen.getByRole('button', { name: index === exercises.length - 1 ? 'Finish' : 'Next' }));
-  });
+    await fireEvent.press(screen.getByRole('button', { name: optionName(id) }));
+    await fireEvent.press(screen.getByRole('button', { name: index === exercises.length - 1 ? 'Finish' : 'Next' }));
+  }
 }
 
 describe('ListeningPractice', () => {
-  it('reads the word only when asked, and offers written words without showing the answer', () => {
-    render(<ListeningPractice lessonId="de-a1-1" words={words} source="ar" />);
+  it('reads the word only when asked, and offers written words without showing the answer', async () => {
+    await render(<ListeningPractice lessonId="de-a1-1" words={words} source="ar" />);
     expect(speech.calls).toEqual([]); // nothing plays on its own (no talking over a screen reader)
     expect(screen.getByText('Listen and pick the word you hear')).toBeTruthy();
     for (const id of exercises[0]!.options) expect(screen.getByRole('button', { name: optionName(id) })).toBeTruthy();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
     expect(speech.calls.map((c) => c.text)).toEqual(['Hallo']);
     expect(screen.getByRole('button', { name: 'Listen again' })).toBeTruthy();
   });
 
-  it('keeps the options locked until the word has been heard', () => {
-    render(<ListeningPractice lessonId="de-a1-1" words={words} source="ar" />);
+  it('keeps the options locked until the word has been heard', async () => {
+    await render(<ListeningPractice lessonId="de-a1-1" words={words} source="ar" />);
     const first = exercises[0]!;
     const option = () => screen.getByRole('button', { name: optionName(first.answer) });
     expect(screen.getByText('Press Listen first')).toBeTruthy();
     expect(option()).toBeDisabled();
-    fireEvent.press(option());
+    await fireEvent.press(option());
     expect(screen.queryByText('Correct!')).toBeNull();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
     expect(screen.queryByText('Press Listen first')).toBeNull();
     expect(option()).toBeEnabled();
   });
 
-  it('stops a word still being read when moving to the next question', () => {
-    render(<ListeningPractice lessonId="de-a1-1" words={words} source="ar" />);
-    fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
-    fireEvent.press(screen.getByRole('button', { name: optionName(exercises[0]!.answer) }));
-    fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+  it('stops a word still being read when moving to the next question', async () => {
+    await render(<ListeningPractice lessonId="de-a1-1" words={words} source="ar" />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
+    await fireEvent.press(screen.getByRole('button', { name: optionName(exercises[0]!.answer) }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
     expect(speech.stop).toHaveBeenCalledTimes(1);
     expect(screen.getByText('Press Listen first')).toBeTruthy();
   });
 
-  it('after an answer tells whether it was right and shows the word with its meaning', () => {
-    render(<ListeningPractice lessonId="de-a1-1" words={words} source="ar" />);
-    fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
+  it('after an answer tells whether it was right and shows the word with its meaning', async () => {
+    await render(<ListeningPractice lessonId="de-a1-1" words={words} source="ar" />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
     const first = exercises[0]!;
-    fireEvent.press(screen.getByRole('button', { name: optionName(first.options.find((o) => o !== first.answer)!) }));
+    await fireEvent.press(screen.getByRole('button', { name: optionName(first.options.find((o) => o !== first.answer)!) }));
     expect(screen.getByText('Not quite')).toBeTruthy();
     expect(screen.getByText(`The word: ${isolateLtr('Hallo')} (مرحباً)`)).toBeTruthy();
   });
 
-  it('a new question starts unheard and reads its own word', () => {
-    render(<ListeningPractice lessonId="de-a1-1" words={words} source="ar" />);
-    fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
-    fireEvent.press(screen.getByRole('button', { name: optionName(exercises[0]!.answer) }));
-    fireEvent.press(screen.getByRole('button', { name: 'Next' }));
-    fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
+  it('a new question starts unheard and reads its own word', async () => {
+    await render(<ListeningPractice lessonId="de-a1-1" words={words} source="ar" />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
+    await fireEvent.press(screen.getByRole('button', { name: optionName(exercises[0]!.answer) }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
     expect(speech.calls.map((c) => c.text)).toEqual(['Hallo', byId.get(exercises[1]!.subjectId)!.term]);
   });
 
   it('records the run once and shows the score; retry starts again', async () => {
     const onFinish = jest.fn();
-    render(<ListeningPractice lessonId="de-a1-1" words={words} source="ar" onFinish={onFinish} />);
-    answerAll(4);
+    await render(<ListeningPractice lessonId="de-a1-1" words={words} source="ar" onFinish={onFinish} />);
+    await answerAll(4);
     await act(async () => {}); // let the save settle
     expect(onFinish).toHaveBeenCalledTimes(1);
     expect(onFinish).toHaveBeenCalledWith({ correct: 4, total: words.length });
     expect(screen.getByText(`You recognised 4 of ${words.length} by ear`)).toBeTruthy();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Try again' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Try again' }));
     expect(screen.getByText(`Question 1 of ${words.length}`)).toBeTruthy();
   });
 
   it('keeps the score and offers a retry when saving fails', async () => {
     const onFinish = jest.fn().mockRejectedValueOnce(new Error('disk full')).mockResolvedValueOnce(undefined);
-    render(<ListeningPractice lessonId="de-a1-1" words={words} onFinish={onFinish} />);
-    answerAll(words.length);
+    await render(<ListeningPractice lessonId="de-a1-1" words={words} onFinish={onFinish} />);
+    await answerAll(words.length);
     await act(async () => {});
     expect(screen.getByText('We could not save your progress.')).toBeTruthy();
     await act(async () => {
-      fireEvent.press(screen.getByRole('button', { name: 'Try again' }));
+      await fireEvent.press(screen.getByRole('button', { name: 'Try again' }));
     });
     expect(onFinish).toHaveBeenLastCalledWith({ correct: words.length, total: words.length });
     expect(screen.getByText(`You recognised ${words.length} of ${words.length} by ear`)).toBeTruthy();
   });
 
-  it('stops a word still being read when the practice is left', () => {
-    const view = render(<ListeningPractice lessonId="de-a1-1" words={words} />);
-    fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
-    view.unmount();
+  it('stops a word still being read when the practice is left', async () => {
+    const view = await render(<ListeningPractice lessonId="de-a1-1" words={words} />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Listen' }));
+    await view.unmount();
     expect(speech.stop).toHaveBeenCalledTimes(1);
   });
 
-  it('explains when the lesson has too few words', () => {
-    render(<ListeningPractice lessonId="de-a1-1" words={words.slice(0, 3)} />);
+  it('explains when the lesson has too few words', async () => {
+    await render(<ListeningPractice lessonId="de-a1-1" words={words.slice(0, 3)} />);
     expect(screen.getByText('There are not enough words to practise yet.')).toBeTruthy();
   });
 });

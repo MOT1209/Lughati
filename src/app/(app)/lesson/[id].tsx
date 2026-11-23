@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { router, useLocalSearchParams, useNavigation } from 'expo-router';
+import { router, useLocalSearchParams, usePreventRemove } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -39,24 +39,35 @@ export default function LessonScreen() {
   const [quizRun, setQuizRun] = useState(0); // a new run remounts the quiz with a fresh session
   const saving = useRef(false); // a double tap on the last button must not record the lesson twice
   const quizStartedAt = useRef(0); // study time is what the run really took, not the lesson's estimate
-  const navigation = useNavigation();
+  const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
     if (step === 'quiz') quizStartedAt.current = Date.now();
   }, [step, quizRun]);
 
+  // A confirmed exit normally unmounts the screen. If it is still here shortly after (the removal
+  // did not happen), turn the guard back on so a later exit asks again instead of dropping answers.
+  useEffect(() => {
+    if (!leaving) return;
+    const timer = setTimeout(() => setLeaving(false), 1000);
+    return () => clearTimeout(timer);
+  }, [leaving]);
+
   // Leaving mid-quiz (header back, Android back, a swipe) would drop every answer given so far,
   // so ask first. Other steps have nothing unsaved and leave without a prompt.
-  useEffect(() => {
-    if (step !== 'quiz') return;
-    return navigation.addListener('beforeRemove', (event) => {
-      event.preventDefault();
-      Alert.alert(t('lesson.leaveTitle'), t('lesson.leaveMessage'), [
-        { text: t('lesson.stay'), style: 'cancel' },
-        { text: t('lesson.leaveConfirm'), style: 'destructive', onPress: () => navigation.dispatch(event.data.action) },
-      ]);
-    });
-  }, [navigation, step, t]);
+  usePreventRemove(step === 'quiz' && !leaving, ({ repeat }) => {
+    Alert.alert(t('lesson.leaveTitle'), t('lesson.leaveMessage'), [
+      { text: t('lesson.stay'), style: 'cancel' },
+      {
+        text: t('lesson.leaveConfirm'),
+        style: 'destructive',
+        onPress: () => {
+          setLeaving(true);
+          repeat();
+        },
+      },
+    ]);
+  });
 
   const data = useAsyncData(async () => {
     const repos = getRepositories();

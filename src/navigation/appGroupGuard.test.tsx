@@ -33,8 +33,8 @@ const session = {
   issuedAt: '2026-01-01',
 } as const;
 
-const signInAs = (state: { profile: { source: string; target: string } | null; profileLoaded: boolean }) =>
-  act(() => {
+const signInAs = async (state: { profile: { source: string; target: string } | null; profileLoaded: boolean }) =>
+  await act(() => {
     useAuthStore.setState({ session: session as never, initialized: true });
     useLearningStore.setState({
       userId: 'u1',
@@ -44,67 +44,67 @@ const signInAs = (state: { profile: { source: string; target: string } | null; p
     });
   });
 
-const renderAppAt = (url: string) => renderRouter(routes as never, { initialUrl: url });
+const renderAppAt = async (url: string) => await renderRouter(routes as never, { initialUrl: url });
 
 describe('(app) deep-link protection', () => {
   beforeEach(() => {
     registerRepositories(createMockRepositories());
   });
 
-  afterEach(() =>
-    act(() => {
+  afterEach(async () =>
+    await act(() => {
       useAuthStore.setState({ session: null });
       useLearningStore.setState({ userId: null, profile: null, profileLoaded: false, progressVersion: 0 });
     }),
   );
 
-  it('shows nothing while the signed-in account profile is still loading', () => {
-    signInAs({ profile: null, profileLoaded: false });
-    renderAppAt('/home');
+  it('shows nothing while the signed-in account profile is still loading', async () => {
+    await signInAs({ profile: null, profileLoaded: false });
+    await renderAppAt('/home');
     expect(screen.queryByText('home-screen')).toBeNull();
     expect(screen.queryByText('setup-screen')).toBeNull();
   });
 
-  it('deep links land on the mandatory setup when the profile loaded but is missing', () => {
-    signInAs({ profile: null, profileLoaded: true });
-    renderAppAt('/home');
+  it('deep links land on the mandatory setup when the profile loaded but is missing', async () => {
+    await signInAs({ profile: null, profileLoaded: true });
+    await renderAppAt('/home');
     expect(screen.queryByText('home-screen')).toBeNull();
     expect(screen.getByText('setup-screen')).toBeTruthy();
   });
 
-  it('another learning deep link (settings) also lands on the mandatory setup', () => {
-    signInAs({ profile: null, profileLoaded: true });
-    renderAppAt('/settings');
+  it('another learning deep link (settings) also lands on the mandatory setup', async () => {
+    await signInAs({ profile: null, profileLoaded: true });
+    await renderAppAt('/settings');
     expect(screen.getByText('setup-screen')).toBeTruthy();
   });
 
-  it('opens the learning screen directly once the profile is complete', () => {
-    signInAs({ profile: { source: 'ar', target: 'de' }, profileLoaded: true });
-    renderAppAt('/home');
+  it('opens the learning screen directly once the profile is complete', async () => {
+    await signInAs({ profile: { source: 'ar', target: 'de' }, profileLoaded: true });
+    await renderAppAt('/home');
     expect(screen.getByText('home-screen')).toBeTruthy();
     expect(screen.queryByText('setup-screen')).toBeNull();
   });
 
-  it('a completed learner can also deep link Settings', () => {
-    signInAs({ profile: { source: 'ar', target: 'de' }, profileLoaded: true });
-    renderAppAt('/settings');
+  it('a completed learner can also deep link Settings', async () => {
+    await signInAs({ profile: { source: 'ar', target: 'de' }, profileLoaded: true });
+    await renderAppAt('/settings');
     expect(screen.getByText('settings-screen')).toBeTruthy();
   });
 
-  it('a profile read that fails resolves as "not chosen yet" (setup, never the learning screens)', () => {
+  it('a profile read that fails resolves as "not chosen yet" (setup, never the learning screens)', async () => {
     // loadProfile mirrors a repository failure to profile null + profileLoaded true.
-    signInAs({ profile: null, profileLoaded: true });
-    renderAppAt('/home');
+    await signInAs({ profile: null, profileLoaded: true });
+    await renderAppAt('/home');
     expect(screen.queryByText('home-screen')).toBeNull();
     expect(screen.getByText('setup-screen')).toBeTruthy();
   });
 
-  it('a signed-out learner cannot reach any (app) deep link', () => {
-    act(() => {
+  it('a signed-out learner cannot reach any (app) deep link', async () => {
+    await act(() => {
       useAuthStore.setState({ session: null });
       useLearningStore.setState({ profile: { source: 'ar', target: 'de' }, profileLoaded: true });
     });
-    renderAppAt('/home');
+    await renderAppAt('/home');
     expect(screen.queryByText('home-screen')).toBeNull();
   });
 });
