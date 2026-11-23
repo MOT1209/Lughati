@@ -25,3 +25,22 @@ jest.mock('expo-speech', () => ({
   stop: jest.fn(() => Promise.resolve()),
   getAvailableVoicesAsync: jest.fn(() => new Promise(() => {})),
 }));
+
+// expo-router 58's renderRouter switches Jest to fake timers. Under RNTL 14's async act() a
+// screen handler that awaits a timer (e.g. the mock auth latency) then never settles, so every
+// press hangs. The app's integration tests run on real timers, as they did before SDK 58.
+jest.mock('expo-router/testing-library', () => {
+  const actual = jest.requireActual('expo-router/testing-library');
+  const descriptors = Object.getOwnPropertyDescriptors(actual);
+  delete descriptors.renderRouter;
+  const wrapped = Object.defineProperties({}, descriptors);
+  Object.defineProperty(wrapped, 'renderRouter', {
+    enumerable: true,
+    value: async (...args: Parameters<typeof actual.renderRouter>) => {
+      const result = await actual.renderRouter(...args);
+      jest.useFakeTimers({ advanceTimers: true });
+      return result;
+    },
+  });
+  return wrapped;
+});

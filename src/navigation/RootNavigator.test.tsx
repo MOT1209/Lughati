@@ -25,39 +25,39 @@ const routes = {
 };
 
 describe('RootNavigator route protection', () => {
-  afterEach(() => {
-    act(() => useAuthStore.setState({ session: null }));
+  afterEach(async () => {
+    await act(() => useAuthStore.setState({ session: null }));
   });
 
-  it('without a session the app group is unreachable and the auth group is reachable', () => {
+  it('without a session the app group is unreachable and the auth group is reachable', async () => {
     useAuthStore.setState({ session: null });
-    renderRouter(routes, { initialUrl: '/login' });
+    await renderRouter(routes, { initialUrl: '/login' });
     expect(screen.getByText('login-screen')).toBeTruthy();
   });
 
-  it('without a session a deep link to the app group does not show the app screen', () => {
+  it('without a session a deep link to the app group does not show the app screen', async () => {
     useAuthStore.setState({ session: null });
-    renderRouter(routes, { initialUrl: '/home' });
+    await renderRouter(routes, { initialUrl: '/home' });
     expect(screen.queryByText('home-screen')).toBeNull();
   });
 
-  it('with a session the app group is reachable', () => {
+  it('with a session the app group is reachable', async () => {
     useAuthStore.setState({ session: session as never });
-    renderRouter(routes, { initialUrl: '/home' });
+    await renderRouter(routes, { initialUrl: '/home' });
     expect(screen.getByText('home-screen')).toBeTruthy();
   });
 
-  it('with a session a deep link to the auth group does not show the login screen', () => {
+  it('with a session a deep link to the auth group does not show the login screen', async () => {
     useAuthStore.setState({ session: session as never });
-    renderRouter(routes, { initialUrl: '/login' });
+    await renderRouter(routes, { initialUrl: '/login' });
     expect(screen.queryByText('login-screen')).toBeNull();
   });
 
-  it('signing out removes access to the app group', () => {
+  it('signing out removes access to the app group', async () => {
     useAuthStore.setState({ session: session as never });
-    renderRouter(routes, { initialUrl: '/home' });
+    await renderRouter(routes, { initialUrl: '/home' });
     expect(screen.getByText('home-screen')).toBeTruthy();
-    act(() => useAuthStore.setState({ session: null }));
+    await act(() => useAuthStore.setState({ session: null }));
     expect(screen.queryByText('home-screen')).toBeNull();
   });
 });

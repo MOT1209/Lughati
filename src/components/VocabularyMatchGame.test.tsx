@@ -55,13 +55,13 @@ describe('VocabularyMatchGame', () => {
     const onExit = jest.fn();
     const questions = buildMatchSession(words, 'ar', rng);
 
-    render(<VocabularyMatchGame words={words} source="ar" random={rng} onFinish={onFinish} onExit={onExit} />);
+    await render(<VocabularyMatchGame words={words} source="ar" random={rng} onFinish={onFinish} onExit={onExit} />);
 
     for (const [index, question] of questions.entries()) {
       const answer = byId.get(question.wordId)!;
-      fireEvent.press(screen.getByRole('button', { name: `Option: ${answer.translations.ar}` }));
+      await fireEvent.press(screen.getByRole('button', { name: `Option: ${answer.translations.ar}` }));
       await act(async () => {
-        fireEvent.press(screen.getByRole('button', { name: index === questions.length - 1 ? 'Finish' : 'Next' }));
+        await fireEvent.press(screen.getByRole('button', { name: index === questions.length - 1 ? 'Finish' : 'Next' }));
       });
     }
 
@@ -69,7 +69,7 @@ describe('VocabularyMatchGame', () => {
     expect(await screen.findByText('Practice complete')).toBeTruthy();
     expect(screen.getByText(`You matched ${words.length} of ${words.length}`)).toBeTruthy();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Continue' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Continue' }));
     expect(onExit).toHaveBeenCalled();
   }, 30_000);
 
@@ -81,33 +81,33 @@ describe('VocabularyMatchGame', () => {
     });
     const questions = buildMatchSession(words, 'ar', rng);
 
-    render(<VocabularyMatchGame words={words} source="ar" random={rng} onFinish={onFinish} />);
+    await render(<VocabularyMatchGame words={words} source="ar" random={rng} onFinish={onFinish} />);
 
     for (const [index, question] of questions.entries()) {
       const answer = byId.get(question.wordId)!;
-      fireEvent.press(screen.getByRole('button', { name: `Option: ${answer.translations.ar}` }));
+      await fireEvent.press(screen.getByRole('button', { name: `Option: ${answer.translations.ar}` }));
       await act(async () => {
-        fireEvent.press(screen.getByRole('button', { name: index === questions.length - 1 ? 'Finish' : 'Next' }));
+        await fireEvent.press(screen.getByRole('button', { name: index === questions.length - 1 ? 'Finish' : 'Next' }));
       });
     }
 
     expect(await screen.findByText('We could not save your progress.')).toBeTruthy();
     await act(async () => {
-      fireEvent.press(screen.getByRole('button', { name: 'Try again' }));
+      await fireEvent.press(screen.getByRole('button', { name: 'Try again' }));
     });
     expect(await screen.findByText('Practice complete')).toBeTruthy();
     expect(attempts).toBe(2);
   }, 30_000);
 
-  it('shows a helpful message when there are not enough playable words', () => {
+  it('shows a helpful message when there are not enough playable words', async () => {
     const empty = words.map((word) => ({ ...word, translations: {} }));
-    render(<VocabularyMatchGame words={empty} source="ar" random={rng} />);
+    await render(<VocabularyMatchGame words={empty} source="ar" random={rng} />);
     expect(screen.getByText('There are not enough words to practise yet.')).toBeTruthy();
   });
 
-  it('renders the word being learned isolated for correct direction', () => {
+  it('renders the word being learned isolated for correct direction', async () => {
     const first = byId.get(buildMatchSession(words, 'ar', rng)[0].wordId)!;
-    render(<VocabularyMatchGame words={words} source="ar" random={rng} />);
+    await render(<VocabularyMatchGame words={words} source="ar" random={rng} />);
     expect(screen.getByText(isolateLtr(first.term))).toBeTruthy();
   });
 });

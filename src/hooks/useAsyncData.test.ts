@@ -17,9 +17,12 @@ const successOf = (state: ReturnType<typeof useAsyncData<string>>) =>
 
 describe('useAsyncData', () => {
   it('loads on mount and reports success', async () => {
-    const { result } = renderHook(() => useAsyncData(async () => 'ready', []));
+    // A pending promise keeps the loading state observable (RNTL 14's async render flushes settled work).
+    const load = deferred<string>();
+    const { result } = await renderHook(() => useAsyncData(() => load.promise, []));
 
     expect(result.current.status).toBe('loading');
+    await act(async () => load.resolve('ready'));
     await waitFor(() => expect(successOf(result.current)).toBe('ready'));
     expect(result.current.status).toBe('success');
   });
@@ -29,14 +32,14 @@ describe('useAsyncData', () => {
     const second = deferred<string>();
     const loader = (dep: number) => (dep === 1 ? first.promise : second.promise);
 
-    const { result, rerender } = renderHook(({ dep }: { dep: number }) => useAsyncData(() => loader(dep), [dep]), {
+    const { result, rerender } = await renderHook(({ dep }: { dep: number }) => useAsyncData(() => loader(dep), [dep]), {
       initialProps: { dep: 1 },
     });
 
     first.resolve('one');
     await waitFor(() => expect(successOf(result.current)).toBe('one'));
 
-    rerender({ dep: 2 });
+    await rerender({ dep: 2 });
     // Stale-while-revalidate: no spinner flash on a deps change.
     expect(result.current.status).toBe('success');
     expect(successOf(result.current)).toBe('one');
@@ -49,12 +52,12 @@ describe('useAsyncData', () => {
     const first = deferred<string>();
     const second = deferred<string>();
     let calls = 0;
-    const { result } = renderHook(() => useAsyncData(() => (calls++ === 0 ? first.promise : second.promise), []));
+    const { result } = await renderHook(() => useAsyncData(() => (calls++ === 0 ? first.promise : second.promise), []));
 
     first.reject(new Error('boom'));
     await waitFor(() => expect(result.current.status).toBe('error'));
 
-    act(() => result.current.reload());
+    await act(() => result.current.reload());
     expect(result.current.status).toBe('loading');
 
     second.resolve('recovered');
@@ -68,18 +71,18 @@ describe('useAsyncData', () => {
     let depOneCalls = 0;
     const loader = (dep: number) => (dep === 2 ? nextDep.promise : depOneCalls++ === 0 ? initial.promise : retried.promise);
 
-    const { result, rerender } = renderHook(({ dep }: { dep: number }) => useAsyncData(() => loader(dep), [dep]), {
+    const { result, rerender } = await renderHook(({ dep }: { dep: number }) => useAsyncData(() => loader(dep), [dep]), {
       initialProps: { dep: 1 },
     });
 
     initial.resolve('first');
     await waitFor(() => expect(successOf(result.current)).toBe('first'));
 
-    act(() => result.current.reload());
+    await act(() => result.current.reload());
     retried.resolve('retried');
     await waitFor(() => expect(successOf(result.current)).toBe('retried'));
 
-    rerender({ dep: 2 });
+    await rerender({ dep: 2 });
     // Regression: a past reload must not turn later deps changes into a spinner.
     expect(result.current.status).toBe('success');
     expect(successOf(result.current)).toBe('retried');
@@ -93,14 +96,14 @@ describe('useAsyncData', () => {
     const nextDep = deferred<string>();
     const loader = (dep: number) => (dep === 1 ? failing.promise : nextDep.promise);
 
-    const { result, rerender } = renderHook(({ dep }: { dep: number }) => useAsyncData(() => loader(dep), [dep]), {
+    const { result, rerender } = await renderHook(({ dep }: { dep: number }) => useAsyncData(() => loader(dep), [dep]), {
       initialProps: { dep: 1 },
     });
 
     failing.reject(new Error('boom'));
     await waitFor(() => expect(result.current.status).toBe('error'));
 
-    rerender({ dep: 2 });
+    await rerender({ dep: 2 });
     expect(result.current.status).toBe('loading');
 
     nextDep.resolve('fine');
@@ -109,7 +112,7 @@ describe('useAsyncData', () => {
 
   it('exposes the failure so a screen can react to it', async () => {
     const failing = deferred<string>();
-    const { result } = renderHook(() => useAsyncData(() => failing.promise, []));
+    const { result } = await renderHook(() => useAsyncData(() => failing.promise, []));
 
     failing.reject({ message: 'Could not connect.', code: 'network' });
     await waitFor(() => expect(result.current.status).toBe('error'));
