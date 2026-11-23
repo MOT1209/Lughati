@@ -45,6 +45,14 @@ export default function LessonScreen() {
     if (step === 'quiz') quizStartedAt.current = Date.now();
   }, [step, quizRun]);
 
+  // A confirmed exit normally unmounts the screen. If it is still here shortly after (the removal
+  // did not happen), turn the guard back on so a later exit asks again instead of dropping answers.
+  useEffect(() => {
+    if (!leaving) return;
+    const timer = setTimeout(() => setLeaving(false), 1000);
+    return () => clearTimeout(timer);
+  }, [leaving]);
+
   // Leaving mid-quiz (header back, Android back, a swipe) would drop every answer given so far,
   // so ask first. Other steps have nothing unsaved and leave without a prompt.
   usePreventRemove(step === 'quiz' && !leaving, ({ repeat }) => {
