@@ -10,7 +10,7 @@ npx expo-doctor                # يحتاج شبكة (exp.host)
 npx expo export --platform android
 psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rls.sql   # اختبار RLS على قاعدة فيها الهجرات والبذر
 ```
-نتائج آخر تشغيل موثقة في `FINAL_ENGINEERING_REPORT.md` (لا أعدّل أرقاماً هنا يدوياً).
+التقارير القديمة (ومنها `FINAL_ENGINEERING_REPORT.md`) في `docs/archive/`؛ أرقام الاختبارات الحالية في شارة README (لا أعدّل أرقاماً هنا يدوياً).
 
 ## ما تغطيه الاختبارات الآلية
 | المجال | الملفات |

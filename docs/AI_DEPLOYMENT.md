@@ -7,6 +7,8 @@
 3. **الأسرار:**
    ```bash
    supabase secrets set OPENCODE_ZEN_API_KEY=... OPENCODE_ZEN_BASE_URL=...
+   # اختياري إن لم تكن قائمة النماذج تحت العنوان الأساسي:
+   # supabase secrets set OPENCODE_ZEN_MODELS_URL=https://…/models
    supabase secrets set AI_DAILY_REQUEST_LIMIT=40 AI_MINUTE_LIMIT=6 AI_MAX_OUTPUT_TOKENS=700   # اختياري
    ```
 4. **النشر:** تم (انظر الحالة أعلاه). للتحديث: `supabase functions deploy ai-gateway` (لا تعطّل `verify_jwt`). الدالة القديمة `ai-tutor` (Anthropic) ما زالت منشورة على المشروع من مرحلة سابقة ولم تعد مستخدمة؛ احذفها من لوحة Supabase.
